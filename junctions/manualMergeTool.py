@@ -54,25 +54,28 @@ def reMerge(complete_df, new_clust):
 
 def update_clust(curr_clust, new_clust, region, buffer_size):
 
-    # curr_clust = np.float64(curr_clust)
-    # new_clust = np.float64(new_clust)
+    curr_clust = np.float64(curr_clust)
+    new_clust = np.float64(new_clust)
 
     print("test")
 
     # complete_df = pd.read_csv(f'{region}_jcts_buf={buffer_size}_manual_merging_target.csv', sep='|')
 
-    complete_df = pd.read_csv('manual_merging_target.csv', sep='|')
+    # complete_df = pd.read_csv('manual_merging_target.csv', sep='|')
+
+    complete_df = pd.read_pickle("manualMergeTarget")
 
     complete_df.loc[:,'neighbour_cluster'] = complete_df['neighbour_cluster'].map(lambda x: x if x != curr_clust else new_clust)
 
     # Grab the rows from complete_df that are going to be merged
+
+    # parsed_df = parseDf(complete_df)
 
     res = reMerge(complete_df, new_clust)
 
     complete_df = manualClusterPrep.split_and_plot(res, region, buffer_size)
 
     complete_df.to_csv('manual_merging_target.csv', index=False, sep="|")
-
 
 if __name__ == '__main__':
   fire.Fire(update_clust)

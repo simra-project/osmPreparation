@@ -95,9 +95,9 @@ def plotPrep (nonIsolatedJunctions):
 
     ## (b) Join the remaining df columns too using pandas groupby and merge everything together
 
-    nonIsolatedJunctions = nonIsolatedJunctions.drop(["poly_vertices_lats", "poly_vertices_lons", "neighbours", "poly_geometry"], axis=1)
+    nonIsolatedJunctions = nonIsolatedJunctions.drop(["poly_vertices_lats", "poly_vertices_lons", "poly_geometry"], axis=1)
 
-    nonIsolatedJunctions = nonIsolatedJunctions.groupby('neighbour_cluster', as_index = False).agg({'id': lambda x: ', '.join(map(str, x)), 'lat': lambda x: ', '.join(map(str, x)), 'lon': lambda x: ', '.join(map(str, x)), 'highwaynames': 'sum', 'highwaytypes': 'sum', 'highwaylanes': 'sum','highwaylanesBw': 'sum', 'clust_inconsist': 'sum'})
+    nonIsolatedJunctions = nonIsolatedJunctions.groupby('neighbour_cluster', as_index = False).agg({'id': lambda x: ', '.join(map(str, x)), 'lat': lambda x: ', '.join(map(str, x)), 'lon': lambda x: ', '.join(map(str, x)), 'highwaynames': 'sum', 'highwaytypes': 'sum', 'highwaylanes': 'sum','highwaylanesBw': 'sum', 'neighbours': 'sum','clust_inconsist': 'sum'})
 
     nonIsolatedMelt = pd.merge(nonIsolatedJunctions, junctionClusters, on='neighbour_cluster')
 
@@ -142,10 +142,12 @@ def meta_assist (region, small_buf, large_buf):
 
     complete_df = split_and_plot(comp_res, region, small_buf)
 
-    complete_df.to_csv('manual_merging_target.csv', index=False, sep="|")
+    # complete_df.to_csv('manual_merging_target.csv', index=False, sep="|")
 
-pforzbb = [8.653482,48.873994,8.743249,48.910329]
+    complete_df.to_pickle("manualMergeTarget")
 
-pforzCentroid = [48.877046,8.710584]
+# pforzbb = [8.653482,48.873994,8.743249,48.910329]
 
-meta_assist("pforz", 2, 3)
+# pforzCentroid = [48.877046,8.710584]
+
+# meta_assist("pforz", 2, 3)

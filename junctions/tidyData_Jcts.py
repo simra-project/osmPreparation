@@ -20,10 +20,6 @@ def explodeAndConcat(nonIsolatedMerge, isolatedJunctions):
 
     nonIsolatedMerge.loc[:,'poly_vertices_lons'] = ''
 
-    nonIsolatedMerge.loc[:,'poly_vertices_lats'] = ''
-
-    nonIsolatedMerge.loc[:,'poly_vertices_lons'] = ''
-
     ### Set up a dict as interim storage. Yup I know it's quick and dirty and not very elegant to do this
 
     nonIsolatedMerge['extracted_polys'] = np.empty((len(nonIsolatedMerge), 0)).tolist()
@@ -60,19 +56,22 @@ def explodeAndConcat(nonIsolatedMerge, isolatedJunctions):
 
     polyLists = nonIsolatedMerge.extracted_polys.values.tolist()
     lens = [len(r) for r in polyLists]
-    neighClusters = np.repeat(nonIsolatedMerge.neighbour_cluster, lens)
     ids = np.repeat(nonIsolatedMerge.id, lens)
     lats = np.repeat(nonIsolatedMerge.lat, lens)
     lons = np.repeat(nonIsolatedMerge.lon, lens)
-    names = np.repeat(nonIsolatedMerge.highwaynames, lens)
-    types = np.repeat(nonIsolatedMerge.highwaytypes, lens)
-    lanes = np.repeat(nonIsolatedMerge.highwaylanes, lens)
-    lanesBw = np.repeat(nonIsolatedMerge.highwaylanesBw, lens)
+    hwIds = np.repeat(nonIsolatedMerge.highwayids, lens)
+    hwNames = np.repeat(nonIsolatedMerge.highwaynames, lens)
+    hwTypes = np.repeat(nonIsolatedMerge.highwaytypes, lens)
+    hwLanes = np.repeat(nonIsolatedMerge.highwaylanes, lens)
+    hwLanesBw = np.repeat(nonIsolatedMerge.highwaylanesBw, lens)
+    neighs = np.repeat(nonIsolatedMerge.neighbours, lens)
+    neighbourClusters = np.repeat(nonIsolatedMerge.neighbour_cluster, lens)
+
     # buckets = np.repeat(nonIsolatedMerge.bucket, lens)
 
     # explodedNonIsolatedJunctions = pd.DataFrame(np.column_stack((neighClusters, ids, lats, lons, names, types, lanes, lanesBw, buckets, np.concatenate(polyLists))), columns=['neighbour_cluster','id','lat','lon','highwaynames','highwaytypes','highwaylanes','highwaylanesBw','bucket','poly_geometry'])
 
-    explodedNonIsolatedJunctions = pd.DataFrame(np.column_stack((neighClusters, ids, lats, lons, names, types, lanes, lanesBw, np.concatenate(polyLists))), columns=['neighbour_cluster','id','lat','lon','highwaynames','highwaytypes','highwaylanes','highwaylanesBw','poly_geometry'])
+    explodedNonIsolatedJunctions = pd.DataFrame(np.column_stack((ids, lats, lons, hwIds, hwNames, hwTypes, hwLanes, hwLanesBw, np.concatenate(polyLists), neighs, neighbourClusters)), columns=['id','lat','lon','highwayids','highwaynames','highwaytypes','highwaylanes','highwaylanesBw','poly_geometry', 'neighbours', 'neighbour_cluster'])
 
     polyLats = explodedNonIsolatedJunctions['poly_geometry'].map(lambda x: x.exterior.coords.xy).map(lambda x: x[0]).map(lambda x: list(x))
 
@@ -80,11 +79,17 @@ def explodeAndConcat(nonIsolatedMerge, isolatedJunctions):
 
     explodedNonIsolatedJunctions.loc[:,'poly_vertices_lats'], explodedNonIsolatedJunctions.loc[:,'poly_vertices_lons'] = polyLats, polyLons
 
+    explodedNonIsolatedJunctions_reordered = explodedNonIsolatedJunctions.reindex(columns=['id','lat','lon','highwayids','highwaynames','highwaytypes','highwaylanes','highwaylanesBw','poly_geometry','poly_vertices_lats','poly_vertices_lons','neighbours','neighbour_cluster'])
+
+    # explodedNonIsolatedJunctions.loc[:,'neighbours'] = neighs
+
+    # explodedNonIsolatedJunctions.loc[:,'neighbour_cluster'] = neighbourClusters
+
     # explodedNonIsolatedJunctions = explodedNonIsolatedJunctions.drop(["poly_geometry","neighbour_cluster"], axis=1)
 
     ## d) Merge back together with the isolatedJunctions.
 
-    completeJunctions = pd.concat([explodedNonIsolatedJunctions, isolatedJunctions], ignore_index = True, sort = False)
+    completeJunctions = pd.concat([explodedNonIsolatedJunctions_reordered, isolatedJunctions], ignore_index = True, sort = False)
 
     # completeJunctions = completeJunctions.drop("neighbours", axis = 1)
 
@@ -105,11 +110,13 @@ def tidyItUp(region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, buffer
 
     ## (b) Join the remaining df columns too using pandas groupby and merge everything together
 
-    nonIsolatedJunctions = nonIsolatedJunctions.drop(["poly_vertices_lats", "poly_vertices_lons", "neighbours", "poly_geometry"], axis=1)
+    nonIsolatedJunctions = nonIsolatedJunctions.drop(["poly_vertices_lats", "poly_vertices_lons", "poly_geometry"], axis=1)
 
     # nonIsolatedJunctions = nonIsolatedJunctions.groupby('neighbour_cluster', as_index = False).agg({'id': lambda x: ', '.join(map(str, x)), 'lat': lambda x: ', '.join(map(str, x)), 'lon': lambda x: ', '.join(map(str, x)), 'highwaynames': 'sum', 'highwaytypes': 'sum', 'highwaylanes': 'sum','highwaylanesBw': 'sum', 'bucket': list})
 
-    nonIsolatedJunctions = nonIsolatedJunctions.groupby('neighbour_cluster', as_index = False).agg({'id': lambda x: ', '.join(map(str, x)), 'lat': lambda x: ', '.join(map(str, x)), 'lon': lambda x: ', '.join(map(str, x)), 'highwaynames': 'sum', 'highwaytypes': 'sum', 'highwaylanes': 'sum','highwaylanesBw': 'sum'})
+    nonIsolatedJunctions = nonIsolatedJunctions.groupby('neighbour_cluster', as_index = False).agg({'id': lambda x: ', '.join(map(str, x)), 'lat': lambda x: ', '.join(map(str, x)), 'lon': lambda x: ', '.join(map(str, x)), 'highwayids': 'sum', 'highwaynames': 'sum', 'highwaytypes': 'sum', 'highwaylanes': 'sum','highwaylanesBw': 'sum', 'neighbours': 'sum'})
+
+    # nonIsolatedJunctions.to_csv(region + '_junctions_FIVE.csv', index=False, sep="|")
 
     nonIsolatedMerge = pd.merge(nonIsolatedJunctions, junctionClusters, on='neighbour_cluster')
 
@@ -117,6 +124,6 @@ def tidyItUp(region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, buffer
 
     mapJcts.runAllMapTasks(region, bbCentroid, nonIsolatedMerge, isolatedJunctions, bufferSize, neighbourParam)
 
-    completeJunctions = explodeAndConcat (nonIsolatedMerge, isolatedJunctions)
+    completeJunctions = explodeAndConcat(nonIsolatedMerge, isolatedJunctions)
 
     return completeJunctions
