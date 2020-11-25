@@ -97,7 +97,7 @@ def plotPrep (nonIsolatedJunctions):
 
     nonIsolatedJunctions = nonIsolatedJunctions.drop(["poly_vertices_lats", "poly_vertices_lons", "poly_geometry"], axis=1)
 
-    nonIsolatedJunctions = nonIsolatedJunctions.groupby('neighbour_cluster', as_index = False).agg({'id': lambda x: ', '.join(map(str, x)), 'lat': lambda x: ', '.join(map(str, x)), 'lon': lambda x: ', '.join(map(str, x)), 'highwaynames': 'sum', 'highwaytypes': 'sum', 'highwaylanes': 'sum','highwaylanesBw': 'sum', 'neighbours': 'sum','clust_inconsist': 'sum'})
+    nonIsolatedJunctions = nonIsolatedJunctions.groupby('neighbour_cluster', as_index = False).agg({'id': lambda x: ', '.join(map(str, x)), 'lat': lambda x: ', '.join(map(str, x)), 'lon': lambda x: ', '.join(map(str, x)), 'highwayids': 'sum', 'highwaynames': 'sum', 'highwaytypes': 'sum', 'highwaylanes': 'sum','highwaylanesBw': 'sum', 'neighbours': 'sum','clust_inconsist': 'sum'})
 
     nonIsolatedMelt = pd.merge(nonIsolatedJunctions, junctionClusters, on='neighbour_cluster')
 
@@ -114,7 +114,7 @@ def split_and_plot (df, region, bufferSize):
 
     # Melt nonIsolatedJunctions together based on neighbour cluster
 
-    nonIsolatedMelt = plotPrep (nonIsolatedJunctions)
+    nonIsolatedMelt = plotPrep(nonIsolatedJunctions)
 
     # Map 
 
@@ -133,6 +133,8 @@ def meta_assist (region, small_buf, large_buf):
 
     merged_not_melted_small = getData(region, small_buf)
 
+    # merged_not_melted_small.to_csv('merged_not_melted_small.csv', index=False, sep="|")
+
     merged_not_melted_large = getData(region, large_buf)
 
     # comp_res corresponds to small_buff enriched with the information on where clusters differ depending on buffer size
@@ -140,9 +142,11 @@ def meta_assist (region, small_buf, large_buf):
 
     comp_res = clusterComp (merged_not_melted_small, merged_not_melted_large)
 
+    # comp_res.to_csv('comp_res.csv', index=False, sep="|")
+
     complete_df = split_and_plot(comp_res, region, small_buf)
 
-    # complete_df.to_csv('manual_merging_target.csv', index=False, sep="|")
+    complete_df.to_csv('manual_merging_target.csv', index=False, sep="|")
 
     complete_df.to_pickle("manualMergeTarget")
 

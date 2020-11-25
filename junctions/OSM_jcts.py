@@ -115,8 +115,9 @@ params = [
         # ["wupp",wuppbb,wuppCentroid,80,2.5],
         ]
 
-main(["pforz",pforzbb,pforzCentroid,100,2,['lon','lat']])
-# main(["pforz",pforzbb,pforzCentroid,100,3,['lon','lat']])
+if __name__ == "__main__":
+    main(["pforz",pforzbb,pforzCentroid,100,2,['lon','lat']])
+    # main(["pforz",pforzbb,pforzCentroid,100,3,['lon','lat']])
 
 '''
 start = time.time()

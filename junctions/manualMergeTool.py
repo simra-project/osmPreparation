@@ -13,6 +13,8 @@ from itertools import starmap
 
 from shapely.geometry.polygon import Polygon 
 
+import tidyData_Jcts
+
 # ---------------------------------------------------------------------------------------------------
 
 # (*) Helper func for parsing required list properties of df from string
@@ -46,7 +48,9 @@ def reMerge(complete_df, new_clust):
 
     melted_target = manualClusterPrep.plotPrep(target)
 
-    return pd.concat([remainder, melted_target], ignore_index = True, sort = False)
+    # return pd.concat([remainder, melted_target], ignore_index = True, sort = False)
+
+    return melted_target, remainder
 
 # Expose functionality as CLI using fire library
 
@@ -54,8 +58,12 @@ def reMerge(complete_df, new_clust):
 
 def update_clust(curr_clust, new_clust, region, buffer_size):
 
-    curr_clust = np.float64(curr_clust)
-    new_clust = np.float64(new_clust)
+    print(type(curr_clust))
+
+    # curr_clust = np.float64(curr_clust)
+    # new_clust = np.float64(new_clust)
+
+    print(type(curr_clust))
 
     print("test")
 
@@ -65,17 +73,29 @@ def update_clust(curr_clust, new_clust, region, buffer_size):
 
     complete_df = pd.read_pickle("manualMergeTarget")
 
-    complete_df.loc[:,'neighbour_cluster'] = complete_df['neighbour_cluster'].map(lambda x: x if x != curr_clust else new_clust)
+    print(type(complete_df['neighbour_cluster'][464]))
 
+    complete_df.loc[:,'neighbour_cluster'] = complete_df['neighbour_cluster'].map(lambda x: x if x != curr_clust else new_clust)
+ 
     # Grab the rows from complete_df that are going to be merged
 
     # parsed_df = parseDf(complete_df)
 
-    res = reMerge(complete_df, new_clust)
+    # RE-DO THIS SECTION!!!
 
-    complete_df = manualClusterPrep.split_and_plot(res, region, buffer_size)
+    # (1) After clusters have been re-assigned, apply plotPrep to nonIsolatedJunctions.
+    # (2) Plot.
+    # (3) 
 
-    complete_df.to_csv('manual_merging_target.csv', index=False, sep="|")
+    target, remainder = reMerge(complete_df, new_clust)
+
+    mapping.runAllMapTasks(region, target, remainder, buffer_size)
+
+    complete_df = tidyData_Jcts.explodeAndConcat(target, remainder)
+
+    # complete_df = manualClusterPrep.split_and_plot(res, region, buffer_size)
+
+    complete_df.to_csv('manual_merging_res.csv', index=False, sep="|")
 
 if __name__ == '__main__':
   fire.Fire(update_clust)
