@@ -21,6 +21,9 @@ import tidyData_Jcts
 
 import paramsPerRegion
 
+#*******************************************************************************************************************
+# (*) Generate data frames using functionality from the project's main script, 'OSM_jcts'
+
 def getData (region, buffer_size):
 
     bounding_box, bb_centroid, neighbour_param, sorting_params = paramsPerRegion.paramDict[region]['bounding_box'], paramsPerRegion.paramDict[region]['centroid'], paramsPerRegion.paramDict[region]['neighbour_param'], paramsPerRegion.paramDict[region]['sorting_params']
@@ -33,7 +36,12 @@ def getData (region, buffer_size):
 
 #*******************************************************************************************************************
 # (1) Check where junctions have been assigned to different clusters depending on buffer size. 
-#     Assign this property to the data frame generated with the small buffer. 
+#     Assign this new property ('clust_inconsist') to the data frame generated with the small buffer. 
+#
+#     (Because obviously, it is much easier to perform additional merges where they haven't yet taken place,
+#     an operation we can perform based on the data generated using the small buffer, than to undo merges that
+#     have already taken place, an operation we could possibly perform based on the data generated using the large 
+#     buffer.)
 
 # 'Comp' is for 'Comparison', not 'Computation' in case you were wondering (I personally was wondering one day
 # after writing this)
@@ -81,7 +89,14 @@ def splitDf (junctionsdf):
     return nonIsolatedJunctions, isolatedJunctions
 
 #*******************************************************************************************************************
-# (3) Split the df according to 'junction has/does not have neighbours'
+# (3) Merge junctions according to their neighbour clusters:
+#     polygon shapes of junctions in the same cluster are dissolved, i.e. melted together;
+#     the remaining columns are also aggregated by cluster. 
+#     (Naturally, these operations are only performed for the 'non-isolated junctions', i.e. those whose polygon surfaces
+#     overlap with those of other junctions) 
+#    
+#     (This function isn't called directy by this script's main function, but only by split_and_plot. It is also
+#     called by the manualMergeTool.)
 
 def plotPrep (nonIsolatedJunctions):
 
@@ -103,11 +118,12 @@ def plotPrep (nonIsolatedJunctions):
 
     return nonIsolatedMelt
 
-# (5) 'Outsourced' part of main function as it will be called again after a manual modification of the df has been performed
+#*******************************************************************************************************************
+# (4) This function does many things, please refer to descriptions of the respective steps below
 
 def split_and_plot (df, region, bufferSize):
 
-    # Next split the data frame according to which junctions do/do not have neighbours so neighbour clusters can be
+    # Split the data frame according to which junctions do/do not have neighbours so neighbour clusters can be
     # dissolved (melted together).
 
     nonIsolatedJunctions, isolatedJunctions = splitDf(df)
@@ -142,7 +158,7 @@ def meta_assist (region, small_buf, large_buf):
 
     comp_res = clusterComp (merged_not_melted_small, merged_not_melted_large)
 
-    # comp_res.to_csv('comp_res.csv', index=False, sep="|")
+    # split_and_plot does everything else: merging, plotting, data hygiene
 
     complete_df = split_and_plot(comp_res, region, small_buf)
 
@@ -150,8 +166,5 @@ def meta_assist (region, small_buf, large_buf):
 
     complete_df.to_pickle("manualMergeTarget")
 
-# pforzbb = [8.653482,48.873994,8.743249,48.910329]
-
-# pforzCentroid = [48.877046,8.710584]
-
-# meta_assist("pforz", 2, 3)
+if __name__ == "__main__":
+    meta_assist("pforz", 2, 3)

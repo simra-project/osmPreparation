@@ -51,11 +51,7 @@ def plotPolys (df, geomCol, map, style):
     
     for ind in df.index:
 
-        # To add: 
-        # * neighbour_cluster (to display in popup), 
-        # * polygon centroid (for positioning marker),
-        # * 'clust_inconsist' for highlighting junctions that have ended up in inconsistent clusters depending on 
-        #   buffer size.
+        # Inconsistent clusters are highlighted in yellow.
 
         if df.at[ind,'clust_inconsist'] > 0: 
 
@@ -88,4 +84,4 @@ def runAllMapTasks (region, nonIsolatedJunctions, isolatedJunctions, bufferSize)
 
     # III.) Export map as htmls
 
-    myMap.save(f'{region}-jcts-map_buf={bufferSize}_np={neighbourParam}.html')
+    myMap.save(f'{region}-jcts-manualClust_buf={bufferSize}_np={neighbourParam}.html')
