@@ -11,7 +11,22 @@ from shapely.geometry.polygon import Polygon
 
 from statistics import mean
 
+import datetime
+
+import random
+
 import paramsPerRegion # internal import
+
+#*******************************************************************************************************************
+# (*) Scatter marker location to prevent overlay
+
+def scatter(lat, lon):
+
+    lat_scatter = random.uniform(-0.0001, 0.0001)
+
+    lon_scatter = random.uniform(-0.0001, 0.0001)
+
+    return [lat + lat_scatter, lon + lon_scatter]
 
 #*******************************************************************************************************************
 # (*) Plot polygons onto map.
@@ -19,7 +34,7 @@ import paramsPerRegion # internal import
 # This variant follows the following approach to plotting MultiPolygons:
 # extract individual Polygons from MultiPolygons and plot these. 
 
-def extractAndPlot (extractable_shape, neighbour_cluster, mmaapp, style, crs):
+def extractAndPlot (extractable_shape, neighbour_cluster, mmaapp, style, crs, marker_color):
 
     if isinstance(extractable_shape, Polygon):
         
@@ -33,9 +48,9 @@ def extractAndPlot (extractable_shape, neighbour_cluster, mmaapp, style, crs):
 
         lat, lon = extractable_shape.centroid.x, extractable_shape.centroid.y
 
-        # folium.Marker([lat, lon], popup=f'<i>Neighbour-Cluster: {neighbour_cluster}</i>').add_to(mmaapp)
+        folium.Marker(scatter(lat, lon), popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
 
-        folium.Marker([lat, lon], popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>').add_to(mmaapp)
+        # folium.Marker([lat, lon], popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
             
     elif isinstance(extractable_shape, MultiPolygon):
             
@@ -43,32 +58,33 @@ def extractAndPlot (extractable_shape, neighbour_cluster, mmaapp, style, crs):
             
         for poly in individual_polys:
         
-            extractAndPlot(poly, neighbour_cluster, mmaapp, style, crs)
+            extractAndPlot(poly, neighbour_cluster, mmaapp, style, crs, marker_color)
 
-def plotPolys (df, geomCol, map, style):
+def plotPolys (df, map, style, marker_color):
 
     crs = "EPSG:4326" # CRS = coordinate reference system, epsg:4326 = Europa im Lat/Lon Format
-    
+
+    # Workaround because of different names for the column containing the geometric shape to be plotted, 
+    # TODO get rid of this bc it's ugly !!!
+
+    geomCol = 'poly_geometry' if 'poly_geometry' in df.columns else 'geometry'
+
     for ind in df.index:
 
-        # Inconsistent clusters are highlighted in yellow.
+        if df.at[ind, 'neighbour_cluster'] == 999999:
 
-        if df.at[ind,'clust_inconsist'] > 0: 
+            style = {'fillColor': '#ffd700', 'lineColor': '#DAA520'}
 
-            extractAndPlot(df.at[ind, geomCol], df.at[ind, 'neighbour_cluster'], map, {'fillColor': '#FFD700', 'lineColor': '#8c0d26'}, crs)
-
-        else:
-
-            extractAndPlot(df.at[ind, geomCol], df.at[ind, 'neighbour_cluster'], map, style, crs)
+        extractAndPlot(df.at[ind, geomCol], df.at[ind, 'neighbour_cluster'], map, style, crs, marker_color)
 
 #*******************************************************************************************************************
 # (*) Execute all the map jobs in logical order.
 
-def runAllMapTasks (region, nonIsolatedJunctions, isolatedJunctions, bufferSize):
+def runAllMapTasks (region, nonIsolatedMelt_small_buf, isolatedJunctions, nonIsolatedMelt_large_buf, bufferSize):
+
+    # region, nonIsolatedJunctions, isolatedJunctions, bufferSize
 
     bbCentroid = paramsPerRegion.paramDict[region]['centroid']
-
-    neighbourParam = paramsPerRegion.paramDict[region]['neighbour_param']
 
     # I.) Set up our maps
 
@@ -78,10 +94,12 @@ def runAllMapTasks (region, nonIsolatedJunctions, isolatedJunctions, bufferSize)
 
     # II.) Plot polys onto their respective maps
 
-    plotPolys (nonIsolatedJunctions, 'geometry', myMap, {'fillColor': '#ff1493', 'lineColor': '#FF6347'})
+    plotPolys (nonIsolatedMelt_large_buf, myMap, {'fillColor': '#87CEEB', 'lineColor': '#4682B4'}, 'blue')
 
-    plotPolys (isolatedJunctions, 'poly_geometry', myMap, {'fillColor': '#7FFF00', 'lineColor': '#F5FFFA'})
+    plotPolys (nonIsolatedMelt_small_buf, myMap, {'fillColor': '#3CB371', 'color': '#2E8B57'}, 'green')
+
+    plotPolys (isolatedJunctions, myMap, {'fillColor': '#3CB371', 'color': '#2E8B57'}, 'green')
 
     # III.) Export map as htmls
 
-    myMap.save(f'{region}-jcts-manualClust_buf={bufferSize}_np={neighbourParam}.html')
+    myMap.save(f'{region}-jcts-manualClust_{datetime.date.today()}.html')

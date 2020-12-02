@@ -116,7 +116,7 @@ params = [
         ]
 
 if __name__ == "__main__":
-    main(["pforz",pforzbb,pforzCentroid,100,2,['lon','lat']])
+    main(["stutt",stuttbb,stuttCentroid,100,3,['lon','lat']])
     # main(["pforz",pforzbb,pforzCentroid,100,3,['lon','lat']])
 
 '''

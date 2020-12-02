@@ -60,10 +60,21 @@ def clusterComp (small_buf, large_buf):
 
     # (II.) Calculate difference: neighbour clusters have different members.
 
-    small_buf['clust_inconsist'] = [x for x in starmap(lambda x, y: 1 if not set(x) == set(y) else 0, 
+    small_buf['clust_inconsist'] = [x for x in starmap(lambda y, z: 0 if set(y) == set(z) else 1, 
                                                         list(zip(small_buf['neighbours'],large_buf['neighbours'])))]
 
-    return small_buf
+    large_buf['clust_inconsist'] = [x for x in starmap(lambda y, z: 0 if set(y) == set(z) else 1, 
+                                                        list(zip(large_buf['neighbours'],small_buf['neighbours'])))]
+
+    # (III.) Return inconsistent subsets of small_buf and large_buf
+
+    small_buf_inconsist = small_buf[small_buf['clust_inconsist'] == 1] 
+
+    small_buf_consist = small_buf[small_buf['clust_inconsist'] == 0] 
+
+    large_buf_inconsist = large_buf[large_buf['clust_inconsist'] == 1]
+
+    return small_buf_inconsist, small_buf_consist, large_buf_inconsist
 
 #*******************************************************************************************************************
 # (2) Split the df according to 'junction has/does not have neighbours'
@@ -98,6 +109,8 @@ def splitDf (junctionsdf):
 #     (This function isn't called directy by this script's main function, but only by split_and_plot. It is also
 #     called by the manualMergeTool.)
 
+# TODO RENAME!!!!!
+
 def plotPrep (nonIsolatedJunctions):
 
     ## a) Merge neighbour clusters: dissolving geometric shapes according to a shared property can be achieved using [geopandas](https://www.earthdatascience.org/workshops/gis-open-source-python/dissolve-polygons-in-python-geopandas-shapely/)
@@ -120,27 +133,47 @@ def plotPrep (nonIsolatedJunctions):
 
 #*******************************************************************************************************************
 # (4) This function does many things, please refer to descriptions of the respective steps below
+# TODO RENAME!!!!!
 
-def split_and_plot (df, region, bufferSize):
+def split_and_plot (small_buf_inconsist, large_buf_inconsist, region, bufferSize):
 
     # Split the data frame according to which junctions do/do not have neighbours so neighbour clusters can be
     # dissolved (melted together).
 
-    nonIsolatedJunctions, isolatedJunctions = splitDf(df)
+    nonIsolatedJunctions, isolatedJunctions = splitDf(small_buf_inconsist)
 
     # Melt nonIsolatedJunctions together based on neighbour cluster
 
-    nonIsolatedMelt = plotPrep(nonIsolatedJunctions)
+    nonIsolatedMelt_small_buf = plotPrep(nonIsolatedJunctions)
+
+    nonIsolatedMelt_large_buf = plotPrep(large_buf_inconsist)
 
     # Map 
 
-    mapping.runAllMapTasks(region, nonIsolatedMelt, isolatedJunctions, bufferSize)
+    mapping.runAllMapTasks(region, nonIsolatedMelt_small_buf, isolatedJunctions, nonIsolatedMelt_large_buf, bufferSize)
 
     # return
 
-    complete_df = tidyData_Jcts.explodeAndConcat(nonIsolatedMelt, isolatedJunctions)
+    small_buf_inconsist_processed = tidyData_Jcts.explodeAndConcat(nonIsolatedMelt_small_buf, isolatedJunctions)
 
-    return complete_df
+    large_buf_inconsist_processed = tidyData_Jcts.explodeAndConcat(nonIsolatedMelt_large_buf, pd.DataFrame())
+
+    return small_buf_inconsist_processed, large_buf_inconsist_processed
+
+#*******************************************************************************************************************
+# (5) Process consistent junctions (where clustering solutions do not differ between large and small buffers):
+#     merge junction clusters geometrically and aggregate the corresponding data, then put back into a df with
+#     those junctions that do not belong to a junction cluster
+
+def process_consistent_junctions(small_buf_consist):
+
+    nonIsolated_consistent, isolated_consistent = splitDf(small_buf_consist)
+
+    nonIsolated_consistent_melt = plotPrep(nonIsolated_consistent)
+
+    small_buf_consist_processed = tidyData_Jcts.explodeAndConcat(nonIsolated_consistent_melt, isolated_consistent)
+
+    return small_buf_consist_processed
 
 #*******************************************************************************************************************
 # (*) Call all functions in logical order.
@@ -153,18 +186,55 @@ def meta_assist (region, small_buf, large_buf):
 
     merged_not_melted_large = getData(region, large_buf)
 
-    # comp_res corresponds to small_buff enriched with the information on where clusters differ depending on buffer size
-    # (property 'clust_inconsist')
+    # Get those subsets of the large-/small_buf-df where clusters differ depending on buffer size
+    # (property 'clust_inconsist' == True)
 
-    comp_res = clusterComp (merged_not_melted_small, merged_not_melted_large)
+    small_buf_inconsist, small_buf_consist, large_buf_inconsist = clusterComp(merged_not_melted_small, merged_not_melted_large)
 
-    # split_and_plot does everything else: merging, plotting, data hygiene
+    # Split the 'clust_inconsist' == True - subset of the small_buf_df into junctions with/without neighbours
+    # (other junctions exhibiting an overlapping polygon surface);
+    # dissolve/aggregate the non-isolated junctions per cluster;
+    # plot the inconsistent clusters in the small_buf- and large_buf-df onto the same map for comparison purposes;
+    # merge the isolated- and non-isolated junctions in the inconsistent subset of the small_buf-df back together
+    # --> return the 'processed' inconsistent subset of the small_buf-df
 
-    complete_df = split_and_plot(comp_res, region, small_buf)
+    small_buf_inconsist_processed, large_buf_inconsist_processed = split_and_plot(small_buf_inconsist, large_buf_inconsist, region, small_buf)
 
-    complete_df.to_csv('manual_merging_target.csv', index=False, sep="|")
+    # small_buf_inconsist_processed.to_csv('manual_merging_target.csv', index=False, sep="|")
 
-    complete_df.to_pickle("manualMergeTarget")
+    # PICKLE (SERIALIZE) THREE DATA SETS FOR USE BY MANUALMERGETOOL:
+    # (1) 'small_buf_inconsist': subset of the small buffer df where clustering solutions differ from the
+    #     larger buffer solution.
+    # (2) 'large_buf_inconsist': subset of the large buffer df where clustering solutions differ from the
+    #     smaller buffer solution. 
+    # (3) 'consistent_clusters': subset of the small buffer df where clustering solutions DO NOT differ from
+    #     the larger buffer solution; i.e. if this subset was taken from the large buffer df it would be exactly
+    #     the same.
+
+    # INTENDED PROCESSING OF THESE DATA SETS IN MANUALMERGETOOL:
+    # * The more conservative solutions contained in 'small_buf_inconsist' can be manually edited, i.e. replaced by the 
+    #   more liberal solutions contained in 'large_buf_inconsist'. 
+    # * That means, when a user compares the rivaling conservative vs. liberal solutions for inconsistent clusters, 
+    #   she might decide to pick the liberal solution over the conservative one. 
+    # * Hence, the respective rows belonging to the conservative solution are DELETED from the 'small_buf_inconsist'
+    #   df and the respective row belonging to the liberal solution is taken from the 'large_buf_inconsist' data set
+    #   and MOVED to 'small_buf_consist', our 'base' df which will be returned after all of the manual editing is
+    #   finished. This means that the conflict has been resolved.
+    # * When all editing is done, what remains of 'small_buf_inconsist' (i.e., the conservative solutions that
+    #   were chosen over their liberal counterparts) is concatenated with 'consistent_clusters', which already
+    #   contains all the more liberal solutions that were chosen over the conservative ones.
+
+    small_buf_inconsist_processed.to_pickle("small_buf_inconsist")
+
+    # small_buf_inconsist_processed.to_csv('small_buf_inconsist.csv', index=False, sep="|")
+
+    large_buf_inconsist_processed.to_pickle("large_buf_inconsist")
+
+    # large_buf_inconsist_processed.to_csv('large_buf_inconsist.csv', index=False, sep="|")
+
+    small_buf_consist_processed = process_consistent_junctions(small_buf_consist)
+
+    small_buf_consist_processed.to_pickle("consistent_clusters")
 
 if __name__ == "__main__":
-    meta_assist("pforz", 2, 3)
+    meta_assist("stutt", 2, 2.5)

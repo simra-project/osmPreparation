@@ -22,6 +22,6 @@ paramDict = {
         "bounding_box": [9.038601,48.692019,9.31582,48.866399],
         "centroid": [48.778461,9.177910],
         "neighbour_param": 80,
-        "sorting_params": ['lon','at'] # long-ish bounding box - prioritize sorting via lon over lat.
+        "sorting_params": ['lon','lat'] # long-ish bounding box - prioritize sorting via lon over lat.
     }
 }

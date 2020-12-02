@@ -81,12 +81,6 @@ def explodeAndConcat(nonIsolatedMerge, isolatedJunctions):
 
     explodedNonIsolatedJunctions_reordered = explodedNonIsolatedJunctions.reindex(columns=['id','lat','lon','highwayids','highwaynames','highwaytypes','highwaylanes','highwaylanesBw','poly_geometry','poly_vertices_lats','poly_vertices_lons','neighbours','neighbour_cluster'])
 
-    # explodedNonIsolatedJunctions.loc[:,'neighbours'] = neighs
-
-    # explodedNonIsolatedJunctions.loc[:,'neighbour_cluster'] = neighbourClusters
-
-    # explodedNonIsolatedJunctions = explodedNonIsolatedJunctions.drop(["poly_geometry","neighbour_cluster"], axis=1)
-
     ## d) Merge back together with the isolatedJunctions.
 
     completeJunctions = pd.concat([explodedNonIsolatedJunctions_reordered, isolatedJunctions], ignore_index = True, sort = False)
@@ -94,7 +88,7 @@ def explodeAndConcat(nonIsolatedMerge, isolatedJunctions):
     # completeJunctions = completeJunctions.drop("neighbours", axis = 1)
 
     return completeJunctions
-
+    
 
 def tidyItUp(region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, bufferSize, neighbourParam):
 
