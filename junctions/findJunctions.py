@@ -60,6 +60,9 @@ def getJunctionsDf(nodesdf, region):
 
     junctionsdf = junctionsdf.drop(['index','junction'],axis=1)
 
-    pd.DataFrame(junctionsdf[['id','lat','lon']]).to_csv(f"{region}_junctions_aux.csv")
+    # Map ids to list to facilitate cluster comparison in manualClusterPrep
+    # COMMENT OUT TO PREVENT THIS
+
+    junctionsdf['id'] = junctionsdf['id'].map(lambda i: [i])
 
     return junctionsdf

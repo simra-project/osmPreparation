@@ -1,5 +1,11 @@
 
 paramDict = {
+    "augs": {
+        "bounding_box": [10.763362,48.249337,10.959333,48.468336],
+        "centroid": [48.354761, 10.896351],
+        "neighbour_param": 80, 
+        "sorting_params": ['lat','lon'] # wide bounding box - prioritize sorting via lat over lon.
+    },
     "bern": {
         "bounding_box": [7.423641,46.93916,7.469955,46.962112],
         "centroid": [46.945876,7.415994],

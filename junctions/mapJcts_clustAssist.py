@@ -67,20 +67,22 @@ def plotPolys (df, map, style, marker_color):
     # Workaround because of different names for the column containing the geometric shape to be plotted, 
     # TODO get rid of this bc it's ugly !!!
 
-    geomCol = 'poly_geometry' if 'poly_geometry' in df.columns else 'geometry'
+    # geomCol = 'poly_geometry' if 'poly_geometry' in df.columns else 'geometry'
 
     for ind in df.index:
 
         if df.at[ind, 'neighbour_cluster'] == 999999:
 
-            style = {'fillColor': '#ffd700', 'lineColor': '#DAA520'}
+            extractAndPlot(df.at[ind, 'poly_geometry'], df.at[ind, 'neighbour_cluster'], map, {'fillColor': '#ffd700', 'lineColor': '#DAA520'}, crs, 'orange')
 
-        extractAndPlot(df.at[ind, geomCol], df.at[ind, 'neighbour_cluster'], map, style, crs, marker_color)
+        else:
+
+            extractAndPlot(df.at[ind, 'poly_geometry'], df.at[ind, 'neighbour_cluster'], map, style, crs, marker_color)
 
 #*******************************************************************************************************************
 # (*) Execute all the map jobs in logical order.
 
-def runAllMapTasks (region, nonIsolatedMelt_small_buf, isolatedJunctions, nonIsolatedMelt_large_buf, bufferSize):
+def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     # region, nonIsolatedJunctions, isolatedJunctions, bufferSize
 
@@ -94,11 +96,9 @@ def runAllMapTasks (region, nonIsolatedMelt_small_buf, isolatedJunctions, nonIso
 
     # II.) Plot polys onto their respective maps
 
-    plotPolys (nonIsolatedMelt_large_buf, myMap, {'fillColor': '#87CEEB', 'lineColor': '#4682B4'}, 'blue')
+    plotPolys (large_buf_inconsist, myMap, {'fillColor': '#87CEEB', 'lineColor': '#4682B4'}, 'blue')
 
-    plotPolys (nonIsolatedMelt_small_buf, myMap, {'fillColor': '#3CB371', 'color': '#2E8B57'}, 'green')
-
-    plotPolys (isolatedJunctions, myMap, {'fillColor': '#3CB371', 'color': '#2E8B57'}, 'green')
+    plotPolys (small_buf_inconsist, myMap, {'fillColor': '#3CB371', 'color': '#2E8B57'}, 'green')
 
     # III.) Export map as htmls
 

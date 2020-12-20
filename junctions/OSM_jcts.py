@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import requests
 import json
+import paramsPerRegion
 import dataAcqAndForm_Jcts as dfShizzle
 import findJunctions
 import bufferJcts
@@ -27,7 +28,7 @@ import concurrent.futures
 #                    different for different regions (as the dfs are of different sizes). Hence,
 #                    for every region we're trying out different values for this parameter to compare
 #                    the results and determine which value is most suitable.
-#  * bufferSize: junctions are buffered into two-dimensional shapes according to the mean width of the
+#  * buffer_size: junctions are buffered into two-dimensional shapes according to the mean width of the
 #                highways intersecting at this junction multiplied with a factor. This factor varies 
 #                depending on the city layout.
 #  * sortingParams: either ['lat','lon'] or ['lon','lat']; that's because we're sorting the junctions
@@ -35,88 +36,23 @@ import concurrent.futures
 #                   sort by lat resp. lon first depending on the shape of the bounding box 
 #                   (long but slim bounding box: sort by lat first; wide but low bb: sort by lon first) 
 
-def doUntilMerge (region, boundingBox, bbCentroid, neighbourParam, bufferSize, sortingParams): 
+def main(region, buffer_size):
 
-    nodesdf = dfShizzle.metaFunc(boundingBox)
+    nodesdf = dfShizzle.metaFunc(paramsPerRegion.paramDict[region]["bounding_box"])
 
     junctionsdf = findJunctions.getJunctionsDf(nodesdf, region)
 
-    bufferedJunctionsDf = bufferJcts.bufferize(junctionsdf, bufferSize)
+    bufferedJunctionsDf = bufferJcts.bufferize(junctionsdf, buffer_size)
 
-    nonIsolatedJunctions, isolatedJunctions = clusterJcts.cluster(bufferedJunctionsDf, neighbourParam, sortingParams)
+    nonIsolatedJunctions, isolatedJunctions = clusterJcts.cluster(bufferedJunctionsDf, paramsPerRegion.paramDict[region]["neighbour_param"], paramsPerRegion.paramDict[region]["sorting_params"])
 
-    return nonIsolatedJunctions, isolatedJunctions
+    completeJunctions = tidyData_Jcts.tidyItUp(region, paramsPerRegion.paramDict[region]["centroid"], nonIsolatedJunctions, isolatedJunctions, buffer_size, paramsPerRegion.paramDict[region]["sorting_params"])
 
-def main(args):
-
-    region, boundingBox, bbCentroid, neighbourParam, bufferSize, sortingParams = args
-
-    nonIsolatedJunctions, isolatedJunctions = doUntilMerge(region, boundingBox, bbCentroid, neighbourParam, bufferSize, sortingParams)
-
-    completeJunctions = tidyData_Jcts.tidyItUp(region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, bufferSize, neighbourParam)
-
-    completeJunctions.to_csv(region + '_junctions_complete.csv', index=False, sep="|")
-
-    return f'Finished script for {region}!'
-
-# Define params for different regions
-
-## a) BoundingBoxes
-
-# Working with smaller regions for now; for these, a browser can display a map of the complete area including 
-# geometric shapes without dying, so no need to work with sub-bounding boxes and multiple maps.
-
-### I) Bern
-
-bernbb = [7.423641,46.93916,7.469955,46.962112]
-
-### II) Augsburg
-
-augsbb = [10.763362,48.249337,10.959333,48.468336]
-
-### III) Pforzheim
-
-pforzbb = [8.653482,48.873994,8.743249,48.910329]
-
-### IV) Stuttgart
-
-stuttbb = [9.038601,48.692019,9.31582,48.866399]
-
-### V) Wuppertal
-
-wuppbb = [7.014072,51.165803,7.31343,51.318062]
-
-## b) Centroids
-
-bernCentroid = [46.945876,7.415994]
-
-augsCentroid = [48.354761, 10.896351]
-
-pforzCentroid = [48.877046,8.710584]
-
-stuttCentroid = [48.778461,9.177910]
-
-wuppCentroid = [51.240631,7.163216]
-
-## c) Set up param array
-
-params = [
-        ["augs",augsbb,augsCentroid,50,2.5,['lat','lon']],
-        ["augs",augsbb,augsCentroid,80,2.5,['lat','lon']],
-        #
-        ["pforz",pforzbb,pforzCentroid,100,2.5,['lon','lat']],
-        #
-        # ["stutt",stuttbb,stuttCentroid,80,2.5,['lon','lat']],
-        #
-        ["wupp",wuppbb,wuppCentroid,130,2.5,['lat','lon']],
-        #
-        # ["wupp",wuppbb,wuppCentroid,80,2],
-        # ["wupp",wuppbb,wuppCentroid,80,2.25],
-        # ["wupp",wuppbb,wuppCentroid,80,2.5],
-        ]
+    return completeJunctions
 
 if __name__ == "__main__":
-    main(["stutt",stuttbb,stuttCentroid,100,3,['lon','lat']])
+    completeJunctions = main("stutt",2.5)
+    completeJunctions.to_csv("stutt" + '_junctions_complete.csv', index=False, sep="|")
     # main(["pforz",pforzbb,pforzCentroid,100,3,['lon','lat']])
 
 '''

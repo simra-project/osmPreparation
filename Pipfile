@@ -36,6 +36,8 @@ Jinja2 = "==2.11.2"
 MarkupSafe = "==1.1.1"
 Shapely = "==1.7.0"
 fire = "*"
+jupyter = "*"
+ipykernel = "*"
 
 [requires]
 python_version = "3.8"

@@ -11,6 +11,8 @@ from itertools import starmap
 
 from shapely.geometry.polygon import Polygon 
 
+import datetime
+
 # Internal imports
 
 # (1) Manual cluster preparation tool:
@@ -53,7 +55,8 @@ import tidyData_Jcts
 
 # ($) Function for changing a junction's cluster manually via command line.
 
-# Sample call of CLI: python manualMergeTool.py --curr-clust=600.0 --new_clust=605.0 --region="pforz" --buffer_size=2
+# Sample call of CLI: python manualMergeTool.py --small_buf_clstrs='[600.0,601.0]' --large_buf_clstr=605.0 --region="stutt"
+# BE SURE TO 'cd junctions' first! Otherwise the script won't be found, obvsly.
 
 # USAGE:
 # (a) Execute manualClusterPrep, specifying the region and the buffers of different sizes to compare.
@@ -63,13 +66,13 @@ import tidyData_Jcts
 #     and the size of the smaller buffer.
 # (e) Reload the map (refresh browser window) to see the result.
 
-def update_clust(small_buf_clstrs, large_buf_clstr, region, buffer_size):
+def update_clust(small_buf_clstrs, large_buf_clstr, region):
 
-    small_buf_inconsist = pd.read_pickle("small_buf_inconsist")
+    small_buf_inconsist = pd.read_pickle(f"small_buf_inconsist_{region}")
 
-    large_buf_inconsist = pd.read_pickle("large_buf_inconsist")
+    large_buf_inconsist = pd.read_pickle(f"large_buf_inconsist_{region}")
 
-    consistent_clusters = pd.read_pickle("consistent_clusters")
+    consistent_clusters = pd.read_pickle(f"consistent_clusters_{region}")
 
     # 'small_buf_clstrs' is a list of clusters having emerged in the small_buf-solution; remove the rows
     # corresponding to these clusters from 'small_buf_inconsist' as the large_buf-solution for the same
@@ -85,7 +88,7 @@ def update_clust(small_buf_clstrs, large_buf_clstr, region, buffer_size):
 
     # Grab the accepted solution from 'large_buf_inconsist'
 
-    accepted_solution = large_buf_inconsist.loc[large_buf_inconsist['neighbour_cluster'] == large_buf_clstr]
+    accepted_solution = large_buf_inconsist.loc[large_buf_inconsist['neighbour_cluster'] == large_buf_clstr].copy()
 
     # Set 'neighbour_cluster' to 999999 to make manual editing obvious and facilitate highlighting on map
 
@@ -97,37 +100,30 @@ def update_clust(small_buf_clstrs, large_buf_clstr, region, buffer_size):
 
     consistent_clusters = pd.concat([consistent_clusters, accepted_solution], ignore_index = True, sort = False)
 
-    small_buf_inconsist_nonIsolated, small_buf_inconsist_isolated = manualClusterPrep.splitDf(small_buf_inconsist)
-
-    mapping.runAllMapTasks(region, small_buf_inconsist_nonIsolated, small_buf_inconsist_isolated, large_buf_inconsist, buffer_size)
+    mapping.runAllMapTasks(region, small_buf_inconsist, large_buf_inconsist)
 
     # Pickle the three data sets for further editing
 
-    small_buf_inconsist.to_pickle("small_buf_inconsist")
+    small_buf_inconsist.to_pickle(f"small_buf_inconsist_{region}")
 
-    large_buf_inconsist.to_pickle("large_buf_inconsist")
+    large_buf_inconsist.to_pickle(f"large_buf_inconsist_{region}")
 
-    consistent_clusters.to_pickle("consistent_clusters")    
+    consistent_clusters.to_pickle(f"consistent_clusters_{region}")    
 
-    '''
+# Sample call of CLI: python manualMergeTool.py --region='stutt'
 
-    complete_df = pd.read_pickle("manualMergeTarget")
+def save_result (region):
 
-    complete_df.loc[:,'neighbour_cluster'] = complete_df['neighbour_cluster'].map(lambda x: x if x != curr_clust else new_clust)
+    small_buf_accepted = pd.read_pickle(f'small_buf_inconsist_{region}')
 
-    target, remainder = reMerge(complete_df, new_clust)
+    consistent_plus_accepted_large_solutions = pd.read_pickle(f'consistent_clusters_{region}')
 
-    # mapping.runAllMapTasks(region, target, remainder, buffer_size)
+    complete_df = pd.concat([small_buf_accepted, consistent_plus_accepted_large_solutions], ignore_index = True, sort = False)
 
-    complete_df = tidyData_Jcts.explodeAndConcat(target, remainder)
-
-    complete_df.to_pickle("manualMergeTarget")
-
-    complete_df.to_csv('manual_merging_res.csv', index=False, sep="|")
-
-    '''
+    complete_df.to_csv(f'manual_merging_res_{region}_{datetime.date.today()}.csv', index=False, sep="|")
 
 if __name__ == '__main__':
-  fire.Fire(update_clust)
+  # fire.Fire(update_clust)
+  fire.Fire(save_result)
 
 
