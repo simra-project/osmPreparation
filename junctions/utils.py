@@ -44,6 +44,6 @@ def getSubDirPath (file):
 
     subdir = 'junctions'
 
-    subdir_path = os.path.join(subdir, 'bern_junctions_complete.csv')
+    subdir_path = os.path.join(subdir, file)
 
     return subdir_path
