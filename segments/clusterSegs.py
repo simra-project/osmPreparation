@@ -5,6 +5,8 @@ from geopandas import GeoSeries
 
 from shapely.geometry import Point
 
+import paramsPerRegion
+
 #*******************************************************************************************************************
 # (1) Find out which ways don't start and/or end with a junction. Wherever that is the case, we want to 
 #     merge segments together in order to get rid of weird breaks - goal is to obtain a clean model of
@@ -265,7 +267,13 @@ def expandNeighbours(df, neighbourParam, clusterInd, outerLoopInd, currNeighbour
 
 # def cluster (segmentsdf, junctionsdf, neighbourParam, sortingParams):
 
-def cluster (segmentsdf, junctionsdf, sortingParams, neighbourParam):
+def cluster (region, segmentsdf, junctionsdf):
+
+    # 0.) Retrieve parameters from param dictionary
+
+    sorting_params = paramsPerRegion.paramDict[region]["sorting_params"]
+
+    neighbour_param = paramsPerRegion.paramDict[region]["neighbour_param"]
 
      # I.) Determine which segments are 'oddballs' (don't start and/or end with a junction)
 
@@ -274,10 +282,10 @@ def cluster (segmentsdf, junctionsdf, sortingParams, neighbourParam):
     # II.) Assign each oddball segment its neighbours (other segments it intersects with without a junction being contained
     #      in that intersection).
 
-    oddballsWithNeighbours = findNeighbours(oddballs, sortingParams, junctionsdf, neighbourParam)
+    oddballsWithNeighbours = findNeighbours(oddballs, sorting_params, junctionsdf, neighbour_param)
 
     # III.) Cluster the oddball segments based on their neighbours
 
-    clusterNeighbours(oddballsWithNeighbours, neighbourParam)
+    clusterNeighbours(oddballsWithNeighbours, neighbour_param)
 
     return oddballsWithNeighbours, normies

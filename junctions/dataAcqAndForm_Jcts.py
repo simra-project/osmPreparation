@@ -85,6 +85,7 @@ def getHighwayDf(osmdata):
 def getNodesDf(osmdata):
 
     nodes = []
+
     for dct in osmdata:
         #print dct
         if dct['type']=='way':

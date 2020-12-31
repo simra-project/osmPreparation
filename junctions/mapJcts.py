@@ -11,6 +11,10 @@ from shapely.geometry.polygon import Polygon
 
 from statistics import mean
 
+import os
+
+import utils # internal import
+
 #*******************************************************************************************************************
 # (*) Plot polygons onto map.
 
@@ -60,6 +64,18 @@ def runAllMapTasks (region, bbCentroid, nonIsolatedJunctions, isolatedJunctions,
 
     plotPolys_B(isolatedJunctions, 'poly_geometry', myMap, {'fillColor': '#7FFF00', 'lineColor': '#F5FFFA'})
 
-    # III.) Export map as htmls
+    # III.) Export map as html
 
-    myMap.save(f'{region}-jcts-map_buf={bufferSize}_np={neighbourParam}.html')
+    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
+    # PyPipeline_ (background: we want to write all files related to junctions to the
+    # junctions subdirectory)
+
+    cwd = os.getcwd()
+
+    in_target_dir = utils.inTargetDir(cwd)
+
+    file_name = f'{region}-jcts-map_buf={bufferSize}_np={neighbourParam}.html'
+
+    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
+
+    myMap.save(path)

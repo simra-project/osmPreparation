@@ -5,17 +5,18 @@ import pandas as pd
 import numpy as np
 import requests
 import json
-import paramsPerRegion
+import time
+#import concurrent.futures
+import os
+
+pd.set_option('display.max_columns', 200)
+
+import utils
 import dataAcqAndForm_Jcts as dfShizzle
 import findJunctions
 import bufferJcts
 import clusterJcts
 import tidyData_Jcts
-pd.set_option('display.max_columns', 200)
-
-import time
-
-import concurrent.futures
 
 # ARGUMENTS.
 #  * region: a string - which region are we currently looking at? Required for writing files.
@@ -38,22 +39,35 @@ import concurrent.futures
 
 def main(region, buffer_size):
 
-    nodesdf = dfShizzle.metaFunc(paramsPerRegion.paramDict[region]["bounding_box"])
+    nodesdf = dfShizzle.metaFunc(utils.paramDict[region]["bounding_box"])
 
     junctionsdf = findJunctions.getJunctionsDf(nodesdf, region)
 
     bufferedJunctionsDf = bufferJcts.bufferize(junctionsdf, buffer_size)
 
-    nonIsolatedJunctions, isolatedJunctions = clusterJcts.cluster(bufferedJunctionsDf, paramsPerRegion.paramDict[region]["neighbour_param"], paramsPerRegion.paramDict[region]["sorting_params"])
+    nonIsolatedJunctions, isolatedJunctions = clusterJcts.cluster(bufferedJunctionsDf, utils.paramDict[region]["neighbour_param"], utils.paramDict[region]["sorting_params"])
 
-    completeJunctions = tidyData_Jcts.tidyItUp(region, paramsPerRegion.paramDict[region]["centroid"], nonIsolatedJunctions, isolatedJunctions, buffer_size, paramsPerRegion.paramDict[region]["sorting_params"])
+    completeJunctions = tidyData_Jcts.tidyItUp(region, utils.paramDict[region]["centroid"], nonIsolatedJunctions, isolatedJunctions, buffer_size, utils.paramDict[region]["sorting_params"])
 
     return completeJunctions
 
 if __name__ == "__main__":
-    completeJunctions = main("stutt",2.5)
-    completeJunctions.to_csv("stutt" + '_junctions_complete.csv', index=False, sep="|")
-    # main(["pforz",pforzbb,pforzCentroid,100,3,['lon','lat']])
+
+    completeJunctions = main("bern",2)
+
+    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
+    # PyPipeline_ (background: we want to write all files related to junctions to the
+    # junctions subdirectory)
+
+    cwd = os.getcwd()
+
+    in_target_dir = utils.inTargetDir(cwd)
+
+    file_name = "bern_junctions_complete.csv"
+
+    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
+
+    completeJunctions.to_csv(path, index=False, sep="|")
 
 '''
 start = time.time()

@@ -1,3 +1,4 @@
+
 import folium
 
 import geopandas as gpd
@@ -14,9 +15,7 @@ import datetime
 
 import random
 
-import os
-
-import utils # internal import
+from .. import paramsPerRegion # internal import
 
 #*******************************************************************************************************************
 # (*) Scatter marker location to prevent overlay
@@ -87,11 +86,11 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     # region, nonIsolatedJunctions, isolatedJunctions, bufferSize
 
-    bbCentroid = utils.paramDict[region]['centroid']
+    bbCentroid = paramsPerRegion.paramDict[region]['centroid']
 
     # I.) Set up our maps
 
-    bbCentroid = utils.paramDict[region]['centroid']
+    bbCentroid = paramsPerRegion.paramDict[region]['centroid']
 
     myMap = folium.Map(location=bbCentroid, zoom_start=15, tiles='cartodbpositron')
 
@@ -103,16 +102,4 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     # III.) Export map as htmls
 
-    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
-    # PyPipeline_ (background: we want to write all files related to junctions to the
-    # junctions subdirectory)
-
-    cwd = os.getcwd()
-
-    in_target_dir = utils.inTargetDir(cwd)
-
-    file_name = f'{region}-jcts-manualClust_{datetime.date.today()}.html'
-
-    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
-
-    myMap.save(path)
+    myMap.save(f'{region}-jcts-manualClust_{datetime.date.today()}.html')
