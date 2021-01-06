@@ -13,6 +13,12 @@ from shapely.geometry import Point
 
 import numpy as np
 
+import os
+
+import datetime
+
+import utils # internal import
+
 #*******************************************************************************************************************
 # (*) Plot polygons onto map.
 
@@ -62,8 +68,18 @@ def runAllMapTasks (region, bbCentroid, oddballs, normies, neighbourParam):
 
     plotPolys(normies, 'poly_geometry', myMap, {'fillColor': '#7FFF00', 'lineColor': '#F5FFFA'})
 
-    # III.) Export map as htmls
+    # III.) Export map as html
 
-    # myMap.save(f'{region}-map_buf={bufferSize}_np={neighbourParam}.html')
+    # Find out if we're operating in 'segments'-subdirectory or its parent directory,
+    # PyPipeline_ (background: we want to write all files related to segments to the
+    # segments subdirectory)
 
-    myMap.save(f'{region}-segs-map_np={neighbourParam}.html')
+    cwd = os.getcwd()
+
+    in_target_dir = utils.inTargetDir(cwd)
+
+    file_name = f'{region}-segs-map_np={neighbourParam}_{datetime.date.today()}.html'
+
+    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
+
+    myMap.save(path)

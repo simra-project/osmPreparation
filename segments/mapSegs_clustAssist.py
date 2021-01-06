@@ -15,7 +15,9 @@ import datetime
 
 import random
 
-from .. import paramsPerRegion # internal import
+import os
+
+import utils # internal import
 
 #*******************************************************************************************************************
 # (*) Scatter marker location to prevent overlay
@@ -86,11 +88,11 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     # region, nonIsolatedJunctions, isolatedJunctions, bufferSize
 
-    bbCentroid = paramsPerRegion.paramDict[region]['centroid']
+    bbCentroid = utils.paramDict[region]['centroid']
 
     # I.) Set up our maps
 
-    bbCentroid = paramsPerRegion.paramDict[region]['centroid']
+    bbCentroid = utils.paramDict[region]['centroid']
 
     myMap = folium.Map(location=bbCentroid, zoom_start=15, tiles='cartodbpositron')
 
@@ -102,4 +104,16 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     # III.) Export map as htmls
 
-    myMap.save(f'{region}-jcts-manualClust_{datetime.date.today()}.html')
+    # Find out if we're operating in 'segments'-subdirectory or its parent directory,
+    # PyPipeline_ (background: we want to write all files related to segments to the
+    # segments subdirectory)
+
+    cwd = os.getcwd()
+
+    in_target_dir = utils.inTargetDir(cwd)
+
+    file_name = f'{region}-segs-manualClust_{datetime.date.today()}.html'
+
+    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
+
+    myMap.save(path)

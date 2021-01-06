@@ -21,7 +21,7 @@ import numpy as np
 #*******************************************************************************************************************
 # (0) Define some functions the actual buffer-function requires.
 
-def roadWidth (roadType) :
+def roadWidth (roadType, buffer_size) :
          switcher = {
                  'motorway': 9,
                  'trunk': 8,
@@ -49,7 +49,7 @@ def roadWidth (roadType) :
                  'path': 2.5,
                  'cycleway': 1.5
              }
-         return switcher.get(roadType, 6.5)
+         return (buffer_size * switcher.get(roadType, 6.5))
 
 # A little more cumbersome as in case of the junctions, we have to differentiate when creating 2D-shapes 
 # from the segment data: there might be segments of length 1, which LineStrings can't be projected from (only Points).
@@ -73,7 +73,7 @@ def get2DGeom(coords):
 # If we apply function to whole data frame columns (= pd.Series) or, even better, numpy arrays, checks are only done
 # once for every Series/array => faaaaaast!
 
-def bufferize(segmentsdf):
+def bufferize(segmentsdf, buffer_size):
 
     segmentsdf.loc[:,'poly_geometry'] = segmentsdf['coords'].map(get2DGeom)
 
@@ -92,7 +92,7 @@ def bufferize(segmentsdf):
 
     highwaytypes = segmentsdf.highwaytype.values
 
-    highwaywidths = np.vectorize(roadWidth)(highwaytypes)
+    highwaywidths = np.vectorize(roadWidth)(highwaytypes, buffer_size)
 
     # Buffer segments into 3 D according to highwaywidths
 

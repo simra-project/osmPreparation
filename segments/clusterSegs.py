@@ -5,7 +5,7 @@ from geopandas import GeoSeries
 
 from shapely.geometry import Point
 
-import paramsPerRegion
+import utils
 
 #*******************************************************************************************************************
 # (1) Find out which ways don't start and/or end with a junction. Wherever that is the case, we want to 
@@ -210,6 +210,8 @@ def clusterNeighbours(df, neighbourParam):
         
             clusterInd += 1
 
+    return df
+
 def expandNeighbours(df, neighbourParam, clusterInd, outerLoopInd, currNeighbours, included):
     
     lower = max(outerLoopInd-neighbourParam, 0)
@@ -271,9 +273,9 @@ def cluster (region, segmentsdf, junctionsdf):
 
     # 0.) Retrieve parameters from param dictionary
 
-    sorting_params = paramsPerRegion.paramDict[region]["sorting_params"]
+    sorting_params = utils.paramDict[region]["sorting_params"]
 
-    neighbour_param = paramsPerRegion.paramDict[region]["neighbour_param"]
+    neighbour_param = utils.paramDict[region]["neighbour_param"]
 
      # I.) Determine which segments are 'oddballs' (don't start and/or end with a junction)
 
@@ -286,6 +288,12 @@ def cluster (region, segmentsdf, junctionsdf):
 
     # III.) Cluster the oddball segments based on their neighbours
 
-    clusterNeighbours(oddballsWithNeighbours, neighbour_param)
+    oddballsWithNeighbours_clustered = clusterNeighbours(oddballsWithNeighbours, neighbour_param)
 
-    return oddballsWithNeighbours, normies
+    # IV.) Add a cluster to the isolated segments too (each will have their own, due to their isolation :'( ))
+
+    max_ni_clust = oddballsWithNeighbours_clustered['neighbour_cluster'].max() 
+
+    normies["neighbour_cluster"] = normies.index.map(lambda x: max_ni_clust + x)
+
+    return oddballsWithNeighbours_clustered, normies

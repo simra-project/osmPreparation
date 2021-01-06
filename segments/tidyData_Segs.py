@@ -1,4 +1,3 @@
-
 # import mapSegs
 
 import geopandas as gpd
@@ -11,15 +10,15 @@ from shapely.geometry import Polygon, MultiPolygon
 
 import mapSegs
 
-import paramsPerRegion
+import utils
 
 def tidyItUp(region, oddballs, normies):
 
     # 0.) Retrieve params from dict
 
-    bb_centroid = paramsPerRegion.paramDict[region]["bb_centroid"]
+    bb_centroid = utils.paramDict[region]["centroid"]
 
-    neighbour_param = paramsPerRegion.paramDict[region]["neighbour_param"]
+    neighbour_param = utils.paramDict[region]["neighbour_param"]
 
     ## a) Merge neighbour clusters: dissolving geometric shapes according to a shared property can be achieved using [geopandas](https://www.earthdatascience.org/workshops/gis-open-source-python/dissolve-polygons-in-python-geopandas-shapely/)
 
@@ -33,7 +32,7 @@ def tidyItUp(region, oddballs, normies):
 
     oddballs = oddballs.drop(["index","lats","lons","coords","oddball","poly_geometry","poly_vertices_lats","poly_vertices_lons","neighbours"], axis=1)
 
-    oddballs = oddballs.groupby('neighbour_cluster', as_index = False).agg({'id': lambda x: ', '.join(map(str, x)), 'highwayname': lambda x: ', '.join(map(str, x)), 'highwaytype': lambda x: ', '.join(map(str, x)), 'highwaylanes': lambda x: ', '.join(map(str, x)),'lanes:backward': lambda x: ', '.join(map(str, x)), 'segment_nodes_ids': 'sum', 'seg_length': 'sum'})
+    oddballs = oddballs.groupby('neighbour_cluster', as_index = False).agg({'id': 'sum', 'highwayname': lambda x: ', '.join(map(str, x)), 'highwaytype': lambda x: ', '.join(map(str, x)), 'highwaylanes': lambda x: ', '.join(map(str, x)),'lanes:backward': lambda x: ', '.join(map(str, x)), 'segment_nodes_ids': 'sum', 'seg_length': 'sum'})
 
     oddballMerge = pd.merge(oddballs, oddballClusters, on='neighbour_cluster')
 
@@ -102,9 +101,7 @@ def tidyItUp(region, oddballs, normies):
 
     ## d) Merge back together with the normie-df.
 
-    explodedOddballs = explodedOddballs.drop(["neighbour_cluster", "poly_geometry"],axis=1)
-
-    unfoldedNormies = normies.drop(["index","lats","lons","coords","oddball","poly_geometry"], axis=1)
+    unfoldedNormies = normies.drop(["index","lats","lons","coords","oddball"], axis=1)
 
     completeSegments = pd.concat([explodedOddballs, unfoldedNormies], ignore_index = True, sort = False)
 

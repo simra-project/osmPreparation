@@ -13,6 +13,8 @@ from statistics import mean
 
 import os
 
+import datetime
+
 import utils # internal import
 
 #*******************************************************************************************************************
@@ -74,7 +76,7 @@ def runAllMapTasks (region, bbCentroid, nonIsolatedJunctions, isolatedJunctions,
 
     in_target_dir = utils.inTargetDir(cwd)
 
-    file_name = f'{region}-jcts-map_buf={bufferSize}_np={neighbourParam}.html'
+    file_name = f'{region}-jcts-map_buf={bufferSize}_np={neighbourParam}_{datetime.date.today()}.html'
 
     path = file_name if in_target_dir else utils.getSubDirPath(file_name)
 

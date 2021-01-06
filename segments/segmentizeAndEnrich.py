@@ -60,16 +60,38 @@ def unfold(highwaydf):
     # OMG it's so fast!!
 
     vals = highwaydf.segments.values.tolist()
-    rs = [len(r) for r in vals]    
-    ids = np.repeat(highwaydf.id, rs)
+    rs = [len(r) for r in vals]  
 
     name = np.repeat(highwaydf.name, rs)
     highway = np.repeat(highwaydf.highway, rs)
     lanes = np.repeat(highwaydf.lanes, rs)
     lanesBw = np.repeat(highwaydf['lanes:backward'], rs)
 
-    unfoldeddf = pd.DataFrame(np.column_stack((ids, name, highway, lanes, lanesBw, np.concatenate(vals))), 
-                                columns=['id','highwayname','highwaytype','highwaylanes','lanes:backward','segment_nodes_ids'])
+    unfoldeddf = pd.DataFrame(np.column_stack((name, highway, lanes, lanesBw, np.concatenate(vals))), 
+                                columns=['highwayname','highwaytype','highwaylanes','lanes:backward','segment_nodes_ids'])
+  
+
+    '''
+    * Manual remerging of segments shall be enabled via a CLI (> manualMergeCLIFlow_segs.py).
+    * Manual remerging is done by computing clustering solutions for two different buffer sizes and determining 
+      the differences between these solutions; segment clusters are compared based on strings containing the sorted 
+      ids of the individual segments contained in them.
+    * Segments are fractions of OSM ways; therefore, they inherit a range of properties from their 'parent' highways. 
+      'id' is one of them. Hence, values in the 'id'-column aren't unique. 
+    * It is nicer though to keep them unique, otherwise different clustering solutions cannot be compared. The easiest
+      strategy for obtaining a unique id is to just use the index. 
+    * QUICK RECAP OF THE CLUSTER COMPARISON PROCESS (because it can't be repeated often enough!):
+        (1) map ids to lists; 
+        (2) if two segments end up in the same cluster and hence ar geographically merged and property-wise aggregated, 
+            their ids are concatenated; 
+        (3) in the end, those id lists are sorted (to ensure identical clusters are recognized as such when represented
+            as strings) and converted to string (so they can be put into sets, i.e. hashed); 
+        (4) then, two data sets that are based on clustering solutions obtained with different values for buffer size can 
+            be compared using their respective sets of segment clusters, with each segment cluster (irrespective of its 
+            containing a single or multiple segment/s) represented by a string of id/s.  
+    '''
+
+    unfoldeddf['id'] = unfoldeddf.index.map(lambda x: [x])
 
     return unfoldeddf
     

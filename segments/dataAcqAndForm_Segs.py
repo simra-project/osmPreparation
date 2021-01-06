@@ -4,6 +4,8 @@ import pandas as pd
 import requests
 import numpy as np
 
+import utils
+
 # ********************************************************************************************************************
 
 tags = ['primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
@@ -83,6 +85,14 @@ def getHighwayDf(ways):
     # Replace `NaN` with word `unknown` and reset the index:
 
     highwaydf = highwaydf.fillna(u'unknown').reset_index(drop=True)
+
+    # PROBABLY NOT BC NEED UNIQUE 
+    # Map ids to list to facilitate cluster comparison in manualClusterPrep
+    # COMMENT OUT TO PREVENT THIS
+
+    highwaydf['id'] = highwaydf['id'].map(lambda i: [i])
+
+    # *********************************************************************
     
     return highwaydf
 
@@ -114,6 +124,15 @@ def metaFunc(bbox, region):
 
     idCoords_dict = getCoordsFromNodes(nodes)
 
-    junctionsdf = pd.read_csv(f"{region}_junctions_aux.csv")
+    # Read the junctions data from csv that was produced by the junctions sub-project 
+    # and is therefore located in PyPipeline_/junctions.
+    # !!!!! Be sure to execute the junctions project first before executing the 
+    #       segments project for the same region !!!!
+    # (Otherwise, there might be no file to read.)
+    # TODO is this reasonable?
+
+    subdir_path = utils.getSubDirPath(f"{region}_junctions_for_segs.csv", 'junctions')
+
+    junctionsdf = pd.read_csv(subdir_path)
     
     return highwaydf, junctionsdf, idCoords_dict

@@ -8,6 +8,7 @@ import json
 import time
 #import concurrent.futures
 import os
+import datetime
 
 pd.set_option('display.max_columns', 200)
 
@@ -53,7 +54,7 @@ def main(region, buffer_size):
 
 if __name__ == "__main__":
 
-    completeJunctions = main("bern",2)
+    completeJunctions = main("stuttgart",2.5)
 
     # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
     # PyPipeline_ (background: we want to write all files related to junctions to the
@@ -63,27 +64,9 @@ if __name__ == "__main__":
 
     in_target_dir = utils.inTargetDir(cwd)
 
-    file_name = "bern_junctions_complete.csv"
+    file_name = f"bern_junctions_complete_{datetime.date.today()}.csv"
 
     path = file_name if in_target_dir else utils.getSubDirPath(file_name)
 
     completeJunctions.to_csv(path, index=False, sep="|")
 
-'''
-start = time.time()
-
-with concurrent.futures.ProcessPoolExecutor() as executor: 
-
-    # This way there are no 'future' objects involved, only the return values. 
-    # These are returned in the order in which processes were started
-    results = executor.map(main, params)
-
-    # Result is just a string proclaiming that work for a specific region is complete.
-    for result in results:
-        print(result)
-
-end = time.time()
-
-print(end - start)
-
-'''

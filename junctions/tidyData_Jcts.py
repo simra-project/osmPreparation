@@ -67,10 +67,6 @@ def explodeAndConcat(nonIsolatedMerge, isolatedJunctions):
     neighs = np.repeat(nonIsolatedMerge.neighbours, lens)
     neighbourClusters = np.repeat(nonIsolatedMerge.neighbour_cluster, lens)
 
-    # buckets = np.repeat(nonIsolatedMerge.bucket, lens)
-
-    # explodedNonIsolatedJunctions = pd.DataFrame(np.column_stack((neighClusters, ids, lats, lons, names, types, lanes, lanesBw, buckets, np.concatenate(polyLists))), columns=['neighbour_cluster','id','lat','lon','highwaynames','highwaytypes','highwaylanes','highwaylanesBw','bucket','poly_geometry'])
-
     explodedNonIsolatedJunctions = pd.DataFrame(np.column_stack((ids, lats, lons, hwIds, hwNames, hwTypes, hwLanes, hwLanesBw, np.concatenate(polyLists), neighs, neighbourClusters)), columns=['id','lat','lon','highwayids','highwaynames','highwaytypes','highwaylanes','highwaylanesBw','poly_geometry', 'neighbours', 'neighbour_cluster'])
 
     polyLats = explodedNonIsolatedJunctions['poly_geometry'].map(lambda x: x.exterior.coords.xy).map(lambda x: x[0]).map(lambda x: list(x))

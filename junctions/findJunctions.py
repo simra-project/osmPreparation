@@ -6,6 +6,10 @@ from shapely.geometry import Polygon
 
 from shapely.geometry import Point
 
+import os
+
+import utils # internal import
+
 relevantTypes = ['primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
 
 # ********************************************************************************************************************
@@ -58,6 +62,20 @@ def getJunctionsDf(nodesdf, region):
     junctionsdf.reset_index(inplace=True)
 
     junctionsdf = junctionsdf.drop(['index','junction'],axis=1)
+
+    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
+    # PyPipeline_ (background: we want to write all files related to junctions to the
+    # junctions subdirectory)
+
+    cwd = os.getcwd()
+
+    in_target_dir = utils.inTargetDir(cwd)
+
+    file_name = f"{region}_junctions_for_segs.csv"
+
+    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
+
+    pd.DataFrame(junctionsdf[['id','lat','lon']]).to_csv(path)
 
     # Map ids to list to facilitate cluster comparison in manualClusterPrep
     # COMMENT OUT TO PREVENT THIS

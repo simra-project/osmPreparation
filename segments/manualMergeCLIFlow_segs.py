@@ -5,13 +5,13 @@ import datetime
 
 # INTERNAL IMPORTS
 
-import manualMergePrep
+import manualMergePrep_segs
 
-import manualMergeTool
+import manualMergeTool_segs
 
 # ****************************************************************************
 
-print("\nWelcome to the manual merging tool for junctions!\n")
+print("\nWelcome to the manual merging tool for segments!\n")
 
 # (1) In order to run 'manualMergePrep.py', ask the user for three params:
 # * region
@@ -22,13 +22,13 @@ print(f'\nThanks! The region you entered is {region}.\n')
 
 # * small_buf
 
-small_buf = float(input("Please enter a rather small buffer size (e.g.: 2): \n"))
+small_buf = float(input("Please enter a rather small buffer size (e.g.: 1): \n"))
 
 print(f'\nThanks! The small buffer size you entered is {small_buf}.\n')
 
 # * large_buf
 
-large_buf = float(input("Please enter a larger buffer size (e.g.: 2.25): \n"))
+large_buf = float(input("Please enter a larger buffer size (e.g.: 1.25): \n"))
 
 print(f'\nThanks! The large buffer size you entered is {large_buf}. \n')
 
@@ -36,7 +36,7 @@ print(f'\nThanks! The large buffer size you entered is {large_buf}. \n')
 
 print("Please be patient as the ensuing computations will take a few minutes to complete .........\n")
 
-manualMergePrep.meta_assist(region, small_buf, large_buf)
+manualMergePrep_segs.meta_assist(region, small_buf, large_buf)
 
 # (3) Tell the user which outputs were produced and what they will be used for.
 #     Specifically, point out the location of the .html map that was generated,
@@ -102,11 +102,11 @@ while (continue_editing == 'yes'):
 
     print("Please be patient as the ensuing computations will take a few minutes to complete .........\n")
 
-    manualMergeTool.update_clust(small_buf_clstrs, large_buf_clstr, region)
+    manualMergeTool_segs.update_clust(small_buf_clstrs, large_buf_clstr, region)
 
     # (7) Tell the user to refresh the map to see the result    
 
-    print(f'Please refresh the map (PyPipeline_/junctions/\'{region}-jcts-manualClust_{datetime.date.today()}.html\') to see the result (in orange).\n')
+    print(f'Please refresh the map (PyPipeline_/segments/\'{region}-segs-manualClust_{datetime.date.today()}.html\') to see the result (in orange).\n')
 
     # (8) Ask if more manual editing is desired - if so, repeat the process from (5); if not proceed to (9)
 
@@ -116,6 +116,6 @@ while (continue_editing == 'yes'):
 
 print("You've chosen to finish editing. The resultant data will be written to csv.\n")
 
-manualMergeTool.save_result(region)
+manualMergeTool_segs.save_result(region)
 
-print(f'Your data can be found here: PyPipeline_/junctions/manual_merging_res_{region}_{datetime.date.today()}.csv')
+print(f'Your data can be found here: PyPipeline_/segments/manual_merging_res_{region}_{datetime.date.today()}.csv')

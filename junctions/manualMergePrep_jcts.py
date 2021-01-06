@@ -9,9 +9,11 @@ from shapely.geometry.polygon import Polygon
 
 import geopandas as gpd
 
-import mapJcts_clustAssist as mapping
+import mapJcts_clustAssist_jcts as mapping
 
 import collections
+
+import os
 
 # INTERNAL IMPORTS: 
 
@@ -19,7 +21,7 @@ import OSM_jcts
 
 import tidyData_Jcts
 
-import paramsPerRegion
+import utils
 
 #*******************************************************************************************************************
 # (1) Check where junctions have been assigned to different clusters depending on buffer size. 
@@ -49,13 +51,7 @@ def determine_inconsistencies (small_buf, large_buf):
 
     large_buf['id'] = large_buf['id'].sort_values().apply(lambda l: sorted(l)).map(lambda s: ', '.join(map(str, s)))
 
-    # (2) Set these converted ID columns as indices in the two dfs.
-
-    small_buf.set_index('id')
-
-    large_buf.set_index('id')
-
-    # (3) Grab the two ID columns from the df and determine their intersection 
+    # (2) Grab the two ID columns from the df and determine their intersection 
     #     (= the clusters that consistently appear in both data frames)
 
     small_buf_clust_set = set(small_buf['id'])
@@ -64,7 +60,7 @@ def determine_inconsistencies (small_buf, large_buf):
 
     consistent_solutions = small_buf_clust_set.intersection(large_buf_clust_set)
 
-    # (4) Flag the inconsistent rows in the two dfs (= rows whose ids aren't contained in consistent_solutions). 
+    # (3) Flag the inconsistent rows in the two dfs (= rows whose ids aren't contained in consistent_solutions). 
     #     Split dfs accordingly. Return.
 
     small_buf['clust_inconsist'] = small_buf['id'].map(lambda x: 0 if x in consistent_solutions else 1)
@@ -96,8 +92,6 @@ def meta_assist (region, small_buf, large_buf):
 
     mapping.runAllMapTasks(region, small_buf_inconsist, large_buf_inconsist)
 
-    # small_buf_inconsist_processed.to_csv('manual_merging_target.csv', index=False, sep="|")
-
     # PICKLE (SERIALIZE) THREE DATA SETS FOR USE BY MANUALMERGETOOL:
     # (1) 'small_buf_inconsist': subset of the small buffer df where clustering solutions differ from the
     #     larger buffer solution.
@@ -120,11 +114,29 @@ def meta_assist (region, small_buf, large_buf):
     #   were chosen over their liberal counterparts) is concatenated with 'consistent_clusters', which already
     #   contains all the more liberal solutions that were chosen over the conservative ones.
 
-    small_buf_inconsist.to_pickle(f"small_buf_inconsist_{region}")
+    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
+    # PyPipeline_ (background: we want to write all files related to junctions to the
+    # junctions subdirectory)
 
-    small_buf_consist.to_pickle(f"consistent_clusters_{region}")
+    cwd = os.getcwd()
 
-    large_buf_inconsist.to_pickle(f"large_buf_inconsist_{region}")
+    in_target_dir = utils.inTargetDir(cwd) # bool
 
-if __name__ == "__main__":
-    meta_assist("stutt", 2, 2.5)
+    # Write small_buf_inconsist pickle
+
+    small_buf_inconsist_path = f"jcts_small_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}")
+
+    small_buf_inconsist.to_pickle(small_buf_inconsist_path)
+
+    # Write large_buf_inconsist pickle
+
+    large_buf_inconsist_path = f"jcts_large_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}")
+
+    large_buf_inconsist.to_pickle(large_buf_inconsist_path)
+
+    # Write consistent clusters pickle
+
+    consistent_clusters_path = f"jcts_consistent_clusters_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_consistent_clusters_{region}")
+
+    small_buf_consist.to_pickle(consistent_clusters_path)
+
