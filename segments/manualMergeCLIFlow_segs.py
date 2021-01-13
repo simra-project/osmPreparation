@@ -60,7 +60,7 @@ elif (default == "Yes"):
 
 # (2) run 'manualMergePrep.py' - notify user that this will take loooooooong
 
-print("Please be patient as the ensuing computations will take a few minutes to complete .........\n")
+print("Please be patient as the ensuing computations will take a few moments (up to a few minutes) to complete .........\n")
 
 manualMergePrep_segs.meta_assist(region, small_buf, large_buf)
 
@@ -70,7 +70,7 @@ manualMergePrep_segs.meta_assist(region, small_buf, large_buf)
 
 print("Thanks for waiting! All the data necessary to manually edit junction clusters has been computed.\n")
 
-print(f'Please navigate to directory PyPipeline_/junctions and open the file \'{region}-jcts-manualClust_{datetime.date.today()}.html\' in your browser. \n')
+print(f'Please navigate to directory PyPipeline_/segments and open the file \'{region}-segs-manualClust_{datetime.date.today()}.html\' in your browser. \n')
 
 print('By default, the more conservative clustering solutions (green shapes on the map) will be accepted. \n')
 
@@ -80,11 +80,9 @@ print('By default, the more conservative clustering solutions (green shapes on t
 #                       modified data frame if specifically desired by the user 
 #                       (i.e., if a liberal cluster is chosen as a replacement for a conservative one).
 
-print('By default, the more conservative clustering solutions (green shapes on the map) will be accepted. \n')
-
 # (4) Ask the user if any editing is desired. 
 
-continue_editing = input ("Would you like to perform modifications? Please reply with yes or no. \n")
+continue_editing = input ("Would you like to perform any modifications? Please reply with yes or no. \n")
 
 while (continue_editing == 'yes'):
 
@@ -96,7 +94,7 @@ while (continue_editing == 'yes'):
 
     if desired_operation == "Delete":
 
-        # (6.a) In order to run 'manualMergeTool.py' > delete_clust, ask the user to provide the cluster to be 
+        # (6.a) In order to run 'manualMergeTool_segs.py' > delete_clust, ask the user to provide the cluster to be 
         #       deleted.
 
         small_buf_clstr_to_delete = float(input("Please provide the cluster ID of the green shape you want to delete (e.g., 43.0). \n"))

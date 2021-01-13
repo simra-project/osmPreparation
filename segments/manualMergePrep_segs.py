@@ -44,8 +44,8 @@ def determine_inconsistencies (small_buf, large_buf):
     # STRATEGY:
     # (1) Currently, junction IDs appear in the form [3485629] (isolated junction without neighbours) or
     #     [7837590, 872343, 96245] (junction cluster, i.e. merge of multiple individual junctions). 
-    #      Convert these data types to sets of ints/longs, sorted strings or some other form that allows
-    #      for comparison irrespective of order.
+    #     Convert these data types to sets of ints/longs, sorted strings or some other form that allows
+    #     for comparison irrespective of order.
 
     small_buf['id'] = small_buf['id'].sort_values().apply(lambda l: sorted(l)).map(lambda s: ', '.join(map(str, s)))
 

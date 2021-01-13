@@ -80,11 +80,73 @@ def determine_inconsistencies (small_buf, large_buf):
 
 def meta_assist (region, small_buf, large_buf):    
 
+   # NEW as of 12/01/21: avoid re-computing data that already exists.
+    #                     This means that whenever OSM_jcts.py is executed
+    #                     (and also when manual editing is performed and 
+    #                     'manualMergeTool' > save_result is called),
+    #                     the resultant data is not only written to .csv but
+    #                     also saved as a pickle (= python serialization format
+    #                     that is easy to read in, i.e. as opposed to a .csv
+    #                     file we don't have to parse numerical data, lists etc
+    #                     from string)
+    #                     => rather than calling OSM_jcts.py for small_buf and
+    #                        large_buf per default, check if we already have the
+    #                        data and only compute if we don't.
+
+    # Are we operating in target directory (= 'junctions')?
+
+    cwd = os.getcwd()
+
+    in_target = utils.inTargetDir(cwd)
+
     # Get data frames for small_buf (more conservative buffer parameter) and large_buf (more liberal buffer parameter)
+    # => from pickle (PyPipeline_/junctions/pickled_data) or computed
 
-    small_buf = OSM_jcts.main(region, small_buf)
+    # Do we already have a data set for the SMALL buffer size specified?
+    # => if so, use it. Else, compute it.
+    
+    small_buf_file = f"{region}_junctions_buffer={small_buf}"
 
-    large_buf = OSM_jcts.main(region, large_buf)
+    if (utils.fileExists(small_buf_file)):
+
+        if in_target:
+
+            small_buf_path = utils.getSubDirPath(small_buf_file, "pickled_data")
+
+        else:
+
+            sub_one = utils.getSubDirPath(small_buf_file, "pickled_data")
+
+            sub_two = utils.getSubDirPath(sub_one)
+
+            small_buf_path = sub_two
+
+        small_buf = pd.read_pickle(small_buf_path)
+
+    else: small_buf = OSM_jcts.main(region, small_buf)
+
+    # Do we already have a data set for the LARGE buffer size specified?
+    # => if so, use it. Else, compute it.
+
+    large_buf_file = f"{region}_junctions_buffer={large_buf}"
+
+    if (utils.fileExists(large_buf_file)):
+
+        if in_target:
+
+            large_buf_path = utils.getSubDirPath(large_buf_file, "pickled_data")
+
+        else:
+
+            sub_one = utils.getSubDirPath(large_buf_file, "pickled_data")
+
+            sub_two = utils.getSubDirPath(sub_one)
+
+            large_buf_path = sub_two
+
+        large_buf = pd.read_pickle(large_buf_path)
+
+    else: large_buf = OSM_jcts.main(region, large_buf)
 
     # Determine where the two data frames (and thus the clustering solutions for smaller and larger buffer) differ
 

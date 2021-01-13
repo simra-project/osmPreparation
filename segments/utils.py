@@ -59,7 +59,6 @@ def getSubDirPath (file_, subdir = 'segments'):
 
     return subdir_path
 
-
 def fileExists (file_name):
 
     cwd = os.getcwd()

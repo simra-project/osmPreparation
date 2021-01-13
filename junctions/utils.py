@@ -57,3 +57,21 @@ def getSubDirPath (file_, subdir = 'junctions'):
     subdir_path = os.path.join(subdir, file_)
 
     return subdir_path
+
+def fileExists (file_name):
+
+    cwd = os.getcwd()
+
+    if (inTargetDir(cwd)):
+
+        path = getSubDirPath(file_name,'pickled_data')
+
+        return os.path.isfile(path)
+
+    else:
+
+        sub_one = getSubDirPath(file_name, 'pickled_data')
+
+        sub_two = getSubDirPath(sub_one)
+
+        return os.path.isfile(sub_two)

@@ -120,6 +120,34 @@ def update_clust(small_buf_clstrs, large_buf_clstr, region):
 
     consistent_clusters.to_pickle(consistent_clusters_path) 
 
+# NEW 13/01/2021: allow not only replacement of more conservative clusters by more liberal ones, but also
+#                 the deletion of conservative clusters.
+
+def delete_clust(small_buf_clstr, region):
+
+    # small_buf_inconsist: will be modified
+
+    small_buf_inconsist = pd.read_pickle(utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}"))
+
+    # large_buf_inconsist: required for mapping the result
+
+    large_buf_inconsist = pd.read_pickle(utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}"))
+
+    # Delete the specified cluster
+
+    small_buf_inconsist = small_buf_inconsist[small_buf_inconsist['neighbour_cluster'] != small_buf_clstr]
+
+    # Draw a new map
+
+    mapping.runAllMapTasks(region, small_buf_inconsist, large_buf_inconsist)
+    
+# Once editing is finished, write the resultant data - i.e., 
+# a) the clusters that were consistent between the two dfs all along, 
+# b) the conservative clusters that weren't deleted or replaced and thus remain in
+#    the small_buf_inconsist df, 
+# c) the more liberal clusters that were chosen to replace their more conservative counterparts and 
+#    thus added to the consistent_cluster data.
+
 def save_result (region):
 
     small_buf_accepted = pd.read_pickle(utils.getSubDirPath(f'jcts_small_buf_inconsist_{region}'))
