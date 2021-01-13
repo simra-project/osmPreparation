@@ -50,11 +50,32 @@ def main(region, buffer_size):
 
     completeJunctions = tidyData_Jcts.tidyItUp(region, utils.paramDict[region]["centroid"], nonIsolatedJunctions, isolatedJunctions, buffer_size, utils.paramDict[region]["sorting_params"])
 
+    # Write to pickle for future use
+
+    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
+    # PyPipeline_ (background: we want to write all files related to junctions to the
+    # junctions subdirectory)
+
+    cwd = os.getcwd()
+
+    in_target_dir = utils.inTargetDir(cwd)
+
+    file_name = f"{region}_junctions_buffer={buffer_size}"
+
+    path = file_name if in_target_dir else utils.getSubDirPath(file_name, 'pickled_data')
+
+    # Write data frame to pickle folder; include buffer_size in the file name
+    # ==> purpose of this is to be able to reuse data in the manual merging
+    #     tool so if a data set for a specific region and buffer size already
+    #     exists it can be utilized rather than computing everything from scratch again
+
+    completeJunctions.to_pickle(utils.getSubDirPath(path))
+
     return completeJunctions
 
 if __name__ == "__main__":
 
-    completeJunctions = main("stuttgart",2.5)
+    completeJunctions = main("bern",2)
 
     # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
     # PyPipeline_ (background: we want to write all files related to junctions to the

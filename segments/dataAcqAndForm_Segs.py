@@ -3,6 +3,7 @@
 import pandas as pd
 import requests
 import numpy as np
+import sys
 
 import utils
 
@@ -133,6 +134,12 @@ def metaFunc(bbox, region):
 
     subdir_path = utils.getSubDirPath(f"{region}_junctions_for_segs.csv", 'junctions')
 
-    junctionsdf = pd.read_csv(subdir_path)
+    # Notify user if junctions_for_segs.csv is unavailable as the junctions project hasn't been
+    # executed before the segments fraction
+    try:
+        junctionsdf = pd.read_csv(subdir_path)
+    except FileNotFoundError: 
+        print("Junctions file wasn't found! Please execute OSM_jcts.py for this region to generate it.")
+        sys.exit()
     
     return highwaydf, junctionsdf, idCoords_dict

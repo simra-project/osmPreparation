@@ -9,6 +9,8 @@ import manualMergePrep_segs
 
 import manualMergeTool_segs
 
+import utils
+
 # ****************************************************************************
 
 print("\nWelcome to the manual merging tool for segments!\n")
@@ -20,17 +22,41 @@ region = input ("Please enter a region (in lowercase, e.g.: bern): \n")
 
 print(f'\nThanks! The region you entered is {region}.\n')
 
-# * small_buf
+# * the other two params (small_buf, large_buf) are optional - ask user if
+#   defaults (found in paramDict in utils) should be accepted or custom
+#   values desired
 
-small_buf = float(input("Please enter a rather small buffer size (e.g.: 1): \n"))
+small_buf = utils.paramDict[region]["small_buf_default"]
 
-print(f'\nThanks! The small buffer size you entered is {small_buf}.\n')
+large_buf = utils.paramDict[region]["large_buf_default"]
 
-# * large_buf
+print(f"The default buffer sizes to compare for this region are: \n")
 
-large_buf = float(input("Please enter a larger buffer size (e.g.: 1.25): \n"))
+print(f"Small buffer: {small_buf}")
 
-print(f'\nThanks! The large buffer size you entered is {large_buf}. \n')
+print(f"Large buffer: {large_buf}")
+
+default = input ("Would you like to accept these defaults? Please reply with Yes or NO.\n")
+
+if (default == "No"): 
+
+    print("Thanks! You have chosen to supply custom values for a small and large buffer.\n")
+
+    # * read small_buf from user input
+
+    small_buf = float(input("Please enter a rather small buffer size (e.g.: 1): \n"))
+
+    print(f'\nThanks! The small buffer size you entered is {small_buf}.\n')
+
+    # * read large_buf from user input
+
+    large_buf = float(input("Please enter a larger buffer size (e.g.: 1.25): \n"))
+
+    print(f'\nThanks! The large buffer size you entered is {large_buf}. \n')
+
+elif (default == "Yes"):
+
+    print("Thanks! You have chosen to accept the default values for a small and large buffer.\n")
 
 # (2) run 'manualMergePrep.py' - notify user that this will take loooooooong
 
@@ -48,71 +74,107 @@ print(f'Please navigate to directory PyPipeline_/junctions and open the file \'{
 
 print('By default, the more conservative clustering solutions (green shapes on the map) will be accepted. \n')
 
-print('Would you like to replace any of the more conservative clustering solutions (green) by more liberal ones (blue)? \n')
+# NEW 13/02/21: Allow not only chosing liberal buffer solutions over conservative ones, but also the deletion
+#               of conservative clusters 
+#               REMARK: the deletion of more liberal clusters is not necessary as they are only added to the
+#                       modified data frame if specifically desired by the user 
+#                       (i.e., if a liberal cluster is chosen as a replacement for a conservative one).
+
+print('By default, the more conservative clustering solutions (green shapes on the map) will be accepted. \n')
 
 # (4) Ask the user if any editing is desired. 
 
-continue_editing = input ("Please reply with yes or no. \n")
+continue_editing = input ("Would you like to perform modifications? Please reply with yes or no. \n")
 
 while (continue_editing == 'yes'):
 
-# Repeat steps (5) - (8) while the user wishes to continue editing.
+    # Repeat steps (5) - (9) while the user wishes to continue editing.
 
-    print("Typically, a more conservative clustering solution that should be replaced by a more liberal one consists of multiple green shapes.\n")
+    # (5) Request which operation the user wants to perform.
 
-    print("You will therefore be prompted to provide the cluster numbers of all those green shapes one by one.\n")
+    desired_operation = input ("Would you like to delete or replace conservative clusters (= green shapes)? Please reply with Delete or Replace. \n")
 
-    # (5) In order to run 'manualMergeTool.py' > update_clust, ask the user for three params: 
-    # * small_buf_clstrs (list of floats) --> ask for them one by one.
+    if desired_operation == "Delete":
 
-    small_buf_clstrs = []
-    
-    first_small_clstr = float(input("Please enter cluster number of the first green shape you want to replace (e.g., 889.0).\n"))
+        # (6.a) In order to run 'manualMergeTool.py' > delete_clust, ask the user to provide the cluster to be 
+        #       deleted.
 
-    small_buf_clstrs.append(first_small_clstr)
+        small_buf_clstr_to_delete = float(input("Please provide the cluster ID of the green shape you want to delete (e.g., 43.0). \n"))
 
-    further_small_clstrs = input ("Are there more green shapes you wish to replace? Please reply with yes or no.\n")
+        print(f"Thank you! The following green shapes will be replaced: {small_buf_clstr_to_delete}")
 
-    while (further_small_clstrs == 'yes'):
+        # * region: already asked for above
 
-        next_small_clstr = float(input("Please enter the cluster number of the next green shape you want to replace (e.g., 2364.0).\n"))
+        # (7.b) run 'manualMergeTool.py' > delete_clust 
 
-        small_buf_clstrs.append(next_small_clstr)
+        print("Please be patient as the ensuing computations will take a few moments to complete .........\n")
+
+        manualMergeTool_segs.delete_clust(small_buf_clstr_to_delete, region)
+
+        # (8) Tell the user to refresh the map to see the result    
+
+        print(f'Please refresh the map (PyPipeline_/segments/\'{region}-segs-manualClust_{datetime.date.today()}.html\') to see the result.\n')
+
+        # (9) Ask if more manual editing is desired - if so, repeat the process from (5); if not proceed to (9)
+
+        continue_editing = input ("Would you like to continue editing? Please reply with yes or no. \n")
+
+    elif desired_operation == "Replace":
+
+        print("Typically, a more conservative clustering solution that should be replaced by a more liberal one consists of multiple green shapes.\n")
+
+        print("You will therefore be prompted to provide the cluster numbers of all those green shapes one by one.\n")
+
+        # (6.b) In order to run 'manualMergeTool.py' > update_clust, ask the user for three params: 
+        # * small_buf_clstrs (list of floats) --> ask for them one by one.
+
+        small_buf_clstrs = []
+        
+        first_small_clstr = float(input("Please enter cluster number of the first green shape you want to replace (e.g., 889.0).\n"))
+
+        small_buf_clstrs.append(first_small_clstr)
 
         further_small_clstrs = input ("Are there more green shapes you wish to replace? Please reply with yes or no.\n")
 
-    # * large_buf_clstr (float)
+        while (further_small_clstrs == 'yes'):
 
-    print("Thank you! The following green shapes will be replaced: ")
+            next_small_clstr = float(input("Please enter the cluster number of the next green shape you want to replace (e.g., 2364.0).\n"))
 
-    for clust in small_buf_clstrs: 
+            small_buf_clstrs.append(next_small_clstr)
 
-        print(clust)
+            further_small_clstrs = input ("Are there more green shapes you wish to replace? Please reply with yes or no.\n")
 
-    print("\nTypically, the more liberal solution to replace the more conservative one will consist of one blue shape only.\n")
+        # * large_buf_clstr (float)
 
-    large_buf_clstr = float(input("Please enter the cluster number of the blue shape with which you want to replace the previously specified green ones.\n"))
+        print("Thank you! The following green shapes will be replaced: ")
 
-    print(f'\nThanks! The cluster {large_buf_clstr} will replace the previously specified green clusters.\n')
+        for clust in small_buf_clstrs: 
 
-    # * region: already asked for above
+            print(clust)
 
-    # (6) run 'manualMergeTool.py' > update_clust - show progress bar using tqdm as this will take loooooooong
-    #     (though) not as long as 'manualMergePrep.py' 
+        print("\nTypically, the more liberal solution to replace the more conservative one will consist of one blue shape only.\n")
 
-    print("Please be patient as the ensuing computations will take a few minutes to complete .........\n")
+        large_buf_clstr = float(input("Please enter the cluster number of the blue shape with which you want to replace the previously specified green ones.\n"))
 
-    manualMergeTool_segs.update_clust(small_buf_clstrs, large_buf_clstr, region)
+        print(f'\nThanks! The cluster {large_buf_clstr} will replace the previously specified green clusters.\n')
 
-    # (7) Tell the user to refresh the map to see the result    
+        # * region: already asked for above
 
-    print(f'Please refresh the map (PyPipeline_/segments/\'{region}-segs-manualClust_{datetime.date.today()}.html\') to see the result (in orange).\n')
+        # (7) run 'manualMergeTool.py' > update_clust 
 
-    # (8) Ask if more manual editing is desired - if so, repeat the process from (5); if not proceed to (9)
+        print("Please be patient as the ensuing computations will take a few moments to complete .........\n")
 
-    continue_editing = input ("Would you like to continue editing? Please reply with yes or no. \n")
+        manualMergeTool_segs.update_clust(small_buf_clstrs, large_buf_clstr, region)
 
-# (9) Write the resultant data frame to memory: 'manualMergeTool.py' > save_result
+        # (8) Tell the user to refresh the map to see the result    
+
+        print(f'Please refresh the map (PyPipeline_/segments/\'{region}-segs-manualClust_{datetime.date.today()}.html\') to see the result (in orange).\n')
+
+        # (9) Ask if more manual editing is desired - if so, repeat the process from (5); if not proceed to (9)
+
+        continue_editing = input ("Would you like to continue editing? Please reply with yes or no. \n")
+
+# (10) Write the resultant data frame to memory: 'manualMergeTool.py' > save_result
 
 print("You've chosen to finish editing. The resultant data will be written to csv.\n")
 

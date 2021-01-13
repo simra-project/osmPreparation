@@ -50,7 +50,9 @@ def extractAndPlot (extractable_shape, neighbour_cluster, mmaapp, style, crs, ma
 
         lat, lon = extractable_shape.centroid.x, extractable_shape.centroid.y
 
-        folium.Marker(scatter(lat, lon), popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
+        # folium.Marker(scatter(lat, lon), popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
+
+        folium.Marker([lat, lon], popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
 
         # folium.Marker([lat, lon], popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
             
