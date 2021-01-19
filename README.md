@@ -40,40 +40,6 @@ The junction unit comprises the following scripts:
 
 The main output of the junctions unit is a `{region}_junctions_complete.csv` file (e.g., `berlin_junctions_complete.csv`).
 
-## Manually editing junction clusters
-
-Clearly, no one value for **buffer_size** will deliver optimal clustering results in all cases. Therefore, once a fairly good value for **buffer_size** has been determined manual editing can be performed to optimize the clustering result. 
-
-### a) Preparing the manual cluster editing
-
-The script `manualClusterPrep.py` provides the relevant data for manual editing to be performed. In order to do so, choose values for a smaller, more conservative and a larger, more liberal buffer. They shouldn't be too far apart (that would be unreasonable and produce an unmanageable amount of inconsistencies) and the unknown 'optimal' buffer size should supposedly be located in between them. For most city layouts that aren't particularly narrow (Bern) or wide (Berlin), 2 and 2.5 should be suitable as small- and large buffer value, respectively. The lazier you are, the closer together they should be 🤪
-Provide the name of the region in question as well as the values for the small and large buffer as input parameters to the `meta_assist`-function. Run.
-
-The script will execute the main script `OSM_jcts.py` for the smaller and larger buffer and determine which clustering solutions appear in both cases (i.e., junctions that equally remain on their own respectively are merged identically) and which don't. For inconsistent cases, the two different solutions (using a smaller vs. larger buffer) will be plotted on a map named `{region}-jcts-manualClust_YYY-MM-DD.html` so that they can easily be compared. 
-Additionally, three `pickled` data sets are produced by `manualClusterPrep.py`. `Pickle` is a python library for (de-)serializing data. By using it, we can avoid ugly and cumbersome csv-parsing (parsing lists from string 😱💀👿). these are: `consistent_clusters_{region}`,`small_buf_inconsist_{region}`, and `large_buf_inconsist_{region}`. **IMPORTANT**: ensure the map and the three pickled data sets are in the `junctions`-directory. If they aren't, move them for the second part of the procedure to work.
-
-### b) Performing the manual cluster editing
-
-Look at the map produced by `manualClusterPrep.py` (`{region}-jcts-manualClust_YYY-MM-DD.html`). Clustering solutions that differ depending on buffer size are presented, the large buffer solutions in blue, the small buffer ones in green. Smaller buffer solutions (i.e., more conservative merging) are accepted by default; should you discover a case where the more liberal large buffer solution is preferred, proceed as follows:
-
-Assuming you want to replace two clusters `600.0` and `601.0` from the small buffer data set with cluster `605.0` from the large buffer data set, with the region being `Stuttgart`. In the junctions directory (where the output of `manualClusterPrep.py`, i.e. the map and the three pickled data sets also have to be located!), run:
-
-```bash
-python manualMergeTool.py --small_buf_clstrs='[600.0,601.0]' --large_buf_clstr=605.0 --region="stutt"
-```
-
-Reload the map. The replaced cluster will appear in orange (with cluster nr. `999999`). 
-
-Once all corrections have taken place, scroll down to the bottom of `manualMergeTool.py` and re-do the in-/out-commenting like so:
-
-```python
-if __name__ == '__main__':
-  # fire.Fire(update_clust)
-  fire.Fire(save_result)
-```
-
-This way, the function `save_result` will be exposed as a command line interface (rather than `update_clust`). The manual editing result (i.e., a data frame containing both the consistent clustering solutions as well as the solution of choice for inconsistent cases - that is, the small buffer solution by default and the large buffer solution if manually chosen over the small buffer one): the output is a text file named `manual_merging_res_{region}_YYY-MM_DD.csv`
-
 ## Getting segment data
 
 This logical unit of scripts mostly performs computations analogous to the junction unit described above, only for street segments rather than junction nodes. Hence, only where the segments unit deviates from what the junction unit does additional explanations will be provided.
@@ -84,3 +50,21 @@ This logical unit of scripts mostly performs computations analogous to the junct
 * `segmentizeAndEnrich.py`: this script reads the csv file generated in `findJunctions.py` from memory. The file contains the ids, latitudes and longitudes of junction nodes. This information is used to break highways into segments at junctions. 
 
 The main output of the segments unit is a `{region}_segments_complete.csv` file (e.g., `berlin_segments_complete.csv`).
+
+## Manually editing junction and/or segment clusters
+
+Clearly, no one value for **buffer_size** will deliver optimal clustering results in all cases. Therefore, once a fairly good value for **buffer_size** has been determined manual editing can be performed to optimize the clustering result. Concretely, the clustering solutions will be compared for a more conservative and a more liberal buffer size. The logic here is that the conservative- and the liberal buffer will for many cases produce the same clustering solutions, but in some cases, the liberal buffer will have produced additional merges where the conservative buffer hasn't. Hence, the user will be able to look at the locations where these differences have occurred and decide whether the more conservative or more liberal solution should be accepted into the final data frame.
+
+For junctions and segments each, there now exist scripts that guide the user through the process of manual cluster editing: `manualMergeCLIFlow_jcts.py` and `manualMergeCLIFlow_segs.py`. These are designed to enable a user-friendly step-by-step process, making it possible to use the functionality without having to dig into the code first. The actual logic is contained in the scripts `manualMergePrep_jcts.py`/`manualMergePrep_segs.py`, `manualMergeTool_jcts.py`, `manualMergeTool_segs.py`, and `mapJcts_clustAssist.py`/`mapSegs_clustAssist.py`. 
+
+* Firstly, the user is prompted to provided the **region** to work with as a lowercase string (e.g., 'berlin'). 
+* Then, the default values for a rather conservative and rather liberal buffer are presented, so the user can either accept them or provide custom values. When providing custom values, ensure that they aren't too far apart (a difference of 0.25 is usually ideal) - the further apart they are, the more choices between conservative and liberal solutions will have to be performed. 
+* Thereafter, the complete data for both buffer sizes is either retrieved from memory (if available) or computed and a comparison is carried out: where do the two data sets differ regarding the clustering solutions that were produced? - A HTML map displaying the differences is generated, and the user is informed of its location in the project directory.
+* The user is then asked if she wants to perform any modifications. It is important to know that per default, all of the conservative clustering solutions (on the map: green shapes) will be accepted; i.e., editing is only necessary of there are any conservative clusters that shall be DELETED or REPLACED by there more liberal counterparts (on the map: blue shapes). If NO is selected, a data frame consisting of the entire conservative clustering solution (including both rows with clusters that are the same in the more liberal data set and rows that differ from the more liberal data set) is written to csv.
+* If the user does want to perform any editing, she is prompted to decide between replacement and deletion (of conservative clusters = green shapes on the map).
+* For deletion, the cluster number of the to-be-deleted cluster is to be provided (obtainable by clicking the marker belonging to the cluster/shape in question).
+* For replacement, the cluster numbers of two or more conservative clusters (green shapes) need to be entered one after the other. Conceptually, a replacement will always mean that two or more conservative clusters/green shapes are replaced by one more liberal cluster/blue shape as the more liberal buffer will have resulted in additional merges compared with the more conversative one. After all of the to-be-replaced clusters' numbers have been entered, the user is asked to provide the number of the more liberal cluster (= blue shape) that will be included in the final data frame instead. After the operation is finished, the result can be seen in orange (orange marker, orange polygon) on the map.
+* After completing one deletion or replacement process, the user can either decide to continue editing or finish the procedure. If the latter is chosen, the data (consisting of rows that were identical between the two data sets all along, the rows of the conservative buffer data set that differ from their more liberal counterparts but weren't deleted or replaced, plus the rows of the more liberal buffer data sets that differ from their more conservative counterparts and were manually chosen to replace them) is written to csv.
+
+
+
