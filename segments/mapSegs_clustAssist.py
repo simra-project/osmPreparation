@@ -43,16 +43,25 @@ def extractAndPlot (extractable_shape, neighbour_cluster, mmaapp, style, crs, ma
         lats, lons = extractable_shape.exterior.coords.xy
             
         poly_swapped = Polygon(zip(lons, lats))
-            
-        poly_geoDf = gpd.GeoDataFrame(index=[0], crs=crs, geometry=[poly_swapped])
-        
-        folium.GeoJson(poly_geoDf, style_function=lambda x: style).add_to(mmaapp)
 
-        lat, lon = extractable_shape.centroid.x, extractable_shape.centroid.y
+        d = {'geometry': [poly_swapped], 'neighbour_cluster': [neighbour_cluster]}
+            
+        poly_geoDf = gpd.GeoDataFrame(d, crs=crs)
+        
+        folium.GeoJson(poly_geoDf, style_function=lambda x: style,
+                       tooltip=folium.features.GeoJsonTooltip(fields=['neighbour_cluster'],
+                                                             aliases=['Cluster-Nr.'],
+                                                             labels=True,
+                                                             localize=True,
+                                                             style="{'color': 'blue'', 'lineColor': '#FFFAF0'}",
+                                                             # style=f"{'color': {marker_color}, 'lineColor': '#FFFAF0'}",
+                                                             sticky=True)).add_to(mmaapp)
+
+        # lat, lon = extractable_shape.centroid.x, extractable_shape.centroid.y
 
         # folium.Marker(scatter(lat, lon), popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
 
-        folium.Marker([lat, lon], popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
+        # folium.Marker([lat, lon], popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
 
         # folium.Marker([lat, lon], popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
             
