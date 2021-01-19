@@ -1,6 +1,8 @@
 
 import folium
 
+from folium.plugins import MarkerCluster
+
 import geopandas as gpd
 
 from shapely.ops import cascaded_union
@@ -36,7 +38,7 @@ def scatter(lat, lon):
 # This variant follows the following approach to plotting MultiPolygons:
 # extract individual Polygons from MultiPolygons and plot these. 
 
-def extractAndPlot (extractable_shape, neighbour_cluster, mmaapp, style, crs, marker_color):
+def extractAndPlot (extractable_shape, neighbour_cluster, mmaapp, style, crs, marker_cluster, marker_color):
 
     if isinstance(extractable_shape, Polygon):
         
@@ -48,22 +50,11 @@ def extractAndPlot (extractable_shape, neighbour_cluster, mmaapp, style, crs, ma
             
         poly_geoDf = gpd.GeoDataFrame(d, crs=crs)
         
-        folium.GeoJson(poly_geoDf, style_function=lambda x: style,
-                       tooltip=folium.features.GeoJsonTooltip(fields=['neighbour_cluster'],
-                                                             aliases=['Cluster-Nr.'],
-                                                             labels=True,
-                                                             localize=True,
-                                                             style="{'color': 'blue'', 'lineColor': '#FFFAF0'}",
-                                                             # style=f"{'color': {marker_color}, 'lineColor': '#FFFAF0'}",
-                                                             sticky=True)).add_to(mmaapp)
+        folium.GeoJson(poly_geoDf, style_function=lambda x: style).add_to(mmaapp)
 
-        # lat, lon = extractable_shape.centroid.x, extractable_shape.centroid.y
+        lat, lon = extractable_shape.centroid.x, extractable_shape.centroid.y
 
-        # folium.Marker(scatter(lat, lon), popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
-
-        # folium.Marker([lat, lon], popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
-
-        # folium.Marker([lat, lon], popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(mmaapp)
+        folium.Marker(scatter(lat, lon), popup=f'<i>Neighbour Cluster: {neighbour_cluster}</i>', icon=folium.Icon(color=marker_color)).add_to(marker_cluster)
             
     elif isinstance(extractable_shape, MultiPolygon):
             
@@ -71,9 +62,9 @@ def extractAndPlot (extractable_shape, neighbour_cluster, mmaapp, style, crs, ma
             
         for poly in individual_polys:
         
-            extractAndPlot(poly, neighbour_cluster, mmaapp, style, crs, marker_color)
+            extractAndPlot(poly, neighbour_cluster, mmaapp, style, crs, marker_cluster, marker_color)
 
-def plotPolys (df, map, style, marker_color):
+def plotPolys (df, map, style, marker_cluster, marker_color):
 
     crs = "EPSG:4326" # CRS = coordinate reference system, epsg:4326 = Europa im Lat/Lon Format
 
@@ -86,11 +77,11 @@ def plotPolys (df, map, style, marker_color):
 
         if df.at[ind, 'neighbour_cluster'] == 999999:
 
-            extractAndPlot(df.at[ind, 'poly_geometry'], df.at[ind, 'neighbour_cluster'], map, {'fillColor': '#ffd700', 'lineColor': '#DAA520'}, crs, 'orange')
+            extractAndPlot(df.at[ind, 'poly_geometry'], df.at[ind, 'neighbour_cluster'], map, {'fillColor': '#ffd700', 'lineColor': '#DAA520'}, crs, marker_cluster, 'orange')
 
         else:
 
-            extractAndPlot(df.at[ind, 'poly_geometry'], df.at[ind, 'neighbour_cluster'], map, style, crs, marker_color)
+            extractAndPlot(df.at[ind, 'poly_geometry'], df.at[ind, 'neighbour_cluster'], map, style, crs, marker_cluster, marker_color)
 
 #*******************************************************************************************************************
 # (*) Execute all the map jobs in logical order.
@@ -109,9 +100,11 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     # II.) Plot polys onto their respective maps
 
-    plotPolys (large_buf_inconsist, myMap, {'fillColor': '#87CEEB', 'lineColor': '#4682B4'}, 'blue')
+    marker_cluster = MarkerCluster().add_to(myMap)
 
-    plotPolys (small_buf_inconsist, myMap, {'fillColor': '#3CB371', 'color': '#2E8B57'}, 'green')
+    plotPolys (large_buf_inconsist, myMap, {'fillColor': '#87CEEB', 'lineColor': '#4682B4'}, marker_cluster, 'blue')
+
+    plotPolys (small_buf_inconsist, myMap, {'fillColor': '#3CB371', 'color': '#2E8B57'}, marker_cluster, 'green')
 
     # III.) Export map as htmls
 
