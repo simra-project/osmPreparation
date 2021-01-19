@@ -117,7 +117,7 @@ while (continue_editing == 'yes'):
 
         continue_editing = input ("Would you like to continue editing? Please reply with yes or no. \n")
 
-    elif desired_operation == "Replace":
+
 
         print("Typically, a more conservative clustering solution that should be replaced by a more liberal one consists of multiple green shapes.\n")
 
