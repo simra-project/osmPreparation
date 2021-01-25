@@ -30,25 +30,31 @@ def oddballWrapper (segmentsdf, jctids):
 
     # relevantTypes = ['primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
 
-    def findOddballs(nodes):
-    
-        lastNodeIdx = len(nodes) - 1
-        
-        if not(nodes[0] in jctids):
-            
-            return True
-        
-        elif not(nodes[lastNodeIdx] in jctids):
-        
-            return True
-            
-        else:
-            
+    def findOddballs(highwaytype, nodes):
+
+        if highwaytype in ['unclassified', 'pedestrian', 'cycleway']:
+
             return False
+
+        else:
+    
+            lastNodeIdx = len(nodes) - 1
+            
+            if not(nodes[0] in jctids):
+                
+                return True
+            
+            elif not(nodes[lastNodeIdx] in jctids):
+            
+                return True
+                
+            else:
+                
+                return False
 
     # Determine oddballs in segments df
 
-    segmentsdf.loc[:,'oddball'] = segmentsdf.loc[:,'segment_nodes_ids'].map(findOddballs)
+    segmentsdf.loc[:,'oddball'] = [x for x in starmap(findOddballs, list(zip(segmentsdf.loc[:,'highwaytype'], segmentsdf.loc[:,'segment_nodes_ids'])))]
 
     # split the df into two new dfs according to oddball property
 
@@ -95,7 +101,7 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf, neighbourParam)
     ##                         intersects with WITHOUT a junction being contained in that intersection, this function
     ##                         checks for junctions in intersections.
 
-    def isIntersectionValid(polyOne, polyTwo):
+    def isIntersectionValid(polyOne, outerInd, polyTwo, innerInd):
 
         if polyOne == polyTwo:
             
@@ -105,10 +111,37 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf, neighbourParam)
         
         if junctionpoints[lambda x: x.within(intersection)].empty:
                                 
-            return True
+            if not isMotorwayLanesIntersecting(outerInd, innerInd):
+
+                return True
                                 
         else:
     
+            # print("Junction found in segment intersection, not merging!")
+
+            return False
+
+    def isMotorwayLanesIntersecting(outerInd, innerInd):
+
+        # With this function, we want to make sure that separate, but parallel fractions of streets with traffic
+        # going in the opposite direction (usually we're talking motorways here) are not merged. 
+        # IDEA: motorways with separate parallel sections traveling in opposite directions will like
+        #       (hopefully) exhibit the 'destination' feature (e.g. 'Dresden', 'Hamburg', 'Charlottenburg-Wilmersdorf', ...). 
+
+        outerHighwayName = unfoldedOddballs.at[outerInd, 'highwayname']
+
+        innerHighwayName = unfoldedOddballs.at[innerInd, 'highwayname']  
+
+        outerHighwayDestination = unfoldedOddballs.at[outerInd, 'destination']
+
+        innerHighwayDestination = unfoldedOddballs.at[innerInd, 'destination']  
+
+        if (innerHighwayName == outerHighwayName) and (innerHighwayDestination != outerHighwayDestination):
+
+            return True
+
+        else:
+
             return False
 
     ## b) getNeighbours: unsurprisingly, this function assigns each segment its neighbours (definition of 'neighbour'
@@ -145,7 +178,7 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf, neighbourParam)
                         
             if outerPoly.intersects(innerPoly): 
                     
-                validIntersection = isIntersectionValid(outerPoly, innerPoly)
+                validIntersection = isIntersectionValid(outerPoly, outerInd, innerPoly, i)
                         
                 if validIntersection and (outerHighway == innerHighway):
                         

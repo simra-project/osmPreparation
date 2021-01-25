@@ -66,11 +66,11 @@ def unfold(highwaydf):
     highway = np.repeat(highwaydf.highway, rs)
     lanes = np.repeat(highwaydf.lanes, rs)
     lanesBw = np.repeat(highwaydf['lanes:backward'], rs)
+    destinations = np.repeat(highwaydf.destination, rs)
 
-    unfoldeddf = pd.DataFrame(np.column_stack((name, highway, lanes, lanesBw, np.concatenate(vals))), 
-                                columns=['highwayname','highwaytype','highwaylanes','lanes:backward','segment_nodes_ids'])
+    unfoldeddf = pd.DataFrame(np.column_stack((name, highway, lanes, lanesBw, destinations, np.concatenate(vals))), 
+                                columns=['highwayname','highwaytype','highwaylanes','lanes:backward','destination','segment_nodes_ids'])
   
-
     '''
     * Manual remerging of segments shall be enabled via a CLI (> manualMergeCLIFlow_segs.py).
     * Manual remerging is done by computing clustering solutions for two different buffer sizes and determining 

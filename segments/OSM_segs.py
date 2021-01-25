@@ -72,7 +72,7 @@ def main(region, buffer_size):
 
 if __name__ == "__main__":
 
-    completeSegs = main("bern",1)
+    completeSegs = main("stuttgart",1)
 
     # Find out if we're operating in 'segments'-subdirectory or its parent directory,
     # PyPipeline_ (background: we want to write all files related to segments to the
@@ -82,13 +82,12 @@ if __name__ == "__main__":
 
     in_target_dir = utils.inTargetDir(cwd)
 
-    file_name = f"bern_segments_complete_{datetime.date.today()}.csv"
+    file_name = f"stuttgart_segments_complete_{datetime.date.today()}.csv"
 
     path = file_name if in_target_dir else utils.getSubDirPath(file_name)
 
     completeSegs.to_csv(path, index=False, sep="|")
 
     
-
 
 

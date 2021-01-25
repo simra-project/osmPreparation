@@ -75,7 +75,7 @@ def main(region, buffer_size):
 
 if __name__ == "__main__":
 
-    completeJunctions = main("bern",2)
+    completeJunctions = main("stuttgart",2)
 
     # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
     # PyPipeline_ (background: we want to write all files related to junctions to the
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     in_target_dir = utils.inTargetDir(cwd)
 
-    file_name = f"bern_junctions_complete_{datetime.date.today()}.csv"
+    file_name = f"stuttgart_junctions_complete_{datetime.date.today()}.csv"
 
     path = file_name if in_target_dir else utils.getSubDirPath(file_name)
 

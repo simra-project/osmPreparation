@@ -9,7 +9,7 @@ import utils
 
 # ********************************************************************************************************************
 
-tags = ['primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
+tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway']
 
 # (1) Get data from OSM, input param = bounding box
 
@@ -75,7 +75,7 @@ def getHighwayDf(ways):
 
     # osmdf = pd.DataFrame(osmdata)
 
-    highwaydf = pd.DataFrame(ways)[['highway','id','lanes','lanes:backward','name','nodes']].dropna(subset=['name','highway'], how='any')
+    highwaydf = pd.DataFrame(ways)[['highway','id','lanes','lanes:backward','destination','name','nodes']].dropna(subset=['name','highway'], how='any')
 
     # 'id', 'highway', 'lanes', 'lanes:backward', 'name', 'maxspeed', 'nodes', 'ref'
 

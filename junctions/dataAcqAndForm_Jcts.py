@@ -5,7 +5,7 @@ import numpy as np
 
 # ********************************************************************************************************************
 
-tags = ['primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
+tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
 
 # (1) Get data from OSM, input param = bounding box
 
