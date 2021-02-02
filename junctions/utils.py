@@ -41,6 +41,22 @@ paramDict = {
         "sorting_params": ['lon','lat'],  # long-ish bounding box - sort by upper left corner.
         "small_buf_default": 2.25,          # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 2.5            # medium-sized city (< 1 Mio. inhabitants)
+    },
+    "wedding": {
+        "bounding_box": [13.319638,52.538373,13.382339,52.570332],
+        "centroid": [52.555071, 13.349667],
+        "neighbour_param": 100,
+        "sorting_params": ['lat','lon'],     # square bounding box - sort by upper left corner (although it doesn't really matter).
+        "small_buf_default": 2.5,            # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75            # large-sized city (> 1 Mio. inhabitants)
+    },
+    "hannover": {
+        "bounding_box": [9.60443,52.305137,9.918426,52.454335],
+        "centroid": [52.3796, 9.7617],
+        "neighbour_param": 80,
+        "sorting_params": ['lat','lon'],    # square bounding box - sort by upper left corner (although it doesn't really matter).
+        "small_buf_default": 2,             # medium-sized city (< 1 Mio. inhabitants)
+        "large_buf_default": 2.25           # medium-sized city (< 1 Mio. inhabitants)
     }
 }
 def inTargetDir (cwd):

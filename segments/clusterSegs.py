@@ -26,25 +26,45 @@ import utils
 #     2. incorporate the 'phantom junctions' into oddball definition - those are intersections of more than two ways with less than 
 #        two of those being of a relevantType. Hasn't worked out so far.
 
-def oddballWrapper (segmentsdf, jctids):
+def oddballWrapper (segmentsdf, jctsdf):
 
-    # relevantTypes = ['primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
+    # these are ALL junctions (i.e., intersections of at least two highways, irrespective of their type)
+
+    jctids = jctsdf['id'].values 
+
+    # now we also need the LARGER junctions (i.e., intersections of at least two highways of a larger type)
+
+    larger_jcts = jctsdf[jctsdf['junction'] == 'large_junction']
+
+    larger_jctids = larger_jcts['id'].values 
+
+    # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
     def findOddballs(highwaytype, nodes):
 
+        lastNodeIdx = len(nodes) - 1
+
         if highwaytype in ['unclassified', 'pedestrian', 'cycleway']:
 
-            return False
+            if not(nodes[0] in jctids):
+            
+                return True
+        
+            elif not(nodes[lastNodeIdx] in jctids):
+        
+                return True
+            
+            else:
+            
+                return False
 
         else:
-    
-            lastNodeIdx = len(nodes) - 1
             
-            if not(nodes[0] in jctids):
+            if not(nodes[0] in larger_jctids):
                 
                 return True
             
-            elif not(nodes[lastNodeIdx] in jctids):
+            elif not(nodes[lastNodeIdx] in larger_jctids):
             
                 return True
                 
@@ -108,8 +128,10 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf, neighbourParam)
             return False
         
         intersection = polyOne.intersection(polyTwo)
+
+        junctions_in_intersection = junctionpoints[lambda x: x.within(intersection)]
         
-        if junctionpoints[lambda x: x.within(intersection)].empty:
+        if junctions_in_intersection.empty:
                                 
             if not isMotorwayLanesIntersecting(outerInd, innerInd):
 
@@ -117,7 +139,13 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf, neighbourParam)
                                 
         else:
     
-            # print("Junction found in segment intersection, not merging!")
+            if isMotorwayLanesIntersecting(outerInd, innerInd):
+
+                 print("Not merging highwaylanes traveling in opposite directions")
+
+            else:
+
+                print(f"Not merging because of junctions in segment overlap: {junctions_in_intersection}")
 
             return False
 
@@ -312,7 +340,7 @@ def cluster (region, segmentsdf, junctionsdf):
 
      # I.) Determine which segments are 'oddballs' (don't start and/or end with a junction)
 
-    oddballs, normies = oddballWrapper(segmentsdf, junctionsdf['id'].values)
+    oddballs, normies = oddballWrapper(segmentsdf, junctionsdf)
 
     # II.) Assign each oddball segment its neighbours (other segments it intersects with without a junction being contained
     #      in that intersection).
