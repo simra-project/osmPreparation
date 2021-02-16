@@ -34,14 +34,6 @@ paramDict = {
         "small_buf_default": 1,             # medium-sized city  (< 1 Mio. inhabitants)
         "large_buf_default": 1.25           # medium-sized city  (< 1 Mio. inhabitants)
     },
-    "stuttgart": {
-        "bounding_box": [9.038601,48.692019,9.31582,48.866399],
-        "centroid": [48.778461,9.177910],
-        "neighbour_param": 80,
-        "sorting_params": ['minx','maxy'],  # long-ish bounding box - sort by upper left corner.
-        "small_buf_default": 1,             # medium-sized city (< 1 Mio. inhabitants)
-        "large_buf_default": 1.25           # medium-sized city (< 1 Mio. inhabitants)
-    },
     "wedding": {
         "bounding_box": [13.319638,52.538373,13.382339,52.570332],
         "centroid": [52.555071, 13.349667],
@@ -53,8 +45,21 @@ paramDict = {
     "hannover": {
         "bounding_box": [9.60443,52.305137,9.918426,52.454335],
         "centroid": [52.3796, 9.7617],
-        "neighbour_param": 80,
+        "neighbour_param": 200,
         "sorting_params": ['minx','maxy'],  # square bounding box - sort by upper left corner (although it doesn't really matter).
+        "small_buf_default": 1,             # medium-sized city (< 1 Mio. inhabitants)
+        "large_buf_default": 1.25           # medium-sized city (< 1 Mio. inhabitants)
+    },
+
+    # limiting stuttgart to city center for testing purposes
+    # REMEMBER TO UNDO!!!!
+
+    "stuttgart": {
+        "bounding_box": [9.164437,48.771372,9.207154,48.798472],
+        #"bounding_box": [9.038601,48.692019,9.31582,48.866399],
+        "centroid": [48.7825,9.1831],
+        "neighbour_param": 300,
+        "sorting_params": ['minx','maxy'],  # long-ish bounding box - sort by upper left corner.
         "small_buf_default": 1,             # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 1.25           # medium-sized city (< 1 Mio. inhabitants)
     }

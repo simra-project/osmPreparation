@@ -25,7 +25,7 @@ import utils # internal import
 # This variant follows the following approach to plotting MultiPolygons:
 # extract individual Polygons from MultiPolygons and plot these. 
 
-def extractAndPlot (extractableShape, mmaapp, style, crs, highwaytype):
+def extractAndPlot (extractableShape, mmaapp, style, crs, highwaytype, highwayId, neighbour_cluster):
     
     if isinstance(extractableShape, Polygon):
         
@@ -35,15 +35,30 @@ def extractAndPlot (extractableShape, mmaapp, style, crs, highwaytype):
             
         poly_geoDf = gpd.GeoDataFrame(index=[0], crs=crs, geometry=[poly_swapped])
         
-        folium.GeoJson(poly_geoDf, style_function=lambda x: style, tooltip=f"Highwatype: {highwaytype}").add_to(mmaapp)
+        folium.GeoJson(poly_geoDf, style_function=lambda x: style, tooltip=f"Highwatype: {highwaytype}, id: {highwayId}, neighbour cluster: {neighbour_cluster}").add_to(mmaapp)
             
     elif isinstance(extractableShape, MultiPolygon):
             
+        '''
+
         individualPolys = list(extractableShape)
             
         for poly in individualPolys:
         
             extractAndPlot(poly, mmaapp, style, crs, highwaytype)
+
+        '''
+        minx, miny, maxx, maxy = extractableShape.bounds
+
+        multipoly_lats = [minx, maxx, minx]
+
+        multipoly_lons = [miny, maxy, miny]
+
+        poly = Polygon(zip(multipoly_lons, multipoly_lats))
+
+        poly_geoDf = gpd.GeoDataFrame(index=[0], crs=crs, geometry=[poly])
+        
+        folium.GeoJson(poly_geoDf, style_function=lambda x: {'fillColor': '#FFD700', 'lineColor': '#F5FFFA'}, tooltip=f"Highwatype: {highwaytype}").add_to(mmaapp)
 
 def plotPolys (df, geomCol, mmaapp, style) :
     
@@ -51,7 +66,7 @@ def plotPolys (df, geomCol, mmaapp, style) :
 
     for ind in df.index:
         
-        extractAndPlot(df.at[ind, geomCol], mmaapp, style, crs, df.at[ind, 'highwaytype'])
+        extractAndPlot(df.at[ind, geomCol], mmaapp, style, crs, df.at[ind, 'highwaytype'], df.at[ind, 'id'], df.at[ind, 'neighbour_cluster'])
 
 #*******************************************************************************************************************
 # (*) Execute all the map jobs in logical order.
