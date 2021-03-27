@@ -59,11 +59,31 @@ import tidyData_Jcts
 
 def update_clust(small_buf_clstrs, large_buf_clstr, region):
 
-    small_buf_inconsist = pd.read_pickle(utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}"))
+    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
+    # PyPipeline_ (background: we want to write all files related to junctions to the
+    # junctions subdirectory)
 
-    large_buf_inconsist = pd.read_pickle(utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}"))
+    cwd = os.getcwd()
 
-    consistent_clusters = pd.read_pickle(utils.getSubDirPath(f"jcts_consistent_clusters_{region}"))
+    in_target_dir = utils.inTargetDir(cwd) # bool
+
+    # (1) read small_buf_inconsist pickle
+
+    small_buf_inconsist_path = f"jcts_small_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}")
+
+    small_buf_inconsist = pd.read_pickle(small_buf_inconsist_path)
+
+    # (2) read large_buf_inconsist pickle
+
+    large_buf_inconsist_path = f"jcts_large_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}")
+
+    large_buf_inconsist = pd.read_pickle(large_buf_inconsist_path)
+
+    # (3) read consistent clusters pickle
+
+    consistent_clusters_path = f"jcts_consistent_clusters_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_consistent_clusters_{region}")
+
+    consistent_clusters = pd.read_pickle(consistent_clusters_path)
 
     # 'small_buf_clstrs' is a list of clusters having emerged in the small_buf-solution; remove the rows
     # corresponding to these clusters from 'small_buf_inconsist' as the large_buf-solution for the same
@@ -94,29 +114,16 @@ def update_clust(small_buf_clstrs, large_buf_clstr, region):
     mapping.runAllMapTasks(region, small_buf_inconsist, large_buf_inconsist)
 
     # Pickle the three data sets for further editing.
-    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
-    # PyPipeline_ (background: we want to write all files related to junctions to the
-    # junctions subdirectory)
-
-    cwd = os.getcwd()
-
-    in_target_dir = utils.inTargetDir(cwd) # bool
 
     # Write small_buf_inconsist pickle
-
-    small_buf_inconsist_path = f"jcts_small_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}")
 
     small_buf_inconsist.to_pickle(small_buf_inconsist_path)
 
     # Write large_buf_inconsist pickle
 
-    large_buf_inconsist_path = f"jcts_large_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}")
-
     large_buf_inconsist.to_pickle(large_buf_inconsist_path)
 
     # Write consistent clusters pickle
-
-    consistent_clusters_path = f"jcts_consistent_clusters_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_consistent_clusters_{region}")
 
     consistent_clusters.to_pickle(consistent_clusters_path) 
 
@@ -125,13 +132,25 @@ def update_clust(small_buf_clstrs, large_buf_clstr, region):
 
 def delete_clust(small_buf_clstr, region):
 
-    # small_buf_inconsist: will be modified
+    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
+    # PyPipeline_ (background: we want to write all files related to junctions to the
+    # junctions subdirectory)
 
-    small_buf_inconsist = pd.read_pickle(utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}"))
+    cwd = os.getcwd()
 
-    # large_buf_inconsist: required for mapping the result
+    in_target_dir = utils.inTargetDir(cwd) # bool
 
-    large_buf_inconsist = pd.read_pickle(utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}"))
+    # (1) read small_buf_inconsist pickle
+
+    small_buf_inconsist_path = f"jcts_small_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}")
+
+    small_buf_inconsist = pd.read_pickle(small_buf_inconsist_path)
+
+    # (2) read large_buf_inconsist pickle
+
+    large_buf_inconsist_path = f"jcts_large_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}")
+
+    large_buf_inconsist = pd.read_pickle(large_buf_inconsist_path)
 
     # Delete the specified cluster
 
@@ -150,19 +169,23 @@ def delete_clust(small_buf_clstr, region):
 
 def save_result (region):
 
-    small_buf_accepted = pd.read_pickle(utils.getSubDirPath(f'jcts_small_buf_inconsist_{region}'))
-
-    consistent_plus_accepted_large_solutions = pd.read_pickle(utils.getSubDirPath(f'jcts_consistent_clusters_{region}'))
-
-    complete_df = pd.concat([small_buf_accepted, consistent_plus_accepted_large_solutions], ignore_index = True, sort = False)
-
     # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
     # PyPipeline_ (background: we want to write all files related to junctions to the
     # junctions subdirectory)
 
     cwd = os.getcwd()
 
-    in_target_dir = utils.inTargetDir(cwd)
+    in_target_dir = utils.inTargetDir(cwd) # bool
+
+    small_buf_path = f"jcts_small_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}")
+
+    small_buf_accepted = pd.read_pickle(small_buf_path)
+
+    consistent_clusters_path = f"jcts_consistent_clusters_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_consistent_clusters_{region}")
+
+    consistent_plus_accepted_large_solutions = pd.read_pickle(consistent_clusters_path)
+
+    complete_df = pd.concat([small_buf_accepted, consistent_plus_accepted_large_solutions], ignore_index = True, sort = False)
 
     file_name = f'manual_merging_res_{region}_{datetime.date.today()}.csv'
 

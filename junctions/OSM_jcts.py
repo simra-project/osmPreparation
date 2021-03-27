@@ -62,14 +62,14 @@ def main(region, buffer_size):
 
     file_name = f"{region}_junctions_buffer={buffer_size}"
 
-    path = file_name if in_target_dir else utils.getSubDirPath(file_name, 'pickled_data')
+    path = utils.getSubDirPath(file_name, 'pickled_data') if in_target_dir else utils.getPicklePath(file_name)
 
     # Write data frame to pickle folder; include buffer_size in the file name
     # ==> purpose of this is to be able to reuse data in the manual merging
     #     tool so if a data set for a specific region and buffer size already
     #     exists it can be utilized rather than computing everything from scratch again
 
-    completeJunctions.to_pickle(utils.getSubDirPath(path))
+    completeJunctions.to_pickle(path)
 
     return completeJunctions
 

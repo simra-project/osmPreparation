@@ -36,7 +36,7 @@ print(f"Small buffer: {small_buf}")
 
 print(f"Large buffer: {large_buf}")
 
-default = input ("Would you like to accept these defaults? Please reply with Yes or NO.\n")
+default = input ("Would you like to accept these defaults? Please reply with yes or no.\n")
 
 if (default == "No"): 
 
@@ -60,7 +60,7 @@ elif (default == "Yes"):
 
 # (2) run 'manualMergePrep.py' - notify user that this will take loooooooong
 
-print("Please be patient as the ensuing computations will take a moments (up to a few minutes) to complete .........\n")
+print("Please be patient as the ensuing computations will take a few moments (up to a few minutes) to complete .........\n")
 
 manualMergePrep.meta_assist(region, small_buf, large_buf)
 

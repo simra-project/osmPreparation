@@ -74,6 +74,16 @@ def getSubDirPath (file_, subdir = 'junctions'):
 
     return subdir_path
 
+# For storing files in the pickled_data subdirectory, we need a doubly nested subDirPath.
+
+def getPicklePath (file_):
+
+    sub_one = getSubDirPath(file_, 'pickled_data')
+
+    sub_two = getSubDirPath(sub_one)
+
+    return sub_two
+
 def fileExists (file_name):
 
     cwd = os.getcwd()

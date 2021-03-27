@@ -155,9 +155,9 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
         
         if junctions_in_intersection.empty:
                                 
-            if not isMotorwayLanesIntersecting(outerInd, innerInd):
+            # if not isMotorwayLanesIntersecting(outerInd, innerInd):
 
-                return True
+            return True
                                 
         else:
     
