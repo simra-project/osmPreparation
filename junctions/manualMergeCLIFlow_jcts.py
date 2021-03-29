@@ -167,7 +167,7 @@ while (continue_editing == 'yes'):
 
         # (8.a) Tell the user to refresh the map to see the result    
 
-        print(f'Please refresh the map (PyPipeline_/junctions/\'{region}-jcts-manualClust_{datetime.date.today()}.html\') to see the result (in orange).\n')
+        print(f'Please refresh the map (PyPipeline_/junctions/html_maps\'{region}-jcts-manualClust_{datetime.date.today()}.html\') to see the result (in orange).\n')
 
         # (9.a) Ask if more manual editing is desired - if so, repeat the process from (5); if not proceed to (9)
 
@@ -179,4 +179,4 @@ print("You've chosen to finish editing. The resultant data will be written to cs
 
 manualMergeTool.save_result(region)
 
-print(f'Your data can be found here: PyPipeline_/junctions/manual_merging_res_{region}_{datetime.date.today()}.csv')
+print(f'Your data can be found here: PyPipeline_/junctions/pickled_data/manual_merging_res_{region}_{datetime.date.today()}.csv')

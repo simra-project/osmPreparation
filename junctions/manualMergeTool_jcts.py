@@ -59,29 +59,21 @@ import tidyData_Jcts
 
 def update_clust(small_buf_clstrs, large_buf_clstr, region):
 
-    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
-    # PyPipeline_ (background: we want to write all files related to junctions to the
-    # junctions subdirectory)
-
-    cwd = os.getcwd()
-
-    in_target_dir = utils.inTargetDir(cwd) # bool
-
     # (1) read small_buf_inconsist pickle
 
-    small_buf_inconsist_path = f"jcts_small_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}")
+    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data")
 
     small_buf_inconsist = pd.read_pickle(small_buf_inconsist_path)
 
     # (2) read large_buf_inconsist pickle
 
-    large_buf_inconsist_path = f"jcts_large_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}")
+    large_buf_inconsist_path = utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}", "pickled_data")
 
     large_buf_inconsist = pd.read_pickle(large_buf_inconsist_path)
 
     # (3) read consistent clusters pickle
 
-    consistent_clusters_path = f"jcts_consistent_clusters_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_consistent_clusters_{region}")
+    consistent_clusters_path = utils.getSubDirPath(f"jcts_consistent_clusters_{region}", "pickled_data")
 
     consistent_clusters = pd.read_pickle(consistent_clusters_path)
 
@@ -132,23 +124,15 @@ def update_clust(small_buf_clstrs, large_buf_clstr, region):
 
 def delete_clust(small_buf_clstr, region):
 
-    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
-    # PyPipeline_ (background: we want to write all files related to junctions to the
-    # junctions subdirectory)
-
-    cwd = os.getcwd()
-
-    in_target_dir = utils.inTargetDir(cwd) # bool
-
     # (1) read small_buf_inconsist pickle
 
-    small_buf_inconsist_path = f"jcts_small_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}")
+    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data")
 
     small_buf_inconsist = pd.read_pickle(small_buf_inconsist_path)
 
     # (2) read large_buf_inconsist pickle
 
-    large_buf_inconsist_path = f"jcts_large_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}")
+    large_buf_inconsist_path = utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}", "pickled_data")
 
     large_buf_inconsist = pd.read_pickle(large_buf_inconsist_path)
 
@@ -169,19 +153,15 @@ def delete_clust(small_buf_clstr, region):
 
 def save_result (region):
 
-    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
-    # PyPipeline_ (background: we want to write all files related to junctions to the
-    # junctions subdirectory)
+    # (1) read small_buf_inconsist pickle
 
-    cwd = os.getcwd()
+    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data")
 
-    in_target_dir = utils.inTargetDir(cwd) # bool
+    small_buf_accepted = pd.read_pickle(small_buf_inconsist_path)
 
-    small_buf_path = f"jcts_small_buf_inconsist_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}")
+    # (2) read consistent clusters pickle
 
-    small_buf_accepted = pd.read_pickle(small_buf_path)
-
-    consistent_clusters_path = f"jcts_consistent_clusters_{region}" if in_target_dir else utils.getSubDirPath(f"jcts_consistent_clusters_{region}")
+    consistent_clusters_path = utils.getSubDirPath(f"jcts_consistent_clusters_{region}", "pickled_data")
 
     consistent_plus_accepted_large_solutions = pd.read_pickle(consistent_clusters_path)
 
@@ -189,7 +169,7 @@ def save_result (region):
 
     file_name = f'manual_merging_res_{region}_{datetime.date.today()}.csv'
 
-    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
+    path = utils.getSubDirPath(file_name, 'csv_data')
 
     complete_df.to_csv(path, index=False, sep="|")
 

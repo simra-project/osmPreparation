@@ -23,9 +23,9 @@ import utils # internal import
 
 def scatter(lat, lon):
 
-    lat_scatter = random.uniform(-0.0001, 0.0001)
+    lat_scatter = random.uniform(-0.0002, 0.0002)
 
-    lon_scatter = random.uniform(-0.0001, 0.0001)
+    lon_scatter = random.uniform(-0.0002, 0.0002)
 
     return [lat + lat_scatter, lon + lon_scatter]
 
@@ -103,16 +103,8 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     # III.) Export map as htmls
 
-    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
-    # PyPipeline_ (background: we want to write all files related to junctions to the
-    # junctions subdirectory)
-
-    cwd = os.getcwd()
-
-    in_target_dir = utils.inTargetDir(cwd)
-
     file_name = f'{region}-jcts-manualClust_{datetime.date.today()}.html'
 
-    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
+    path = utils.getSubDirPath(file_name, "html_maps")
 
     myMap.save(path)

@@ -75,17 +75,9 @@ def getJunctionsDf(nodesdf, region):
 
     junctionsdf = junctionsdf.drop('index',axis=1)
 
-    # Find out if we're operating in 'junctions'-subdirectory or its parent directory,
-    # PyPipeline_ (background: we want to write all files related to junctions toxs the
-    # junctions subdirectory)
-
-    cwd = os.getcwd()
-
-    in_target_dir = utils.inTargetDir(cwd)
-
     file_name = f"{region}_junctions_for_segs.csv"
 
-    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
+    path = utils.getSubDirPath(file_name, "csv_data")
 
     # Keep the column containing information on the type of junction (small vs. large)
 

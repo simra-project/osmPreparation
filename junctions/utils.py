@@ -59,45 +59,21 @@ paramDict = {
         "large_buf_default": 2.25           # medium-sized city (< 1 Mio. inhabitants)
     }
 }
-def inTargetDir (cwd):
 
-    cwd_parts = cwd.split("/")
-
-    return (cwd_parts[len(cwd_parts)-1] == 'junctions')
-
-def getSubDirPath (file_, subdir = 'junctions'):
+def getSubDirPath (file_, subdir):
 
     # Concatenate path using os library so system can tell which part of the
     # path is a directory and which is a file name.
 
-    subdir_path = os.path.join(subdir, file_)
+    curr_dir = os.path.abspath(os.path.dirname(__file__))
 
-    return subdir_path
+    file_path = os.path.join(curr_dir, subdir, file_)
 
-# For storing files in the pickled_data subdirectory, we need a doubly nested subDirPath.
+    return file_path
 
-def getPicklePath (file_):
-
-    sub_one = getSubDirPath(file_, 'pickled_data')
-
-    sub_two = getSubDirPath(sub_one)
-
-    return sub_two
 
 def fileExists (file_name):
 
-    cwd = os.getcwd()
+    path = getSubDirPath(file_name,'pickled_data')
 
-    if (inTargetDir(cwd)):
-
-        path = getSubDirPath(file_name,'pickled_data')
-
-        return os.path.isfile(path)
-
-    else:
-
-        sub_one = getSubDirPath(file_name, 'pickled_data')
-
-        sub_two = getSubDirPath(sub_one)
-
-        return os.path.isfile(sub_two)
+    return os.path.isfile(path)
