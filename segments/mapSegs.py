@@ -1,4 +1,3 @@
-
 import folium 
 
 import geopandas as gpd
@@ -40,13 +39,11 @@ def extractAndPlot (extractableShape, mmaapp, style, crs, highwaytype, highwayId
     elif isinstance(extractableShape, MultiPolygon):
             
         '''
-
         individualPolys = list(extractableShape)
             
         for poly in individualPolys:
         
             extractAndPlot(poly, mmaapp, style, crs, highwaytype)
-
         '''
         minx, miny, maxx, maxy = extractableShape.bounds
 
@@ -95,6 +92,6 @@ def runAllMapTasks (region, bbCentroid, oddballs, normies, neighbourParam):
 
     file_name = f'{region}-segs-map_np={neighbourParam}_{datetime.date.today()}.html'
 
-    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
+    path = utils.getSubDirPath(file_name, "html_maps")
 
     myMap.save(path)

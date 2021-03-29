@@ -70,7 +70,7 @@ manualMergePrep.meta_assist(region, small_buf, large_buf)
 
 print("Thanks for waiting! All the data necessary to manually edit junction clusters has been computed.\n")
 
-print(f'Please navigate to directory PyPipeline_/junctions and open the file \'{region}-jcts-manualClust_{datetime.date.today()}.html\' in your browser. \n')
+print(f'Please navigate to directory PyPipeline_/junctions/html_maps and open the file \'{region}-jcts-manualClust_{datetime.date.today()}.html\' in your browser. \n')
 
 print('By default, the more conservative clustering solutions (green shapes on the map) will be accepted. \n')
 

@@ -1,4 +1,3 @@
-
 import folium
 
 from folium.plugins import MarkerCluster
@@ -118,6 +117,6 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     file_name = f'{region}-segs-manualClust_{datetime.date.today()}.html'
 
-    path = file_name if in_target_dir else utils.getSubDirPath(file_name)
+    path = utils.getSubDirPath(file_name, "html_maps")
 
     myMap.save(path)
