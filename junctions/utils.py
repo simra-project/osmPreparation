@@ -41,37 +41,39 @@ paramDict = {
         "sorting_params": ['lon','lat'],  # long-ish bounding box - sort by upper left corner.
         "small_buf_default": 2.25,          # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 2.5            # medium-sized city (< 1 Mio. inhabitants)
+    },
+    "wedding": {
+        "bounding_box": [13.319638,52.538373,13.382339,52.570332],
+        "centroid": [52.555071, 13.349667],
+        "neighbour_param": 100,
+        "sorting_params": ['lat','lon'],     # square bounding box - sort by upper left corner (although it doesn't really matter).
+        "small_buf_default": 2.5,            # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75            # large-sized city (> 1 Mio. inhabitants)
+    },
+    "hannover": {
+        "bounding_box": [9.60443,52.305137,9.918426,52.454335],
+        "centroid": [52.3796, 9.7617],
+        "neighbour_param": 80,
+        "sorting_params": ['lat','lon'],    # square bounding box - sort by upper left corner (although it doesn't really matter).
+        "small_buf_default": 2,             # medium-sized city (< 1 Mio. inhabitants)
+        "large_buf_default": 2.25           # medium-sized city (< 1 Mio. inhabitants)
     }
 }
-def inTargetDir (cwd):
 
-    cwd_parts = cwd.split("/")
-
-    return (cwd_parts[len(cwd_parts)-1] == 'junctions')
-
-def getSubDirPath (file_, subdir = 'junctions'):
+def getSubDirPath (file_, subdir):
 
     # Concatenate path using os library so system can tell which part of the
     # path is a directory and which is a file name.
 
-    subdir_path = os.path.join(subdir, file_)
+    curr_dir = os.path.abspath(os.path.dirname(__file__))
 
-    return subdir_path
+    file_path = os.path.join(curr_dir, subdir, file_)
+
+    return file_path
+
 
 def fileExists (file_name):
 
-    cwd = os.getcwd()
+    path = getSubDirPath(file_name,'pickled_data')
 
-    if (inTargetDir(cwd)):
-
-        path = getSubDirPath(file_name,'pickled_data')
-
-        return os.path.isfile(path)
-
-    else:
-
-        sub_one = getSubDirPath(file_name, 'pickled_data')
-
-        sub_two = getSubDirPath(sub_one)
-
-        return os.path.isfile(sub_two)
+    return os.path.isfile(path)

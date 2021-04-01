@@ -36,7 +36,7 @@ print(f"Small buffer: {small_buf}")
 
 print(f"Large buffer: {large_buf}")
 
-default = input ("Would you like to accept these defaults? Please reply with Yes or NO.\n")
+default = input ("Would you like to accept these defaults? Please reply with yes or no.\n")
 
 if (default == "No"): 
 
@@ -60,7 +60,7 @@ elif (default == "Yes"):
 
 # (2) run 'manualMergePrep.py' - notify user that this will take loooooooong
 
-print("Please be patient as the ensuing computations will take a moments (up to a few minutes) to complete .........\n")
+print("Please be patient as the ensuing computations will take a few moments (up to a few minutes) to complete .........\n")
 
 manualMergePrep.meta_assist(region, small_buf, large_buf)
 
@@ -70,7 +70,7 @@ manualMergePrep.meta_assist(region, small_buf, large_buf)
 
 print("Thanks for waiting! All the data necessary to manually edit junction clusters has been computed.\n")
 
-print(f'Please navigate to directory PyPipeline_/junctions and open the file \'{region}-jcts-manualClust_{datetime.date.today()}.html\' in your browser. \n')
+print(f'Please navigate to directory PyPipeline_/junctions/html_maps and open the file \'{region}-jcts-manualClust_{datetime.date.today()}.html\' in your browser. \n')
 
 print('By default, the more conservative clustering solutions (green shapes on the map) will be accepted. \n')
 
@@ -167,7 +167,7 @@ while (continue_editing == 'yes'):
 
         # (8.a) Tell the user to refresh the map to see the result    
 
-        print(f'Please refresh the map (PyPipeline_/junctions/\'{region}-jcts-manualClust_{datetime.date.today()}.html\') to see the result (in orange).\n')
+        print(f'Please refresh the map (PyPipeline_/junctions/html_maps\'{region}-jcts-manualClust_{datetime.date.today()}.html\') to see the result (in orange).\n')
 
         # (9.a) Ask if more manual editing is desired - if so, repeat the process from (5); if not proceed to (9)
 
@@ -179,4 +179,4 @@ print("You've chosen to finish editing. The resultant data will be written to cs
 
 manualMergeTool.save_result(region)
 
-print(f'Your data can be found here: PyPipeline_/junctions/manual_merging_res_{region}_{datetime.date.today()}.csv')
+print(f'Your data can be found here: PyPipeline_/junctions/pickled_data/manual_merging_res_{region}_{datetime.date.today()}.csv')
