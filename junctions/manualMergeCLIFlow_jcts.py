@@ -90,7 +90,7 @@ while (continue_editing == 'yes'):
 
     # (5) Request which operation the user wants to perform.
 
-    desired_operation = input ("Would you like to delete or replace conservative clusters (= green shapes)? Please reply with Delete or Replace. \n")
+    desired_operation = input ("Would you like to delete or replace conservative clusters (= green shapes)? Please reply with delete or replace. \n")
 
     if desired_operation == "Delete":
 

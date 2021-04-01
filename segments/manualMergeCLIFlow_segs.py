@@ -36,7 +36,7 @@ print(f"Small buffer: {small_buf}")
 
 print(f"Large buffer: {large_buf}")
 
-default = input ("Would you like to accept these defaults? Please reply with Yes or NO.\n")
+default = input ("Would you like to accept these defaults? Please reply with yes or no.\n")
 
 if (default == "No"): 
 
@@ -90,7 +90,7 @@ while (continue_editing == 'yes'):
 
     # (5) Request which operation the user wants to perform.
 
-    desired_operation = input ("Would you like to delete or replace conservative clusters (= green shapes)? Please reply with Delete or Replace. \n")
+    desired_operation = input ("Would you like to delete or replace conservative clusters (= green shapes)? Please reply with delete or replace. \n")
 
     if desired_operation == "Delete":
 

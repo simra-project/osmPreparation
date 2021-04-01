@@ -161,6 +161,10 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
                                 
         else:
     
+            '''
+
+            PRINT STATEMENTS FOR DEBUGGING PURPOSES
+
             if isMotorwayLanesIntersecting(outerInd, innerInd):
 
                  print("Not merging highwaylanes traveling in opposite directions")
@@ -168,8 +172,12 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
             else:
 
                 print(f"Not merging because of junctions in segment overlap: {junctions_in_intersection}")
+            '''
 
             return False
+
+    # 'isMotorwayLanesIntersecting is not currently used as the 'destination' property of highways in OSM
+    # is usually 'unknown' and thus not very useful.
 
     def isMotorwayLanesIntersecting(outerInd, innerInd):
 
