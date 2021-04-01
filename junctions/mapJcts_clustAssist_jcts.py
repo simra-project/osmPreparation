@@ -23,9 +23,9 @@ import utils # internal import
 
 def scatter(lat, lon):
 
-    lat_scatter = random.uniform(-0.0002, 0.0002)
+    lat_scatter = random.uniform(-0.00015, 0.00015)
 
-    lon_scatter = random.uniform(-0.0002, 0.0002)
+    lon_scatter = random.uniform(-0.00015, 0.00015)
 
     return [lat + lat_scatter, lon + lon_scatter]
 

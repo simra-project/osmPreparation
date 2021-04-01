@@ -92,7 +92,7 @@ while (continue_editing == 'yes'):
 
     desired_operation = input ("Would you like to delete or replace conservative clusters (= green shapes)? Please reply with delete or replace. \n")
 
-    if desired_operation == "Delete":
+    if desired_operation == "delete":
 
         # (6.a) In order to run 'manualMergeTool_jcts.py' > delete_clust, ask the user to provide the cluster to be 
         #       deleted.
@@ -117,7 +117,7 @@ while (continue_editing == 'yes'):
 
         continue_editing = input ("Would you like to continue editing? Please reply with yes or no. \n")
 
-    elif desired_operation == "Replace":
+    elif desired_operation == "replace":
 
         print("Typically, a more conservative clustering solution that should be replaced by a more liberal one consists of multiple green shapes.\n")
 
