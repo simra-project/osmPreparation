@@ -9,7 +9,7 @@ import utils
 
 # ********************************************************************************************************************
 
-tags = ['primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
+tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway']
 
 # (1) Get data from OSM, input param = bounding box
 
@@ -75,7 +75,7 @@ def getHighwayDf(ways):
 
     # osmdf = pd.DataFrame(osmdata)
 
-    highwaydf = pd.DataFrame(ways)[['highway','id','lanes','lanes:backward','name','nodes']].dropna(subset=['name','highway'], how='any')
+    highwaydf = pd.DataFrame(ways)[['highway','id','lanes','lanes:backward','destination','name','nodes']].dropna(subset=['name','highway'], how='any')
 
     # 'id', 'highway', 'lanes', 'lanes:backward', 'name', 'maxspeed', 'nodes', 'ref'
 
@@ -132,7 +132,7 @@ def metaFunc(bbox, region):
     # (Otherwise, there might be no file to read.)
     # TODO is this reasonable?
 
-    subdir_path = utils.getSubDirPath(f"{region}_junctions_for_segs.csv", 'junctions')
+    subdir_path = utils.getJunctionsDirPath(f"{region}_junctions_for_segs.csv", "csv_data")
 
     # Notify user if junctions_for_segs.csv is unavailable as the junctions project hasn't been
     # executed before the segments fraction

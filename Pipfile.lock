@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "03ac001c6d59238c88bdd25582aec292cf3aafc7da7f60d9bb88f2b0132bbb61"
+            "sha256": "9522e7680e5fcd4113309376c8c09743e0d73531009a75c3093316ed90dbf12d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -180,8 +180,8 @@
         },
         "defusedxml": {
             "hashes": [
-                "sha256:6687150770438374ab581bb7a1b327a847dd9c5749e396102de3fad4e8a3ef93",
-                "sha256:f684034d135af4c6cbb949b8a4d2ed61634515257a67299e5f940fbaa34377f5"
+                "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69",
+                "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61"
             ],
             "version": "==0.6.0"
         },
@@ -294,11 +294,11 @@
         },
         "jinja2": {
             "hashes": [
-                "sha256:89aab215427ef59c34ad58735269eb58b1a5808103067f7bb9d5836c651b3bb0",
-                "sha256:f0a4641d3cf955324a89c04f3d94663aa4d638abe8f733ecd3582848e1c37035"
+                "sha256:03e47ad063331dd6a3f04a43eddca8a966a26ba0c5b7207a9a9e4e08f1b29419",
+                "sha256:a6d58433de0ae800347cab1fa3043cebbabe8baa9d29e668f1c768cb87a333c6"
             ],
             "index": "pypi",
-            "version": "==2.11.2"
+            "version": "==2.11.3"
         },
         "json5": {
             "hashes": [
@@ -333,8 +333,8 @@
         },
         "jupyter-console": {
             "hashes": [
-                "sha256:1d80c06b2d85bfb10bd5cc731b3db18e9023bc81ab00491d3ac31f206490aee3",
-                "sha256:7f6194f4f4692d292da3f501c7f343ccd5e36c6a1becf7b7515e23e66d6bf1e9"
+                "sha256:092283ba2c9b5ceb53f32d95891ecc59ed4bfeb69e36fe017db176213daa5b0e",
+                "sha256:947f66bbdeee2221b4fb3a6b78225d337b8f10832f14cecf7932183635abe1d9"
             ],
             "version": "==6.2.0"
         },
@@ -469,8 +469,8 @@
         },
         "nbclient": {
             "hashes": [
-                "sha256:01e2d726d16eaf2cde6db74a87e2451453547e8832d142f73f72fddcd4fe0250",
-                "sha256:4d6b116187c795c99b9dba13d46e764d596574b14c296d60670c8dfe454db364"
+                "sha256:db17271330c68c8c88d46d72349e24c147bb6f34ec82d8481a8f025c4d26589c",
+                "sha256:e79437364a2376892b3f46bedbf9b444e5396cfb1bc366a472c37b48e9551500"
             ],
             "version": "==0.5.1"
         },

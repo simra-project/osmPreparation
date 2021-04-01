@@ -2,6 +2,9 @@
 import pandas as pd
 import numpy as np
 from geopy import distance
+from itertools import starmap
+
+relevantTypes = ['primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
 
 # ********************************************************************************************************************
 # (1) Determine way segments.
@@ -13,9 +16,35 @@ from geopy import distance
 
 def segmentingWrapper(highwaydf, junctionsdf):
 
-    jctids = junctionsdf['id'].values
+    # these are ALL junctions (i.e., intersections of at least two highways, irrespective of their type)
 
-    def getSegments(wayNodes):
+    jctids = junctionsdf['id'].values 
+
+    # now we also need the LARGER junctions (i.e., intersections of at least two highways of a larger type)
+
+    larger_jcts = junctionsdf[junctionsdf['junction'] == 'large_junction']
+
+    larger_jctids = larger_jcts['id'].values 
+
+    # Helper fct for determining if a node is a junction 
+
+    def isJct(node, highwaytype):
+
+        if (highwaytype in relevantTypes) and (node in larger_jctids):
+
+            return True
+
+        elif (node in jctids):
+
+            return True
+
+        else:
+
+            return False
+
+    ########################################################################################################
+
+    def getSegments(wayNodes, highwaytype):
         
         currSeg = []
         
@@ -31,7 +60,7 @@ def segmentingWrapper(highwaydf, junctionsdf):
                 
                 return pd.Series(segments)
         
-            elif (node in jctids):
+            elif (isJct(node,highwaytype)):
                 
                 if (n > 0):
                 
@@ -45,7 +74,7 @@ def segmentingWrapper(highwaydf, junctionsdf):
             
                 currSeg.append(node)
 
-    highwaydf.loc[:,'segments'] = highwaydf.loc[:,'nodes'].map(getSegments)
+    highwaydf.loc[:,'segments'] = [x for x in starmap(getSegments, list(zip(highwaydf.loc[:,'nodes'], highwaydf.loc[:,'highway'])))]
 
     return highwaydf
 
@@ -66,11 +95,11 @@ def unfold(highwaydf):
     highway = np.repeat(highwaydf.highway, rs)
     lanes = np.repeat(highwaydf.lanes, rs)
     lanesBw = np.repeat(highwaydf['lanes:backward'], rs)
+    destinations = np.repeat(highwaydf.destination, rs)
 
-    unfoldeddf = pd.DataFrame(np.column_stack((name, highway, lanes, lanesBw, np.concatenate(vals))), 
-                                columns=['highwayname','highwaytype','highwaylanes','lanes:backward','segment_nodes_ids'])
+    unfoldeddf = pd.DataFrame(np.column_stack((name, highway, lanes, lanesBw, destinations, np.concatenate(vals))), 
+                                columns=['highwayname','highwaytype','highwaylanes','lanes:backward','destination','segment_nodes_ids'])
   
-
     '''
     * Manual remerging of segments shall be enabled via a CLI (> manualMergeCLIFlow_segs.py).
     * Manual remerging is done by computing clustering solutions for two different buffer sizes and determining 
