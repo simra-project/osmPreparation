@@ -32,7 +32,7 @@ def tidyItUp(region, oddballs, normies):
 
     oddballs = oddballs.drop(["index","lats","lons","coords","oddball","poly_geometry","poly_vertices_lats","poly_vertices_lons","neighbours"], axis=1)
 
-    oddballs = oddballs.groupby('neighbour_cluster', as_index = False).agg({'id': 'sum', 'highwayname': lambda x: ', '.join(map(str, x)), 'highwaytype': lambda x: ', '.join(map(str, x)), 'highwaylanes': lambda x: ', '.join(map(str, x)),'lanes:backward': lambda x: ', '.join(map(str, x)), 'destination': lambda x: ', '.join(map(str, x)), 'segment_nodes_ids': 'sum', 'seg_length': 'sum'})
+    oddballs = oddballs.groupby('neighbour_cluster', as_index = False).agg({'id': 'sum', 'highwayname': lambda x: ', '.join(map(str, x)), 'highwaytype': lambda x: ', '.join(map(str, x)), 'highwaylanes': lambda x: ', '.join(map(str, x)),'lanes:backward': lambda x: ', '.join(map(str, x)), 'segment_nodes_ids': 'sum', 'seg_length': 'sum'})
 
     oddballMerge = pd.merge(oddballs, oddballClusters, on='neighbour_cluster')
 
@@ -86,11 +86,10 @@ def tidyItUp(region, oddballs, normies):
     types = np.repeat(oddballMerge.highwaytype, lens)
     lanes = np.repeat(oddballMerge.highwaylanes, lens)
     lanesBw = np.repeat(oddballMerge['lanes:backward'], lens)
-    destinations = np.repeat(oddballMerge.destination, lens)
     nodesIds = np.repeat(oddballMerge.segment_nodes_ids, lens)
     segLens = np.repeat(oddballMerge.seg_length, lens)
 
-    explodedOddballs = pd.DataFrame(np.column_stack((neighClusters, ids, names, types, lanes, lanesBw, destinations, nodesIds, segLens, np.concatenate(polyLists))), columns=['neighbour_cluster','id','highwayname','highwaytype','highwaylanes','lanes:backward','destinations','segment_nodes_ids','seg_length','poly_geometry'])
+    explodedOddballs = pd.DataFrame(np.column_stack((neighClusters, ids, names, types, lanes, lanesBw, nodesIds, segLens, np.concatenate(polyLists))), columns=['neighbour_cluster','id','highwayname','highwaytype','highwaylanes','lanes:backward','segment_nodes_ids','seg_length','poly_geometry'])
 
     # Retrieve lists of lats & lons from the Polygons
 

@@ -15,6 +15,8 @@ import bufferSegs
 import clusterSegs
 import tidyData_Segs
 
+import time
+
 # ARGUMENTS.
 #  * region: a string - which region are we currently looking at? Required for writing files.
 #  * boundingBox: bounding box for region; used for querying data from Overpass API
@@ -63,9 +65,13 @@ def main(region, buffer_size):
 
 if __name__ == "__main__":
 
-    completeSegs = main("stuttgart",1)
+    start_time = time.time()
 
-    file_name = f"stuttgart_segments_complete_{datetime.date.today()}.csv"
+    completeSegs = main("bern",1)
+
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+    file_name = f"bern_segments_complete_{datetime.date.today()}.csv"
 
     path = utils.getSubDirPath(file_name, "csv_data")
 

@@ -67,9 +67,9 @@ def main(region, buffer_size):
 
 if __name__ == "__main__":
 
-    completeJunctions = main("hannover",2)
+    completeJunctions = main("bern",2)
 
-    file_name = f"hannover_junctions_complete_{datetime.date.today()}.csv"
+    file_name = f"bern_junctions_complete_{datetime.date.today()}.csv"
 
     path = utils.getSubDirPath(file_name, "csv_data")
 

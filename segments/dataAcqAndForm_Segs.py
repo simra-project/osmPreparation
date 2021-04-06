@@ -75,7 +75,7 @@ def getHighwayDf(ways):
 
     # osmdf = pd.DataFrame(osmdata)
 
-    highwaydf = pd.DataFrame(ways)[['highway','id','lanes','lanes:backward','destination','name','nodes']].dropna(subset=['name','highway'], how='any')
+    highwaydf = pd.DataFrame(ways)[['highway','id','lanes','lanes:backward','name','nodes']].dropna(subset=['name','highway'], how='any')
 
     # 'id', 'highway', 'lanes', 'lanes:backward', 'name', 'maxspeed', 'nodes', 'ref'
 

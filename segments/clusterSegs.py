@@ -1,6 +1,8 @@
 
 from itertools import starmap
 
+from itertools import product
+
 from geopandas import GeoSeries
 
 from shapely.geometry import Point
@@ -176,38 +178,16 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
 
             return False
 
-    # 'isMotorwayLanesIntersecting is not currently used as the 'destination' property of highways in OSM
-    # is usually 'unknown' and thus not very useful.
-
-    def isMotorwayLanesIntersecting(outerInd, innerInd):
-
-        # With this function, we want to make sure that separate, but parallel fractions of streets with traffic
-        # going in the opposite direction (usually we're talking motorways here) are not merged. 
-        # IDEA: motorways with separate parallel sections traveling in opposite directions will like
-        #       (hopefully) exhibit the 'destination' feature (e.g. 'Dresden', 'Hamburg', 'Charlottenburg-Wilmersdorf', ...). 
-
-        outerHighwayName = unfoldedOddballs.at[outerInd, 'highwayname']
-
-        innerHighwayName = unfoldedOddballs.at[innerInd, 'highwayname']  
-
-        outerHighwayDestination = unfoldedOddballs.at[outerInd, 'destination']
-
-        innerHighwayDestination = unfoldedOddballs.at[innerInd, 'destination']  
-
-        if (innerHighwayName == outerHighwayName) and (innerHighwayDestination != outerHighwayDestination):
-
-            return True
-
-        else:
-
-            return False
-
     ## b) getNeighbours: unsurprisingly, this function assigns each segment its neighbours (definition of 'neighbour'
     ##                   in this context: see above)
 
     def getNeighbours(outerInd, outerPoly):
         
         neighbours = []
+
+        lower = max(outerInd-200, 0)
+        
+        upper = min(outerInd+200, len(unfoldedOddballs)-1)
         
         # Use buffer trick if polygon is invalid
         # https://stackoverflow.com/questions/13062334/polygon-intersection-error-in-shapely-shapely-geos-topologicalerror-the-opera
@@ -216,7 +196,11 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
             
             outerPoly = outerPoly.buffer(0)
         
-        for ind in unfoldedOddballs.index:
+        # for ind in range(outerInd, len(unfoldedOddballs)):
+
+        # for ind in unfoldedOddballs.index:
+
+        for ind in range(lower, upper+1):
             
             innerPoly = unfoldedOddballs.at[ind,'poly_geometry']
             
@@ -242,7 +226,11 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    unfoldedOddballs['neighbours'] = [x for x in starmap(getNeighbours, list(zip(unfoldedOddballs['index'],unfoldedOddballs['poly_geometry'])))]
+    #_pp = pathos.pools._ProcessPool(4)
+
+    unfoldedOddballs['neighbours'] = [x for x in starmap(getNeighbours, zip(unfoldedOddballs['index'],unfoldedOddballs['poly_geometry']))]
+
+    # _pp.getNeighbours(unfoldedOddballs['index'].values,unfoldedOddballs['poly_geometry'].values)
 
     return unfoldedOddballs
 
