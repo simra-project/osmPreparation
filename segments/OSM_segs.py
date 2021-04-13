@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import os
+
+#os.environ["MODIN_ENGINE"] = "dask"  # Modin will use Dask
+#os.environ["MODIN_ENGINE"] = "ray"  # Modin will use Ray
+#import modin.pandas as pd
+
 import pandas as pd
+
 import numpy as np
 import requests
 import json
-import os
 import datetime
 
 import utils
@@ -67,11 +73,11 @@ if __name__ == "__main__":
 
     start_time = time.time()
 
-    completeSegs = main("bern",1)
+    completeSegs = main("augsburg",1)
 
     print("--- %s seconds ---" % (time.time() - start_time))
 
-    file_name = f"bern_segments_complete_{datetime.date.today()}.csv"
+    file_name = f"augsburg_segments_complete_{datetime.date.today()}.csv"
 
     path = utils.getSubDirPath(file_name, "csv_data")
 

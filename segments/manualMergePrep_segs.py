@@ -1,3 +1,10 @@
+
+import os
+
+#os.environ["MODIN_ENGINE"] = "dask"  # Modin will use Dask
+#os.environ["MODIN_ENGINE"] = "ray"  # Modin will use Ray
+#import modin.pandas as pd
+
 import pandas as pd
 
 import numpy as np
@@ -11,8 +18,6 @@ import geopandas as gpd
 import mapSegs_clustAssist as mapping
 
 import collections
-
-import os
 
 # INTERNAL IMPORTS: 
 

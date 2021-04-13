@@ -9,6 +9,8 @@ from shapely.geometry import Point
 
 import utils
 
+import pathos
+
 #*******************************************************************************************************************
 # (1) Find out which ways don't start and/or end with a junction. Wherever that is the case, we want to 
 #     merge segments together in order to get rid of weird breaks - goal is to obtain a clean model of
@@ -181,13 +183,7 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
     ## b) getNeighbours: unsurprisingly, this function assigns each segment its neighbours (definition of 'neighbour'
     ##                   in this context: see above)
 
-    def getNeighbours(outerInd, outerPoly):
-        
-        neighbours = []
-
-        lower = max(outerInd-200, 0)
-        
-        upper = min(outerInd+200, len(unfoldedOddballs)-1)
+    def getNeighbours(outerInd, outerPoly, outerHighwayType):
         
         # Use buffer trick if polygon is invalid
         # https://stackoverflow.com/questions/13062334/polygon-intersection-error-in-shapely-shapely-geos-topologicalerror-the-opera
@@ -195,42 +191,26 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
         if not(outerPoly.is_valid):
             
             outerPoly = outerPoly.buffer(0)
+
+        unfoldedOddballs['poly_geometry'] = unfoldedOddballs['poly_geometry'].map(lambda p: p if p.is_valid else p.buffer(0))
         
-        # for ind in range(outerInd, len(unfoldedOddballs)):
+        # Filter data frame according to two conditions:
+        # (1) polygon intersects
+        # (2) intersection is valid
+ 
+        neighs = unfoldedOddballs[unfoldedOddballs.apply(lambda row: (row['poly_geometry'].intersects(outerPoly) and isIntersectionValid(outerPoly, outerInd, outerHighwayType, row['poly_geometry'], row.index, row['highwaytype'])), axis=1)]
 
-        # for ind in unfoldedOddballs.index:
+        # Grab indices of the filtered data frame, those are the neighbours 
 
-        for ind in range(lower, upper+1):
-            
-            innerPoly = unfoldedOddballs.at[ind,'poly_geometry']
-            
-            # Use buffer trick if polygon is invalid
-            
-            if not(innerPoly.is_valid):
-            
-                innerPoly = innerPoly.buffer(0)
-            
-            outerHighwayType = unfoldedOddballs.at[outerInd,'highwaytype']
-
-            innerHighwayType = unfoldedOddballs.at[ind,'highwaytype']
-                        
-            if outerPoly.intersects(innerPoly): 
-                    
-                validIntersection = isIntersectionValid(outerPoly, outerInd, outerHighwayType, innerPoly, ind, innerHighwayType)
-
-                if validIntersection:
-                        
-                    neighbours.append(ind)
+        neighbours = neighs.index.tolist()
                         
         return neighbours
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    #_pp = pathos.pools._ProcessPool(4)
+    _pp = pathos.pools._ProcessPool()
 
-    unfoldedOddballs['neighbours'] = [x for x in starmap(getNeighbours, zip(unfoldedOddballs['index'],unfoldedOddballs['poly_geometry']))]
-
-    # _pp.getNeighbours(unfoldedOddballs['index'].values,unfoldedOddballs['poly_geometry'].values)
+    unfoldedOddballs['neighbours'] = [x for x in _pp.starmap(getNeighbours, zip(unfoldedOddballs['index'],unfoldedOddballs['poly_geometry'],unfoldedOddballs['highwaytype']))]
 
     return unfoldedOddballs
 

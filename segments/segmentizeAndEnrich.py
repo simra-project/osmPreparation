@@ -1,5 +1,11 @@
+import os
+
+#os.environ["MODIN_ENGINE"] = "dask"  # Modin will use Dask
+#os.environ["MODIN_ENGINE"] = "ray"  # Modin will use Ray
+#import modin.pandas as pd
 
 import pandas as pd
+
 import numpy as np
 from geopy import distance
 from itertools import starmap

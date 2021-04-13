@@ -1,6 +1,12 @@
 
+import os
+
+#os.environ["MODIN_ENGINE"] = "dask"  # Modin will use Dask
+#os.environ["MODIN_ENGINE"] = "ray"  # Modin will use Ray
+#import modin.pandas as pd
 
 import pandas as pd
+
 import requests
 import numpy as np
 import sys
@@ -8,7 +14,7 @@ import sys
 import utils
 
 # ********************************************************************************************************************
-
+    
 tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway']
 
 # (1) Get data from OSM, input param = bounding box

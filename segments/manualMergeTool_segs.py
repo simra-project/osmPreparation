@@ -1,5 +1,11 @@
 # External imports
 
+import os
+
+#os.environ["MODIN_ENGINE"] = "dask"  # Modin will use Dask
+#os.environ["MODIN_ENGINE"] = "ray"  # Modin will use Ray
+#import modin.pandas as pd
+
 import pandas as pd
 
 import numpy as np
@@ -9,8 +15,6 @@ from itertools import starmap
 from shapely.geometry.polygon import Polygon 
 
 import datetime
-
-import os
 
 # Internal imports
 

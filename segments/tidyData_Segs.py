@@ -2,6 +2,11 @@
 
 import geopandas as gpd
 
+import os
+
+#os.environ["MODIN_ENGINE"] = "ray"  # Modin will use Ray
+#import modin.pandas as pd
+
 import pandas as pd
 
 import numpy as np
