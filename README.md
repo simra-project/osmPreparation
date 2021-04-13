@@ -15,9 +15,13 @@ What the current project mainly does is
 
 Python version: 3.8.3 64-bit
 
-**Recommended**: this project was built using [pipenv](https://pipenv-fork.readthedocs.io/en/latest/basics.html "Pipenv documentation"). Install pipenv on your machine, navigate to the project directory and run `pipenv install` to activate the environment (pipenv gets all the information it needs from the `Pipfile`). That's it! (For a crash course on pipenv, please refer to [this tutorial](https://www.youtube.com/watch?v=6Qmnh5C4Pmo "Pipenv Crash Course by Traversy Media")).
+A `requirements.txt` file is provided. 
 
-**Alternatively**: if you don't want to use pipenv for whatever reason you might have to avoid this amazing package, a `requirements.txt` file is provided as well. You can run `pip install -r 'requirements.txt'` inside the project folder to install all of the required packages.
+To keep dependencies organized, you are advised to set up a virtual environment for each project (Python pain). The most straightforward virtual environment management strategy is to just use `venv`, a module that is shipped with Python since version 3.3 (no additional install required) and `pip`, the standard Python package management tool. 
+
+To do so, navigate to the project's top level folder (i.e., one level above the segments/junctions subdirectories) and execute the command `python3 -m venv name_of_env`, replacing 'name_of_env' with the name you want to assign your virtual environment. A new directory containing the virtual environment will be generated in the current folder. Then, activate the virtual environment with the command `source name_of_env/bin/activate` (again, replacing 'name_of_env' with the name you have given your environment). 
+
+Then run `python -m pip install -r 'requirements.txt'` inside the project folder to install all of the required packages.
 
 ## Getting junction data
 
