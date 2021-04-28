@@ -73,11 +73,11 @@ if __name__ == "__main__":
 
     start_time = time.time()
 
-    completeSegs = main("augsburg",1)
+    completeSegs = main("hannover",1)
 
     print("--- %s seconds ---" % (time.time() - start_time))
 
-    file_name = f"augsburg_segments_complete_{datetime.date.today()}.csv"
+    file_name = f"hannover_segments_complete_{datetime.date.today()}.csv"
 
     path = utils.getSubDirPath(file_name, "csv_data")
 

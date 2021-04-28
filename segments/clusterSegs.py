@@ -1,15 +1,11 @@
 
 from itertools import starmap
 
-from itertools import product
-
 from geopandas import GeoSeries
 
 from shapely.geometry import Point
 
 import utils
-
-import pathos
 
 #*******************************************************************************************************************
 # (1) Find out which ways don't start and/or end with a junction. Wherever that is the case, we want to 
@@ -116,101 +112,40 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
 
     # these are ALL junctions (i.e., intersections of at least two highways, irrespective of their type)
 
-    junctionlats = junctionsdf.lat.values
-    junctionlons = junctionsdf.lon.values
-    junctionpoints = GeoSeries(map(Point, zip(junctionlats, junctionlons)))
+    jctids = junctionsdf['id'].values
 
     # now we also need the LARGER junctions (i.e., intersections of at least two highways of a larger type)
 
     larger_jcts = junctionsdf[junctionsdf['junction'] == 'large_junction']
 
-    larger_junctionlats = larger_jcts.lat.values
-    larger_junctionlons = larger_jcts.lon.values
-    larger_junctionpoints = GeoSeries(map(Point, zip(larger_junctionlats, larger_junctionlons)))
+    larger_jctids = larger_jcts['id'].values 
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Define some inner functions we'll need for determining the segments' neighbours.
+    # Determine neighbours based on shared nodes that aren't junctions.
 
-    ## a) isIntersectionValid: as a neighbouring segment is defined as a segment whose polygon a segments' polygon 
-    ##                         intersects with WITHOUT a junction being contained in that intersection, this function
-    ##                         checks for junctions in intersections.
+    def getNeighbours(outerNodes, outerHighwayType, outerId):
 
-    def isIntersectionValid(polyOne, outerInd, outerHighwayType, polyTwo, innerInd, innerHighwayType):
-
-        if polyOne == polyTwo:
-            
-            return False
-
-        # Now checking for junctions in the two segments' intersection. If both segments belong to highways
-        # of a smaller type, we're considering all types of junctions when looking for junctions in this 
-        # intersection; otherwise, we're only checking for larger junctions.
-
-        smaller_highway_types = ['unclassified', 'pedestrian', 'cycleway']
+        common_nodes = unfoldedOddballs['segment_nodes_ids'].map(lambda innerNodes: set(innerNodes).intersection(set(outerNodes)))
         
-        intersection = polyOne.intersection(polyTwo)
+        common_nodes_list = common_nodes.map(lambda x: list(x))
 
-        if (outerHighwayType in smaller_highway_types) and (innerHighwayType in smaller_highway_types):
-
-            junctions_in_intersection = junctionpoints[lambda x: x.within(intersection)]
-
-        else: 
-            
-            junctions_in_intersection = larger_junctionpoints[lambda x: x.within(intersection)]
+        if outerHighwayType in ['unclassified', 'pedestrian', 'cycleway']:
         
-        if junctions_in_intersection.empty:
-                                
-            # if not isMotorwayLanesIntersecting(outerInd, innerInd):
-
-            return True
-                                
+            common_nodes_nojcts = common_nodes_list.map(lambda cns: [x for x in cns if x not in jctids])
+        
         else:
-    
-            '''
 
-            PRINT STATEMENTS FOR DEBUGGING PURPOSES
-
-            if isMotorwayLanesIntersecting(outerInd, innerInd):
-
-                 print("Not merging highwaylanes traveling in opposite directions")
-
-            else:
-
-                print(f"Not merging because of junctions in segment overlap: {junctions_in_intersection}")
-            '''
-
-            return False
-
-    ## b) getNeighbours: unsurprisingly, this function assigns each segment its neighbours (definition of 'neighbour'
-    ##                   in this context: see above)
-
-    def getNeighbours(outerInd, outerPoly, outerHighwayType):
+            common_nodes_nojcts = common_nodes_list.map(lambda cns: [x for x in cns if x not in larger_jctids])
         
-        # Use buffer trick if polygon is invalid
-        # https://stackoverflow.com/questions/13062334/polygon-intersection-error-in-shapely-shapely-geos-topologicalerror-the-opera
+        neighbours = [i for i in range(len(common_nodes_nojcts)) if common_nodes_nojcts[i]]
         
-        if not(outerPoly.is_valid):
-            
-            outerPoly = outerPoly.buffer(0)
+        neighbours_without_self = [x for x in neighbours if x != outerId]
 
-        unfoldedOddballs['poly_geometry'] = unfoldedOddballs['poly_geometry'].map(lambda p: p if p.is_valid else p.buffer(0))
-        
-        # Filter data frame according to two conditions:
-        # (1) polygon intersects
-        # (2) intersection is valid
- 
-        neighs = unfoldedOddballs[unfoldedOddballs.apply(lambda row: (row['poly_geometry'].intersects(outerPoly) and isIntersectionValid(outerPoly, outerInd, outerHighwayType, row['poly_geometry'], row.index, row['highwaytype'])), axis=1)]
-
-        # Grab indices of the filtered data frame, those are the neighbours 
-
-        neighbours = neighs.index.tolist()
-                        
-        return neighbours
+        return neighbours_without_self
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    _pp = pathos.pools._ProcessPool()
-
-    unfoldedOddballs['neighbours'] = [x for x in _pp.starmap(getNeighbours, zip(unfoldedOddballs['index'],unfoldedOddballs['poly_geometry'],unfoldedOddballs['highwaytype']))]
+    unfoldedOddballs['neighbours'] = [x for x in starmap(getNeighbours, zip(unfoldedOddballs['segment_nodes_ids'], unfoldedOddballs['highwaytype'], unfoldedOddballs.index))]
 
     return unfoldedOddballs
 
