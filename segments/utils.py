@@ -62,6 +62,14 @@ paramDict = {
         "sorting_params": ['minx','maxy'],  # long-ish bounding box - sort by upper left corner.
         "small_buf_default": 1,             # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 1.25           # medium-sized city (< 1 Mio. inhabitants)
+    },
+    "leipzig": {
+        "bounding_box": [12.202565,51.223668,12.552242,51.446150],
+        "centroid": [51.3403333, 12.37475],
+        "neighbour_param": 80,
+        "sorting_params": ['minx','maxy'],    # square bounding box - sort by upper left corner (although it doesn't really matter).
+        "small_buf_default": 1,             # medium-sized city (< 1 Mio. inhabitants)
+        "large_buf_default": 1.25           # medium-sized city (< 1 Mio. inhabitants)
     }
 }
 

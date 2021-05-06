@@ -179,4 +179,4 @@ print("You've chosen to finish editing. The resultant data will be written to cs
 
 manualMergeTool.save_result(region)
 
-print(f'Your data can be found here: PyPipeline_/junctions/pickled_data/manual_merging_res_{region}_{datetime.date.today()}.csv')
+print(f'Your data can be found here: PyPipeline_/junctions/csv_data/manual_merging_res_{region}_{datetime.date.today()}.csv')

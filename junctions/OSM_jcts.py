@@ -6,9 +6,10 @@ import numpy as np
 import requests
 import json
 import time
-#import concurrent.futures
 import os
 import datetime
+import sys
+import argparse
 
 pd.set_option('display.max_columns', 200)
 
@@ -67,9 +68,21 @@ def main(region, buffer_size):
 
 if __name__ == "__main__":
 
-    completeJunctions = main("bern",2)
+    # Create the argument parser and add arguments
 
-    file_name = f"bern_junctions_complete_{datetime.date.today()}.csv"
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(dest='region', type=str, help="The region to compute junctions for.")
+
+    parser.add_argument(dest='buf_size', type=int, help="By how much the one-dimensional junction points will be buffered.")
+
+    # Parse the input parameters
+
+    args = parser.parse_args()
+
+    completeJunctions = main(args.region, args.buf_size)
+
+    file_name = f"{args.region}_junctions_complete_{datetime.date.today()}.csv"
 
     path = utils.getSubDirPath(file_name, "csv_data")
 

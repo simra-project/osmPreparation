@@ -90,7 +90,7 @@ def runAllMapTasks (region, bbCentroid, oddballs, normies, neighbourParam):
 
     in_target_dir = utils.inTargetDir(cwd)
 
-    file_name = f'{region}-segs-map_np={neighbourParam}_{datetime.date.today()}.html'
+    file_name = f'{region}-segs-{datetime.date.today()}.html'
 
     path = utils.getSubDirPath(file_name, "html_maps")
 
