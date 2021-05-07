@@ -18,17 +18,7 @@ import numpy as np
 #*******************************************************************************************************************
 # (1) Define functionality for determining a junction's neighbours
 
-# a) Sort the df by the junctions' lat/lon so we can search for neighbours more efficiently. 
-
-def sortByLocation(junctionsdf, sortingParams):
-
-    junctionsdf.sort_values(by=sortingParams,inplace=True)
-
-    junctionsdf.reset_index(inplace=True, drop=True)
-
-    return junctionsdf
-
-# b) Check if the overlap of two junction polygons is above a specified threshold - could be parameterized as well,
+# a) Check if the overlap of two junction polygons is above a specified threshold - could be parameterized as well,
 #    of course (didn't seem necessary so far, but might be done in the future.)
 
 def largeIntersection(poly1, poly2):
@@ -45,46 +35,24 @@ def sharedSquare(lst1, lst2):
 
 # c) Put it all together to assign its neighbours to each junction
 
-def neighbourFindingWrapper(junctionsdf, neighbourParam):
+def neighbourFindingWrapper(junctionsdf):
 
     def getNeighbours(outerInd, outerPoly, outerHighways):
-    
-        neighbours = []
+
+        # Filter df according to poly overlap or shared square
+
+        neighs = junctionsdf[junctionsdf.apply(lambda row: (largeIntersection(row['poly_geometry'],outerPoly) or sharedSquare(row['highwaynames'], outerHighways)), axis=1)]
         
-        lower = max(outerInd-neighbourParam, 0)
-        
-        upper = min(outerInd+neighbourParam, len(junctionsdf)-1)
-        
-        # Use buffer trick if polygon is invalid
-        # https://stackoverflow.com/questions/13062334/polygon-intersection-error-in-shapely-shapely-geos-topologicalerror-the-opera
-        
-        if not(outerPoly.is_valid):
-            
-            outerPoly = outerPoly.buffer(0)
-        
-        for i in range(lower, upper+1):
-        
-            innerID = junctionsdf.at[i,'id']
-            
-            innerPoly = junctionsdf.at[i,'poly_geometry']
-            
-            # Use buffer trick if polygon is invalid
-            
-            if not(innerPoly.is_valid):
-            
-                innerPoly = innerPoly.buffer(0)
-            
-            innerHighways = junctionsdf.at[i,'highwaynames']
-                
-            if outerPoly != innerPoly:
-                    
-                squareInCommon = sharedSquare(outerHighways, innerHighways)
-                    
-                if largeIntersection(outerPoly, innerPoly): neighbours.append(innerID)
-                    
-                elif  (outerPoly.intersects(innerPoly) and squareInCommon): neighbours.append(innerID)                  
+        neighbours = list(neighs.index)
+
+        neighbours.remove(outerInd)               
                         
         return neighbours
+
+    # Use buffer trick if polygon is invalid
+    # https://stackoverflow.com/questions/13062334/polygon-intersection-error-in-shapely-shapely-geos-topologicalerror-the-opera
+
+    junctionsdf['poly_geometry'] = junctionsdf['poly_geometry'].map(lambda poly: poly if poly.is_valid else poly.buffer(0))   
 
     junctionsdf['neighbours'] = [x for x in starmap(getNeighbours, list(zip(junctionsdf.index,junctionsdf['poly_geometry'],junctionsdf['highwaynames'])))]
 
@@ -371,7 +339,7 @@ def cluster (junctionsdf, neighbourParam, sortingParams):
 
     # I.) Determine which junctions have neighbours and which do not 
 
-    junctionsdf = neighbourFindingWrapper(sortByLocation(junctionsdf, sortingParams), neighbourParam)
+    junctionsdf = neighbourFindingWrapper(junctionsdf)
 
     # II.) Split the df according to 'junction has/does not have neighbours'
 
