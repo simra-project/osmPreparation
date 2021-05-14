@@ -125,9 +125,18 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
 
     def getNeighbours(outerNodes, outerHighwayType, outerId):
 
+        # Filter the 'segment_nodes_ids' column so that only those elements that are also contained in outerNodes
+        # remain
+
         common_nodes = unfoldedOddballs['segment_nodes_ids'].map(lambda innerNodes: set(innerNodes).intersection(set(outerNodes)))
         
+        # Convert back to list (from set)
+
         common_nodes_list = common_nodes.map(lambda x: list(x))
+
+        # If we're looking at smaller highway types, check if any of the nodes each row has in common with outerNodes
+        # is a junction of any type (small or large, the last one meaning that at least two highways of a larger
+        # type - residential, primary, trunk, etc - intersect)
 
         if outerHighwayType in ['unclassified', 'pedestrian', 'cycleway']:
         
@@ -135,9 +144,18 @@ def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
         
         else:
 
+        # If we're looking at larger highway types (residential, primary, trunk, etc), 
+        # check if any of the nodes each row has in common with outerNodes is a junction of a larger type 
+        # (meaning that at least two highways of a larger type - residential, primary, trunk, etc - intersect)
+
             common_nodes_nojcts = common_nodes_list.map(lambda cns: [x for x in cns if x not in larger_jctids])
+
+        # Grab the indices of all rows where the resultant list of nodes (shared with outerNodes, but not a junction)
+        # isn't empty
         
         neighbours = [i for i in range(len(common_nodes_nojcts)) if common_nodes_nojcts[i]]
+
+        # Remove self
         
         neighbours_without_self = [x for x in neighbours if x != outerId]
 
@@ -194,7 +212,7 @@ def clusterNeighbours(df):
         
             # Now iterate through the df again to find the neighbours' neighbours.
 
-            included = expandNeighbours(df, clusterInd, ind, list(set(currNeighbours)), included)
+            included = expandNeighbours(df, clusterInd, list(set(currNeighbours)), included)
                     
             # No more extended neighbours, up the cluster numbers
         
@@ -202,7 +220,7 @@ def clusterNeighbours(df):
 
     return df
 
-def expandNeighbours(df, clusterInd, outerLoopInd, currNeighbours, included):
+def expandNeighbours(df, clusterInd, currNeighbours, included):
 
     # Create a queue based on currNeighbours (the neighbours of the data point in the
     # row considered in the outer loop).

@@ -92,9 +92,4 @@ def getJunctionsDf(nodesdf, region):
 
     junctionsdf = junctionsdf.drop(['index','junction'],axis=1)
 
-    # Map ids to list to facilitate cluster comparison in manualClusterPrep
-    # COMMENT OUT TO PREVENT THIS
-
-    junctionsdf['id'] = junctionsdf['id'].map(lambda i: [i])
-
     return junctionsdf

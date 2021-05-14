@@ -88,6 +88,13 @@ def explodeAndConcat(nonIsolatedMerge, isolatedJunctions):
 
 def tidyItUp(region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, bufferSize, neighbourParam):
 
+    # Map ids to list to facilitate cluster comparison in manualClusterPrep
+    # COMMENT OUT TO PREVENT THIS
+
+    nonIsolatedJunctions['id'] = nonIsolatedJunctions['id'].map(lambda i: [i])
+
+    isolatedJunctions['id'] = nonIsolatedJunctions['id'].map(lambda i: [i])
+
     # ********************************************************************************************************************
 
     ## a) Merge neighbour clusters: dissolving geometric shapes according to a shared property can be achieved using [geopandas](https://www.earthdatascience.org/workshops/gis-open-source-python/dissolve-polygons-in-python-geopandas-shapely/)

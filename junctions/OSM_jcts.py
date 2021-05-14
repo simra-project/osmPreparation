@@ -10,6 +10,7 @@ import os
 import datetime
 import sys
 import argparse
+import time
 
 pd.set_option('display.max_columns', 200)
 
@@ -47,7 +48,7 @@ def main(region, buffer_size):
 
     bufferedJunctionsDf = bufferJcts.bufferize(junctionsdf, buffer_size)
 
-    nonIsolatedJunctions, isolatedJunctions = clusterJcts.cluster(bufferedJunctionsDf, utils.paramDict[region]["neighbour_param"], utils.paramDict[region]["sorting_params"])
+    nonIsolatedJunctions, isolatedJunctions = clusterJcts.cluster(bufferedJunctionsDf)
 
     completeJunctions = tidyData_Jcts.tidyItUp(region, utils.paramDict[region]["centroid"], nonIsolatedJunctions, isolatedJunctions, buffer_size, utils.paramDict[region]["sorting_params"])
 
@@ -80,7 +81,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    start_time = time.time()
+
     completeJunctions = main(args.region, args.buf_size)
+
+    print("--- %s seconds ---" % (time.time() - start_time))
 
     file_name = f"{args.region}_junctions_complete_{datetime.date.today()}.csv"
 
