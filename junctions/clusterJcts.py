@@ -18,7 +18,12 @@ import utils
 #    of course (didn't seem necessary so far, but might be done in the future.)
 
 def largeIntersection(poly1, poly2):
-    return poly1.intersects(poly2) and ((poly1.intersection(poly2).area/poly1.area)*100) > 8
+    if not (poly1.intersects(poly2)):
+        return False
+    elif (((poly1.intersection(poly2).area/poly1.area)*100) > 8):
+        return True
+    elif (((poly1.intersection(poly2).area/poly2.area)*100) > 8):
+        return True
 
 # c) Check if two junctions share a square (which means they should end up in the same cluster)
 def sharedSquare(lst1, lst2): 
@@ -72,10 +77,6 @@ def splitDf (junctionsdf):
 
     isolatedJunctions = junctionsdf.loc[junctionsdf['neighbours'].map(lambda d: len(d)) == 0, :].copy()
 
-    isolatedJunctions.reset_index(inplace=True, drop=True)
-
-    #isolatedJunctions = isolatedJunctions.drop('level_0', axis=1)
-
     return nonIsolatedJunctions, isolatedJunctions
 
 #*******************************************************************************************************************
@@ -123,7 +124,7 @@ def clusterNeighbours(df):
         
             # Now iterate through the df again to find the neighbours' neighbours.
 
-            included = expandNeighbours(df, clusterInd, list(set(currNeighbours)), included)
+            included = expandNeighbours(df, clusterInd, ind, list(set(currNeighbours)), included)
                     
             # No more extended neighbours, up the cluster numbers
         
@@ -131,7 +132,7 @@ def clusterNeighbours(df):
 
     return df
 
-def expandNeighbours(df, clusterInd, currNeighbours, included):
+def expandNeighbours(df, clusterInd, outerInd, currNeighbours, included):
 
     # Create a queue based on currNeighbours (the neighbours of the data point in the
     # row considered in the outer loop).
@@ -171,22 +172,17 @@ def expandNeighbours(df, clusterInd, currNeighbours, included):
 
         # Grab the next neighbour's neighbours
 
+        if (not (nextNeighbour in df.index.values)):
+
+            print(f"Invalid index: {nextNeighbour}")
+
         nextNeighsNeighs = df.at[nextNeighbour,'neighbours']
 
         # Find any distinct neighbours of this neighbour (that aren't already contained in the cluster)
 
-        print(f"nextNeighsNeighs: {nextNeighsNeighs}, currNeighbours: {currNeighbours}")
+        print(f"currInd: {outerInd}, nextNeighbour: {nextNeighbour}, nextNeighsNeighs: {nextNeighsNeighs}, currNeighbours: {currNeighbours}")
 
-        # Check for nan
-        # https://stackoverflow.com/questions/944700/how-can-i-check-for-nan-values#944733
-
-        if nextNeighsNeighs != nextNeighsNeighs:
-
-            distinctNewNeighs = []
-
-        else:
-            
-            distinctNewNeighs = [x for x in nextNeighsNeighs if x not in currNeighbours]
+        distinctNewNeighs = [x for x in nextNeighsNeighs if x not in currNeighbours]
         
         # distinctNewNeighs = [x for x in nextNeighsNeighs if x not in currNeighbours]    
 
@@ -290,16 +286,7 @@ def clusterCorrection(nonIsolatedJunctions):
 
         print(f'clusterHighwayNames: {clusterHighwayNames}, rowHighwayNames: {rowHighwayNames}')
 
-        # Check for nan
-        # https://stackoverflow.com/questions/944700/how-can-i-check-for-nan-values#944733
-
-        if (clusterHighwayNames != clusterHighwayNames):
-
-            res = []
-
-        else:
-
-            res = list((Counter(clusterHighwayNames) - Counter(rowHighwayNames)).elements())
+        res = list((Counter(clusterHighwayNames) - Counter(rowHighwayNames)).elements())
                 
         # Use this neat set operation to remove duplicates
 
@@ -307,16 +294,7 @@ def clusterCorrection(nonIsolatedJunctions):
 
         print(f'noDupsRes: {noDupsRes}, rowHighwayNames: {rowHighwayNames}')
 
-        # Check for nan
-        # https://stackoverflow.com/questions/944700/how-can-i-check-for-nan-values#944733
-
-        if (rowHighwayNames != rowHighwayNames):
-
-            sharedHighways = []
-
-        else:
-
-            sharedHighways = list(set([value for value in rowHighwayNames if value in noDupsRes]))
+        sharedHighways = list(set([value for value in rowHighwayNames if value in noDupsRes]))
 
         # Don't unmerge if the row (junction) shares more than one highway with the cluster.
 
@@ -327,12 +305,6 @@ def clusterCorrection(nonIsolatedJunctions):
         # Don't unmerge if we're dealing with a small cluster.
 
         elif clusterSize <= 3:
-
-            return False
-
-        # Skip nans
-
-        elif clusterHighwayTypes != clusterHighwayTypes:
 
             return False
 
@@ -390,7 +362,7 @@ def clusterCorrection(nonIsolatedJunctions):
 
 def cluster (junctionsdf):
 
-    # 0.) Drop rows with nan in relevant columns
+    # 0.) Drop rows with ^ in relevant columns
     junctionsdf = junctionsdf[junctionsdf['highwaynames'].astype(bool)]
     junctionsdf = junctionsdf[junctionsdf['highwaytypes'].astype(bool)]
     junctionsdf = junctionsdf[junctionsdf['poly_geometry'].astype(bool)]
@@ -399,7 +371,12 @@ def cluster (junctionsdf):
 
     # I.) Determine which junctions have neighbours and which do not 
 
+    junctionsdf.set_index('id', inplace=True)
+
     junctionsWithNeighbourProperty = neighbourFindingWrapper(junctionsdf)
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # D E B U G
 
     file_name = "leipzig_junctions_debug.csv"
 
@@ -407,15 +384,34 @@ def cluster (junctionsdf):
 
     junctionsWithNeighbourProperty.to_csv(path, index=False, sep="|")
 
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     # II.) Split the df according to 'junction has/does not have neighbours'
 
     nonIsolatedJunctions, isolatedJunctions = splitDf(junctionsWithNeighbourProperty)
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # D E B U G
 
     file_name_ = "leipzig_non-isolated_junctions_debug.csv"
 
     path = utils.getSubDirPath(file_name_, "csv_data")
 
-    nonIsolatedJunctions.to_csv(path, index=False, sep="|")
+    nonIsolatedJctsWithResetIndex = nonIsolatedJunctions.reset_index()
+
+    nonIsolatedJctsWithResetIndex.to_csv(path, index=False, sep="|")
+
+    # '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    file_name__ = "leipzig_isolated_junctions_debug.csv"
+
+    path = utils.getSubDirPath(file_name__, "csv_data")
+
+    isolatedJctsWithResetIndex = isolatedJunctions.reset_index()
+
+    isolatedJctsWithResetIndex.to_csv(path, index=False, sep="|")
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # III.) Cluster the nonIsolatedJunctions
 
@@ -425,17 +421,17 @@ def cluster (junctionsdf):
 
     nonIsolatedJunctions = clusterCorrection(nonIsolatedJunctions)
 
-    # V.) Add a cluster to the isolated junctions too (each will have their own, due to their isolation :'( ))
+    # V.) Reset indices to normal integer ones
+
+    nonIsolatedJunctions.reset_index(inplace=True, drop=False)
+
+    isolatedJunctions.reset_index(inplace=True, drop=False)
+
+    # VI.) Add a cluster to the isolated junctions too (each will have their own, due to their isolation :'( ))
 
     max_ni_clust = nonIsolatedJunctions['neighbour_cluster'].max() 
 
     isolatedJunctions["neighbour_cluster"] = isolatedJunctions.index.map(lambda x: max_ni_clust + x)
-
-    # VI.) Reset indices to normal integer ones
-
-    #nonIsolatedJunctions.reset_index(inplace=True, drop=False)
-
-    #isolatedJunctions.reset_index(inplace=True, drop=False)
 
     return nonIsolatedJunctions, isolatedJunctions
 

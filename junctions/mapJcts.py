@@ -54,7 +54,7 @@ def plotPolys_B (df, geomCol, map, style):
 #*******************************************************************************************************************
 # (*) Execute all the map jobs in logical order.
 
-def runAllMapTasks (region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, bufferSize, neighbourParam):
+def runAllMapTasks (region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, bufferSize):
 
     # I.) Set up our maps
 
@@ -68,7 +68,7 @@ def runAllMapTasks (region, bbCentroid, nonIsolatedJunctions, isolatedJunctions,
 
     # III.) Export map as html
 
-    file_name = f'{region}-jcts-map_buf={bufferSize}_np={neighbourParam}_{datetime.date.today()}.html'
+    file_name = f'{region}-jcts-map_buf={bufferSize}_{datetime.date.today()}.html'
 
     path = utils.getSubDirPath(file_name, "html_maps")
 

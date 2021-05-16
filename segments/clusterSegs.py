@@ -96,19 +96,7 @@ def oddballWrapper (segmentsdf, jctsdf):
 #     A neighbouring segment is a segment whose polygon a segments' polygon intersects with (again, without a junction 
 #     being contained in that intersection).
 
-def findNeighbours(unfoldedOddballs, sortingParams, junctionsdf):
-
-    # Sort according to upper left corner; sort by lon (minx) resp lat (maxy) first depending on the bounding box's shape. 
-
-    unfoldedOddballs['minx'] = unfoldedOddballs['poly_geometry'].map(lambda p: p.bounds[0])
-
-    unfoldedOddballs['maxy'] = unfoldedOddballs['poly_geometry'].map(lambda p: p.bounds[3])
-
-    unfoldedOddballs.sort_values(by=sortingParams, inplace=True)
-
-    unfoldedOddballs.reset_index(inplace=True)
-    unfoldedOddballs = unfoldedOddballs.drop('index',axis=1)
-    unfoldedOddballs.reset_index(inplace=True)
+def findNeighbours(unfoldedOddballs, junctionsdf):
 
     # these are ALL junctions (i.e., intersections of at least two highways, irrespective of their type)
 
@@ -288,15 +276,7 @@ def expandNeighbours(df, clusterInd, currNeighbours, included):
 #*******************************************************************************************************************
 # (X) Call all the functions required for clustering in logical order.
 
-# def cluster (segmentsdf, junctionsdf, neighbourParam, sortingParams):
-
 def cluster (region, segmentsdf, junctionsdf):
-
-    # 0.) Retrieve parameters from param dictionary
-
-    sorting_params = utils.paramDict[region]["sorting_params"]
-
-    # neighbour_param = utils.paramDict[region]["neighbour_param"]
 
      # I.) Determine which segments are 'oddballs' (don't start and/or end with a junction)
 
@@ -305,7 +285,7 @@ def cluster (region, segmentsdf, junctionsdf):
     # II.) Assign each oddball segment its neighbours (other segments it intersects with without a junction being contained
     #      in that intersection).
 
-    oddballsWithNeighbours = findNeighbours(oddballs, sorting_params, junctionsdf)
+    oddballsWithNeighbours = findNeighbours(oddballs, junctionsdf)
 
     # III.) Cluster the oddball segments based on their neighbours
 

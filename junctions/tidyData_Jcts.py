@@ -86,14 +86,14 @@ def explodeAndConcat(nonIsolatedMerge, isolatedJunctions):
     return completeJunctions
     
 
-def tidyItUp(region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, bufferSize, neighbourParam):
+def tidyItUp(region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, bufferSize):
 
     # Map ids to list to facilitate cluster comparison in manualClusterPrep
     # COMMENT OUT TO PREVENT THIS
 
     nonIsolatedJunctions['id'] = nonIsolatedJunctions['id'].map(lambda i: [i])
 
-    isolatedJunctions['id'] = nonIsolatedJunctions['id'].map(lambda i: [i])
+    isolatedJunctions['id'] = isolatedJunctions['id'].map(lambda i: [i])
 
     # ********************************************************************************************************************
 
@@ -119,7 +119,7 @@ def tidyItUp(region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, buffer
 
     ## c) Plot !
 
-    mapJcts.runAllMapTasks(region, bbCentroid, nonIsolatedMerge, isolatedJunctions, bufferSize, neighbourParam)
+    mapJcts.runAllMapTasks(region, bbCentroid, nonIsolatedMerge, isolatedJunctions, bufferSize)
 
     completeJunctions = explodeAndConcat(nonIsolatedMerge, isolatedJunctions)
 
