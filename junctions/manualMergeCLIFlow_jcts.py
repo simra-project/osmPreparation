@@ -11,6 +11,8 @@ import manualMergeTool_jcts as manualMergeTool
 
 import utils
 
+import toml
+
 # ****************************************************************************
 
 print("\nWelcome to the manual merging tool for junctions!\n")
@@ -80,103 +82,26 @@ print('By default, the more conservative clustering solutions (green shapes on t
 #                       modified data frame if specifically desired by the user 
 #                       (i.e., if a liberal cluster is chosen as a replacement for a conservative one).
 
-# (4) Ask the user if any editing is desired. 
+# (4) Prompt the user to add the desired changes to {region}.toml. 
 
-continue_editing = input ("Would you like to perform any modifications? Please reply with yes or no. \n")
+run_modifications = input ("Please add your desired modifications to {region}.toml (in the PyPipeline_/junctions/manual_merge_config directory). \n Enter ok once you're done. \n")
 
-while (continue_editing == 'yes'):
+if (run_modifications == 'ok'):
 
-# Repeat steps (5) - (9) while the user wishes to continue editing.
+    config_path = utils.getSubDirPath(f'{region}.toml', 'manual_merge_config')
 
-    # (5) Request which operation the user wants to perform.
+    config = toml.load(config_path)
 
-    desired_operation = input ("Would you like to delete or replace conservative clusters (= green shapes)? Please reply with delete or replace. \n")
+    for elem in config['replace']:
 
-    if desired_operation == "delete":
+        manualMergeTool.update_clust(elem['old'], elem['new'], region)
 
-        # (6.a) In order to run 'manualMergeTool_jcts.py' > delete_clust, ask the user to provide the cluster to be 
-        #       deleted.
+    for elem in config['delete']:
 
-        small_buf_clstr_to_delete = float(input("Please provide the cluster ID of the green shape you want to delete (e.g., 43.0). \n"))
+        manualMergeTool.delete_clust(elem, region)
 
-        print(f"Thank you! The following green shapes will be replaced: {small_buf_clstr_to_delete}")
+        print(elem)
 
-        # * region: already asked for above
+    manualMergeTool.save_result(region)
 
-        # (7.b) run 'manualMergeTool.py' > delete_clust 
-
-        print("Please be patient as the ensuing computations will take a few moments to complete .........\n")
-
-        manualMergeTool.delete_clust(small_buf_clstr_to_delete, region)
-
-        # (8) Tell the user to refresh the map to see the result    
-
-        print(f'Please refresh the map (PyPipeline_/junctions/\'{region}-jcts-manualClust_{datetime.date.today()}.html\') to see the result.\n')
-
-        # (9) Ask if more manual editing is desired - if so, repeat the process from (5); if not proceed to (9)
-
-        continue_editing = input ("Would you like to continue editing? Please reply with yes or no. \n")
-
-    elif desired_operation == "replace":
-
-        print("Typically, a more conservative clustering solution that should be replaced by a more liberal one consists of multiple green shapes.\n")
-
-        print("You will therefore be prompted to provide the cluster numbers of all those green shapes one by one.\n")
-
-        # (6.a) In order to run 'manualMergeTool.py' > update_clust, ask the user for three params: 
-        # * small_buf_clstrs (list of floats) --> ask for them one by one.
-
-        small_buf_clstrs = []
-        
-        first_small_clstr = float(input("Please enter cluster number of the first green shape you want to replace (e.g., 889.0).\n"))
-
-        small_buf_clstrs.append(first_small_clstr)
-
-        further_small_clstrs = input ("Are there more green shapes you wish to replace? Please reply with yes or no.\n")
-
-        while (further_small_clstrs == 'yes'):
-
-            next_small_clstr = float(input("Please enter the cluster number of the next green shape you want to replace (e.g., 2364.0).\n"))
-
-            small_buf_clstrs.append(next_small_clstr)
-
-            further_small_clstrs = input ("Are there more green shapes you wish to replace? Please reply with yes or no.\n")
-
-        # * large_buf_clstr (float)
-
-        print("Thank you! The following green shapes will be replaced: ")
-
-        for clust in small_buf_clstrs: 
-
-            print(clust)
-
-        print("\nTypically, the more liberal solution to replace the more conservative one will consist of one blue shape only.\n")
-
-        large_buf_clstr = float(input("Please enter the cluster number of the blue shape with which you want to replace the previously specified green ones.\n"))
-
-        print(f'\nThanks! The cluster {large_buf_clstr} will replace the previously specified green clusters.\n')
-
-        # * region: already asked for above
-
-        # (7.a) run 'manualMergeTool' > update_clust - show progress bar using tqdm as this will take loooooooong
-        #     (though) not as long as 'manualMergePrep.py' 
-
-        print("Please be patient as the ensuing computations will take a few minutes to complete .........\n")
-
-        manualMergeTool.update_clust(small_buf_clstrs, large_buf_clstr, region)
-
-        # (8.a) Tell the user to refresh the map to see the result    
-
-        print(f'Please refresh the map (PyPipeline_/junctions/html_maps\'{region}-jcts-manualClust_{datetime.date.today()}.html\') to see the result (in orange).\n')
-
-        # (9.a) Ask if more manual editing is desired - if so, repeat the process from (5); if not proceed to (9)
-
-        continue_editing = input ("Would you like to continue editing? Please reply with yes or no. \n")
-
-# (10) Write the resultant data frame to memory: 'manualMergeTool' > save_result
-
-print("You've chosen to finish editing. The resultant data will be written to csv.\n")
-
-manualMergeTool.save_result(region)
-
-print(f'Your data can be found here: PyPipeline_/junctions/csv_data/manual_merging_res_{region}_{datetime.date.today()}.csv')
+    print(f'Your data can be found here: PyPipeline_/junctions/csv_data/manual_merging_res_{region}_{datetime.date.today()}.csv')

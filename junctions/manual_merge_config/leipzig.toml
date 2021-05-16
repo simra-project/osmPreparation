@@ -1,0 +1,15 @@
+
+title = "Config for manual merging tool, region=LEIPZIG"
+
+# (2) Enter (green) clusters to delete.
+#     Example element:
+
+delete = [11.0, 169.0]
+
+# (1) Enter green clusters to replace and the blue ones they will be replaced by.
+#     Example element:
+
+[[replace]]
+old = [240.0, 31.0]
+new = 29.0
+

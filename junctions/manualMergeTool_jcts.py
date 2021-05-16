@@ -140,6 +140,8 @@ def delete_clust(small_buf_clstr, region):
 
     small_buf_inconsist = small_buf_inconsist[small_buf_inconsist['neighbour_cluster'] != small_buf_clstr]
 
+    small_buf_inconsist.to_pickle(small_buf_inconsist_path)
+
     # Draw a new map
 
     mapping.runAllMapTasks(region, small_buf_inconsist, large_buf_inconsist)
