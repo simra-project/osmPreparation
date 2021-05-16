@@ -68,6 +68,7 @@ The project is logically separated into scripts dealing with junction data and s
 ## Getting segment data
 
 **Important**: as mentionend above, the segments project requires a file written by the junctions project (`{region}_junctions_for_segs.csv`). That is because in order to obtain segments, highways need to broken into pieces at junctions. Obviously it would be more aesthetic if the two projects were completely independet, but efficiency considerations outweigh aesthetic ones here. Long story short: in order to run the segments code for a specific region, you must have executed the junctions counterpart beforehand. Then, move the file from the `PyPipeline_/junctions/csv_data` directory into the `PyPipeline_/segments/csv_data` directory. You can do this manually or e.g. by running the command `mv "$(pwd)"/junctions/csv_data/leipzig_junctions_for_segs.csv "$(pwd)"/segments/csv_data/leipzig_junctions_for_segs.csv` in the `PyPipeline_/` directory.
+(In case you're wondering, the reason why the `{region}_junctions_for_segs.csv`-file isn't written into the segments' csv folder is to ensure junctions and segments don't rw from/into each other's directories, as if they did we would have to mount even more directories when executing in Docker).
 
 `OSM_segs.py` is the main script in this logical unit. When calling it, the parameter `region` must be provided. Example call: `python OSM_segs.py "leipzig"`.
 
