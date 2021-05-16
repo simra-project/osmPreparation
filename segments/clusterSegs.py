@@ -221,21 +221,9 @@ def expandNeighbours(df, clusterInd, currNeighbours, included):
     
     while len(neighbour_queue) != 0:
 
-        print("Queue contents before popping: ")
-
-        for q in neighbour_queue:
-
-            print(q)
-
         # Remove first element from queue
 
         nextNeighbour = neighbour_queue.pop(0)
-
-        print("Queue contents after popping: ")
-
-        for q in neighbour_queue:
-
-            print(q)
 
         # Add nextNeighbour to the list of included data points so it won't be
         # considered in the outer loop
@@ -262,21 +250,13 @@ def expandNeighbours(df, clusterInd, currNeighbours, included):
             currNeighbours.extend(distinctNewNeighs)
 
             neighbour_queue.extend(distinctNewNeighs)
-
-        print("Queue contents after extending: ")
-
-        for q in neighbour_queue:
-
-            print(q)
-
-    print("Finished with queue!")
         
     return included
 
 #*******************************************************************************************************************
 # (X) Call all the functions required for clustering in logical order.
 
-def cluster (region, segmentsdf, junctionsdf):
+def cluster (segmentsdf, junctionsdf):
 
      # I.) Determine which segments are 'oddballs' (don't start and/or end with a junction)
 

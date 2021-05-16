@@ -2,8 +2,6 @@
 
 import geopandas as gpd
 
-import os
-
 import pandas as pd
 
 import numpy as np
@@ -19,8 +17,6 @@ def tidyItUp(region, oddballs, normies):
     # 0.) Retrieve params from dict
 
     bb_centroid = utils.paramDict[region]["centroid"]
-
-    neighbour_param = utils.paramDict[region]["neighbour_param"]
 
     ## a) Merge neighbour clusters: dissolving geometric shapes according to a shared property can be achieved using [geopandas](https://www.earthdatascience.org/workshops/gis-open-source-python/dissolve-polygons-in-python-geopandas-shapely/)
 
@@ -40,7 +36,7 @@ def tidyItUp(region, oddballs, normies):
 
     ## c) Plot !
 
-    mapSegs.runAllMapTasks (region, bb_centroid, oddballMerge, normies, neighbour_param)
+    mapSegs.runAllMapTasks (region, bb_centroid, oddballMerge, normies)
 
     ## d) Extract the vertices of shapes. This involves our delightful procedure of exploding MultiPolygons into their
     ##    components because they suck and we don't want them in our df!!!!

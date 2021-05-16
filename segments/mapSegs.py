@@ -38,13 +38,6 @@ def extractAndPlot (extractableShape, mmaapp, style, crs, highwaytype, highwayId
             
     elif isinstance(extractableShape, MultiPolygon):
             
-        '''
-        individualPolys = list(extractableShape)
-            
-        for poly in individualPolys:
-        
-            extractAndPlot(poly, mmaapp, style, crs, highwaytype)
-        '''
         minx, miny, maxx, maxy = extractableShape.bounds
 
         multipoly_lats = [minx, maxx, minx]
@@ -68,7 +61,7 @@ def plotPolys (df, geomCol, mmaapp, style) :
 #*******************************************************************************************************************
 # (*) Execute all the map jobs in logical order.
 
-def runAllMapTasks (region, bbCentroid, oddballs, normies, neighbourParam):
+def runAllMapTasks (region, bbCentroid, oddballs, normies):
 
     # I.) Set up our maps
 
@@ -87,8 +80,6 @@ def runAllMapTasks (region, bbCentroid, oddballs, normies, neighbourParam):
     # segments subdirectory)
 
     cwd = os.getcwd()
-
-    in_target_dir = utils.inTargetDir(cwd)
 
     file_name = f'{region}-segs-{datetime.date.today()}.html'
 

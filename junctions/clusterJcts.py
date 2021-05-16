@@ -145,21 +145,9 @@ def expandNeighbours(df, clusterInd, outerInd, currNeighbours, included):
     
     while len(neighbour_queue) != 0:
 
-        print("Queue contents before popping: ")
-
-        for q in neighbour_queue:
-
-            print(q)
-
         # Remove first element from queue
 
         nextNeighbour = neighbour_queue.pop(0)
-
-        print("Queue contents after popping: ")
-
-        for q in neighbour_queue:
-
-            print(q)
 
         # Add nextNeighbour to the list of included data points so it won't be
         # considered in the outer loop
@@ -172,20 +160,12 @@ def expandNeighbours(df, clusterInd, outerInd, currNeighbours, included):
 
         # Grab the next neighbour's neighbours
 
-        if (not (nextNeighbour in df.index.values)):
-
-            print(f"Invalid index: {nextNeighbour}")
-
         nextNeighsNeighs = df.at[nextNeighbour,'neighbours']
 
         # Find any distinct neighbours of this neighbour (that aren't already contained in the cluster)
 
-        print(f"currInd: {outerInd}, nextNeighbour: {nextNeighbour}, nextNeighsNeighs: {nextNeighsNeighs}, currNeighbours: {currNeighbours}")
-
         distinctNewNeighs = [x for x in nextNeighsNeighs if x not in currNeighbours]
         
-        # distinctNewNeighs = [x for x in nextNeighsNeighs if x not in currNeighbours]    
-
         # If any distinct new neighbours have been found, add them to the cluster members list (currNeighbours)
         # as well as the queue
 
@@ -194,14 +174,6 @@ def expandNeighbours(df, clusterInd, outerInd, currNeighbours, included):
             currNeighbours.extend(distinctNewNeighs)
 
             neighbour_queue.extend(distinctNewNeighs)
-
-        print("Queue contents after extending: ")
-
-        for q in neighbour_queue:
-
-            print(q)
-
-    print("Finished with queue!")
         
     return included
 
@@ -219,11 +191,6 @@ def clusterCorrection(nonIsolatedJunctions):
     highwaysPerCluster = nonIsolatedJunctions[['highwaynames','highwaytypes','neighbour_cluster']].copy()
 
     highwaysPerClusterDict = highwaysPerCluster.groupby('neighbour_cluster').agg('sum').to_dict() 
-
-    # Export dict to json for debugging purposes
-
-    with open('cluster_dict.json', 'w') as fp:
-        json.dump(highwaysPerClusterDict, fp)
 
     #### Determine the size of neighbour clusters
 
@@ -284,15 +251,11 @@ def clusterCorrection(nonIsolatedJunctions):
         # have in common (if we didn't do this subtraction first all of the highways in rowhighways
         # would be included in clusterhighways)
 
-        print(f'clusterHighwayNames: {clusterHighwayNames}, rowHighwayNames: {rowHighwayNames}')
-
         res = list((Counter(clusterHighwayNames) - Counter(rowHighwayNames)).elements())
                 
         # Use this neat set operation to remove duplicates
 
         noDupsRes = list(set(res))
-
-        print(f'noDupsRes: {noDupsRes}, rowHighwayNames: {rowHighwayNames}')
 
         sharedHighways = list(set([value for value in rowHighwayNames if value in noDupsRes]))
 
@@ -375,43 +338,9 @@ def cluster (junctionsdf):
 
     junctionsWithNeighbourProperty = neighbourFindingWrapper(junctionsdf)
 
-    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    # D E B U G
-
-    file_name = "leipzig_junctions_debug.csv"
-
-    path = utils.getSubDirPath(file_name, "csv_data")
-
-    junctionsWithNeighbourProperty.to_csv(path, index=False, sep="|")
-
-    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
     # II.) Split the df according to 'junction has/does not have neighbours'
 
     nonIsolatedJunctions, isolatedJunctions = splitDf(junctionsWithNeighbourProperty)
-
-    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    # D E B U G
-
-    file_name_ = "leipzig_non-isolated_junctions_debug.csv"
-
-    path = utils.getSubDirPath(file_name_, "csv_data")
-
-    nonIsolatedJctsWithResetIndex = nonIsolatedJunctions.reset_index()
-
-    nonIsolatedJctsWithResetIndex.to_csv(path, index=False, sep="|")
-
-    # '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-    file_name__ = "leipzig_isolated_junctions_debug.csv"
-
-    path = utils.getSubDirPath(file_name__, "csv_data")
-
-    isolatedJctsWithResetIndex = isolatedJunctions.reset_index()
-
-    isolatedJctsWithResetIndex.to_csv(path, index=False, sep="|")
-
-    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # III.) Cluster the nonIsolatedJunctions
 

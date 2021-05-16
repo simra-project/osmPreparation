@@ -1,17 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os
-
-#os.environ["MODIN_ENGINE"] = "dask"  # Modin will use Dask
-#os.environ["MODIN_ENGINE"] = "ray"  # Modin will use Ray
-#import modin.pandas as pd
-
 import pandas as pd
 
 import numpy as np
-import requests
-import json
 import datetime
 
 import utils
@@ -37,7 +29,7 @@ def main(region):
 
     bufferedDf = bufferSegs.bufferize(unfoldedEnrichedDf)
 
-    oddballs, normies = clusterSegs.cluster(region, bufferedDf, junctionsdf)
+    oddballs, normies = clusterSegs.cluster(bufferedDf, junctionsdf)
 
     completeSegments = tidyData_Segs.tidyItUp(region, oddballs, normies)
     
