@@ -91,16 +91,28 @@ docker run -i -t -v "$(pwd)"/csv_data:/src/csv_data -v "$(pwd)"/html_maps:/src/h
 
 The additional flags `-i -t` are required to enable an interactive shell inside the container for this application.
 
-* Firstly, the user is prompted to provided the **region** to work with as a lowercase string (e.g., 'berlin'). 
-* Then, the default values for a rather conservative and rather liberal buffer are presented, so the user can either accept them or provide custom values. When providing custom values, ensure that they aren't too far apart (a difference of 0.25 is usually ideal) - the further apart they are, the more choices between conservative and liberal solutions will have to be performed. 
-* Thereafter, the complete data for both buffer sizes is either retrieved from memory (if available) or computed and a comparison is carried out: where do the two data sets differ regarding the clustering solutions that were produced? - A HTML map displaying the differences is generated, and the user is informed of its location in the project directory.
-* The user is then asked if she wants to perform any modifications. It is important to know that per default, all of the conservative clustering solutions (on the map: green shapes) will be accepted; i.e., editing is only necessary if there are any conservative clusters that shall be DELETED or REPLACED by there more liberal counterparts (on the map: blue shapes). If NO is selected, a data frame consisting of the entire conservative clustering solution (including both rows with clusters that are the same in the more liberal data set and rows that differ from the more liberal data set) is written to csv.
-* If the user does want to perform any editing, she is prompted to decide between replacement and deletion (of conservative clusters = green shapes on the map).
-* For deletion, the cluster number of the to-be-deleted cluster is to be provided (obtainable by clicking the marker belonging to the cluster/shape in question).
-* For replacement, the cluster numbers of two or more conservative clusters (green shapes) need to be entered one after the other. Conceptually, a replacement will always mean that two or more conservative clusters/green shapes are replaced by one more liberal cluster/blue shape as the more liberal buffer will have resulted in additional merges compared with the more conversative one. After all of the to-be-replaced clusters' numbers have been entered, the user is asked to provide the number of the more liberal cluster (= blue shape) that will be included in the final data frame instead. After the operation is finished, the result can be seen in orange (orange marker, orange polygon) on the map.
-* After completing one deletion or replacement process, the user can either decide to continue editing or finish the procedure. If the latter is chosen, the data (consisting of rows that were identical between the two data sets all along, the rows of the conservative buffer data set that differ from their more liberal counterparts but weren't deleted or replaced, plus the rows of the more liberal buffer data sets that differ from their more conservative counterparts and were manually chosen to replace them) is written to csv.
+* Firstly, you will be prompted to provided the **region** to work with as a lowercase string (e.g., 'berlin'). 
+* Then, the default values for a rather conservative and rather liberal buffer are presented (these are pulled from the `param_dict` in `utils.py` and can obviously be altered), so you can either accept them or provide custom values. When providing custom values, ensure that they aren't too far apart (a difference of 0.25 is usually ideal) - the further apart they are, the more choices between conservative and liberal solutions will have to be performed. 
+* Thereafter, the complete data for both buffer sizes is either retrieved from memory (if available) or computed and a comparison is carried out: where do the two data sets differ regarding the clustering solutions that were produced? - A HTML map displaying the differences is generated, and you will be informed of its location in the project directory. NOTE: the pickled (serialized) data sets used for this procedure are tracked by git, so if a map appears that already contains orange shapes this means that previous manual editing has taken place. If this process shall be reverted and the manual editing be performed from the beginning again, please navigate to the `pickled_data` directory (within the `junctions`-directory) and delete the pickled data sets corresponding to the buffer sizes chosen, i.e. if you want to compare the two buffer sizes `2` and `2.25` for `leipzig`, delete `pickled_data/leipzig_junctions_buffer=2` and `pickled_data/leipzig_junctions_buffer=2.25` and start `manualMergeCLIFlow_jcts.py` again to perform manual editing based on pristine, un-edited datasets.
+* You will then be prompted to open `manual_merge_config/{region}.toml` to add any desired modifications. Modifications fall into two categories: delete and replace. Add all the green (!) clusters you want to delete (there is no need to delete blue clusters as the data set corresponding to the green clusters is the one we're working with, i.e. it is the default and can be altered as desired by either deleting shapes or replacing them by blue ones) to the `delete`-list. If you don't want to delete any clusters, just leave the delete-list empty. For each of the clusters you want to modify, add an individual `[[modify]]` block, as shown in the example. This `toml` code
+````
+[[replace]]
+old = [429.0, 433.0]
+new = 48.0
 
-**NOTE**: in the future, this procedure will be replaced by a different approach requiring less user input (making use of input files, e.g. in TOML format).
+[[replace]]
+old = [509.0, 507.0]
+new = 62.0
+````
+becomes
+````
+'replace': [{'old': [429.0, 433.0], 'new': 48.0}, {'old': [509.0, 507.0], 'new': 62.0}]
+````
+when read by python, i.e. a list of dictionaries.
+* Once you're done adding the desired modifications to the config file, enter `ok` and the alterations will be executed.
+* The data (consisting of those rows that were identical between the two data sets - conservative and liberal - all along, the rows of the conservative buffer data set that differ from their more liberal counterparts but weren't deleted or replaced, plus the rows of the more liberal buffer data sets that differ from their more conservative counterparts and were manually chosen to replace them) is written to csv. Modified clusters will appear in orange on the html map.
+
+**NOTE**: The scenario where no replacements, but only deletions are to be performed is currently not supported by the CLI flow as it seems unlikely, but might be covered in the future.
 
 ## Manually editing segment clusters
 

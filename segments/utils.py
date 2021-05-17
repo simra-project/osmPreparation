@@ -26,19 +26,21 @@ paramDict = {
         "small_buf_default": 1,             # medium-sized city  (< 1 Mio. inhabitants)
         "large_buf_default": 1.25           # medium-sized city  (< 1 Mio. inhabitants)
     },
+    '''
+    # FOR TESTING ONLY, NOT AN ACTUAL REGION
     "wedding": {
         "bounding_box": [13.319638,52.538373,13.382339,52.570332],
         "centroid": [52.555071, 13.349667],
         "small_buf_default": 1,             # large city (>1 Mio. inhabitants)
         "large_buf_default": 1.25           # large-sized city (> 1 Mio. inhabitants)
     },
+    '''
     "hannover": {
         "bounding_box": [9.60443,52.305137,9.918426,52.454335],
         "centroid": [52.3796, 9.7617],
         "small_buf_default": 1,             # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 1.25           # medium-sized city (< 1 Mio. inhabitants)
     },
-
     "stuttgart": {
         "bounding_box": [8.920709,48.660055,9.43676,48.896052],
         "centroid": [48.7825,9.1831],
@@ -53,12 +55,6 @@ paramDict = {
     }
 }
 
-def inTargetDir (cwd):
-
-    cwd_parts = cwd.split("/")
-
-    return (cwd_parts[len(cwd_parts)-1] == 'segments')
-
 def getSubDirPath (file_, subdir):
 
     # Concatenate path using os library so system can tell which part of the
@@ -67,6 +63,10 @@ def getSubDirPath (file_, subdir):
     curr_dir = os.path.abspath(os.path.dirname(__file__))
 
     file_path = os.path.join(curr_dir, subdir, file_)
+
+    # Create directory if it doesn't already exist
+
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     return file_path
 

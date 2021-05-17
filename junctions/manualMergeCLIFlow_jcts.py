@@ -76,12 +76,6 @@ print(f'Please navigate to directory PyPipeline_/junctions/html_maps and open th
 
 print('By default, the more conservative clustering solutions (green shapes on the map) will be accepted. \n')
 
-# NEW 13/02/21: Allow not only chosing liberal buffer solutions over conservative ones, but also the deletion
-#               of conservative clusters 
-#               REMARK: the deletion of more liberal clusters is not necessary as they are only added to the
-#                       modified data frame if specifically desired by the user 
-#                       (i.e., if a liberal cluster is chosen as a replacement for a conservative one).
-
 # (4) Prompt the user to add the desired changes to {region}.toml. 
 
 run_modifications = input ("Please add your desired modifications to {region}.toml (in the PyPipeline_/junctions/manual_merge_config directory). \n Enter ok once you're done. \n")
@@ -92,6 +86,9 @@ if (run_modifications == 'ok'):
 
     config = toml.load(config_path)
 
+    print(config)
+
+    '''
     for elem in config['replace']:
 
         manualMergeTool.update_clust(elem['old'], elem['new'], region)
@@ -105,3 +102,4 @@ if (run_modifications == 'ok'):
     manualMergeTool.save_result(region)
 
     print(f'Your data can be found here: PyPipeline_/junctions/csv_data/manual_merging_res_{region}_{datetime.date.today()}.csv')
+    '''

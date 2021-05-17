@@ -32,12 +32,15 @@ paramDict = {
         "small_buf_default": 2.25,          # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 2.5            # medium-sized city (< 1 Mio. inhabitants)
     },
+    '''
+    # FOR TESTING ONLY, NOT AN ACTUAL REGION
     "wedding": {
         "bounding_box": [13.319638,52.538373,13.382339,52.570332],
         "centroid": [52.555071, 13.349667],
         "small_buf_default": 2.5,            # large city (>1 Mio. inhabitants)
         "large_buf_default": 2.75            # large-sized city (> 1 Mio. inhabitants)
     },
+    '''
     "hannover": {
         "bounding_box": [9.60443,52.305137,9.918426,52.454335],
         "centroid": [52.3796, 9.7617],
@@ -61,8 +64,11 @@ def getSubDirPath (file_, subdir):
 
     file_path = os.path.join(curr_dir, subdir, file_)
 
-    return file_path
+    # Create directory if it doesn't already exist
 
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    return file_path
 
 def fileExists (file_name):
 

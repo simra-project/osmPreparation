@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     parser.add_argument(dest='region', type=str, help="The region to compute junctions for.")
 
-    parser.add_argument(dest='buf_size', type=int, help="By how much the one-dimensional junction points will be buffered.")
+    parser.add_argument(dest='buf_size', type=float, help="By how much the one-dimensional junction points will be buffered.")
 
     # Parse the input parameters
 
