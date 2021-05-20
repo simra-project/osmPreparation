@@ -32,7 +32,6 @@ paramDict = {
         "small_buf_default": 2.25,          # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 2.5            # medium-sized city (< 1 Mio. inhabitants)
     },
-    '''
     # FOR TESTING ONLY, NOT AN ACTUAL REGION
     "wedding": {
         "bounding_box": [13.319638,52.538373,13.382339,52.570332],
@@ -40,7 +39,6 @@ paramDict = {
         "small_buf_default": 2.5,            # large city (>1 Mio. inhabitants)
         "large_buf_default": 2.75            # large-sized city (> 1 Mio. inhabitants)
     },
-    '''
     "hannover": {
         "bounding_box": [9.60443,52.305137,9.918426,52.454335],
         "centroid": [52.3796, 9.7617],
@@ -55,14 +53,14 @@ paramDict = {
     }
 }
 
-def getSubDirPath (file_, subdir):
+def getSubDirPath (file_, subdir, subproject = ''):
 
     # Concatenate path using os library so system can tell which part of the
     # path is a directory and which is a file name.
 
     curr_dir = os.path.abspath(os.path.dirname(__file__))
 
-    file_path = os.path.join(curr_dir, subdir, file_)
+    file_path = os.path.join(curr_dir, subproject, subdir, file_)
 
     # Create directory if it doesn't already exist
 
@@ -75,3 +73,11 @@ def fileExists (file_name):
     path = getSubDirPath(file_name,'pickled_data')
 
     return os.path.isfile(path)
+
+# For writing to csv_data directory in PyPipeline_ directory
+
+def getTopLevelDataPath (file_name) :
+
+    parent_path = os.path.split(os.path.dirname(__file__))[0]
+
+    return os.path.join(parent_path, 'csv_data', file_name)

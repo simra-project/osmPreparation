@@ -1,25 +1,14 @@
 
 import pandas as pd
 
-import numpy as np
-
-from itertools import starmap
-
-from shapely.geometry.polygon import Polygon 
-
-import geopandas as gpd
-
 import mapJcts_clustAssist_jcts as mapping
-
-import collections
-
-import os
 
 # INTERNAL IMPORTS: 
 
 import OSM_jcts
 
-import tidyData_Jcts
+import sys
+sys.path.append("..")
 
 import utils
 
@@ -103,7 +92,7 @@ def meta_assist (region, small_buf, large_buf):
 
     if (utils.fileExists(small_buf_file)):
 
-        small_buf_path = utils.getSubDirPath(small_buf_file, "pickled_data")
+        small_buf_path = utils.getSubDirPath(small_buf_file, "pickled_data", "junctions")
 
         small_buf = pd.read_pickle(small_buf_path)
 
@@ -116,7 +105,7 @@ def meta_assist (region, small_buf, large_buf):
 
     if (utils.fileExists(large_buf_file)):
 
-        large_buf_path = utils.getSubDirPath(large_buf_file, "pickled_data")
+        large_buf_path = utils.getSubDirPath(large_buf_file, "pickled_data", "junctions")
 
         large_buf = pd.read_pickle(large_buf_path)
 
@@ -152,19 +141,19 @@ def meta_assist (region, small_buf, large_buf):
 
     # Write small_buf_inconsist pickle
 
-    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data")
+    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data", "junctions")
 
     small_buf_inconsist.to_pickle(small_buf_inconsist_path)
 
     # Write large_buf_inconsist pickle
 
-    large_buf_inconsist_path = utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}", "pickled_data")
+    large_buf_inconsist_path = utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}", "pickled_data", "junctions")
 
     large_buf_inconsist.to_pickle(large_buf_inconsist_path)
 
     # Write consistent clusters pickle
 
-    consistent_clusters_path = utils.getSubDirPath(f"jcts_consistent_clusters_{region}", "pickled_data")
+    consistent_clusters_path = utils.getSubDirPath(f"jcts_consistent_clusters_{region}", "pickled_data", "junctions")
 
     small_buf_consist.to_pickle(consistent_clusters_path)
 

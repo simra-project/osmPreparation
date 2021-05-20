@@ -1,12 +1,6 @@
 
 from itertools import starmap
 
-from geopandas import GeoSeries
-
-from shapely.geometry import Point
-
-import utils
-
 #*******************************************************************************************************************
 # (1) Find out which ways don't start and/or end with a junction. Wherever that is the case, we want to 
 #     merge segments together in order to get rid of weird breaks - goal is to obtain a clean model of

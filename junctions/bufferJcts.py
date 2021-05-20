@@ -1,8 +1,6 @@
 
 import numpy as np
 
-from statistics import mean
-
 from geopandas import GeoSeries
 
 from shapely.geometry import Point

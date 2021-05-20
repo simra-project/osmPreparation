@@ -3,21 +3,16 @@
 
 import pandas as pd
 
-import numpy as np
-
-from itertools import starmap
-
-from shapely.geometry.polygon import Polygon 
-
 import datetime
-
-import os
 
 # Internal imports
 
 # (1) Utils:
 #     In this script, we'll require from utils functionality that ensures all files (.csv, .html)
 #     will be written to the junctions subdirectory and not its parent directory.
+
+import sys
+sys.path.append("..")
 
 import utils
 
@@ -61,19 +56,19 @@ def update_clust(small_buf_clstrs, large_buf_clstr, region):
 
     # (1) read small_buf_inconsist pickle
 
-    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data")
+    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data", "junctions")
 
     small_buf_inconsist = pd.read_pickle(small_buf_inconsist_path)
 
     # (2) read large_buf_inconsist pickle
 
-    large_buf_inconsist_path = utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}", "pickled_data")
+    large_buf_inconsist_path = utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}", "pickled_data", "junctions")
 
     large_buf_inconsist = pd.read_pickle(large_buf_inconsist_path)
 
     # (3) read consistent clusters pickle
 
-    consistent_clusters_path = utils.getSubDirPath(f"jcts_consistent_clusters_{region}", "pickled_data")
+    consistent_clusters_path = utils.getSubDirPath(f"jcts_consistent_clusters_{region}", "pickled_data", "junctions")
 
     consistent_clusters = pd.read_pickle(consistent_clusters_path)
 
@@ -126,13 +121,13 @@ def delete_clust(small_buf_clstr, region):
 
     # (1) read small_buf_inconsist pickle
 
-    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data")
+    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data", "junctions")
 
     small_buf_inconsist = pd.read_pickle(small_buf_inconsist_path)
 
     # (2) read large_buf_inconsist pickle
 
-    large_buf_inconsist_path = utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}", "pickled_data")
+    large_buf_inconsist_path = utils.getSubDirPath(f"jcts_large_buf_inconsist_{region}", "pickled_data", "junctions")
 
     large_buf_inconsist = pd.read_pickle(large_buf_inconsist_path)
 
@@ -157,13 +152,13 @@ def save_result (region):
 
     # (1) read small_buf_inconsist pickle
 
-    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data")
+    small_buf_inconsist_path = utils.getSubDirPath(f"jcts_small_buf_inconsist_{region}", "pickled_data", "junctions")
 
     small_buf_accepted = pd.read_pickle(small_buf_inconsist_path)
 
     # (2) read consistent clusters pickle
 
-    consistent_clusters_path = utils.getSubDirPath(f"jcts_consistent_clusters_{region}", "pickled_data")
+    consistent_clusters_path = utils.getSubDirPath(f"jcts_consistent_clusters_{region}", "pickled_data", "junctions")
 
     consistent_plus_accepted_large_solutions = pd.read_pickle(consistent_clusters_path)
 
@@ -171,7 +166,7 @@ def save_result (region):
 
     file_name = f'manual_merging_res_{region}_{datetime.date.today()}.csv'
 
-    path = utils.getSubDirPath(file_name, 'csv_data')
+    path = utils.getSubDirPath(file_name, 'csv_data', 'junctions')
 
     complete_df.to_csv(path, index=False, sep="|")
 

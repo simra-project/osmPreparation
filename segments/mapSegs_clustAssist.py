@@ -4,8 +4,6 @@ from folium.plugins import MarkerCluster
 
 import geopandas as gpd
 
-from shapely.ops import cascaded_union
-
 from shapely.geometry.multipolygon import MultiPolygon
 
 from shapely.geometry.polygon import Polygon
@@ -17,6 +15,9 @@ import datetime
 import random
 
 import os
+
+import sys
+sys.path.append("..")
 
 import utils # internal import
 
@@ -117,6 +118,6 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     file_name = f'{region}-segs-manualClust_{datetime.date.today()}.html'
 
-    path = utils.getSubDirPath(file_name, "html_maps")
+    path = utils.getSubDirPath(file_name, "html_maps", "segments")
 
     myMap.save(path)

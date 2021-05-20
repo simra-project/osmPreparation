@@ -1,17 +1,7 @@
 
-import os
-
-#os.environ["MODIN_ENGINE"] = "dask"  # Modin will use Dask
-#os.environ["MODIN_ENGINE"] = "ray"  # Modin will use Ray
-#import modin.pandas as pd
-
 import pandas as pd
 
 import requests
-import numpy as np
-import sys
-
-import utils
 
 # ********************************************************************************************************************
     
@@ -123,29 +113,12 @@ def getCoordsFromNodes(nodes):
 # ********************************************************************************************************************
 # (0) Call all the functions in this script in logical order.
 
-def metaFunc(bbox, region):
+def metaFunc(bbox):
 
     osmdata, nodes = getFromOverpass(bbox)
 
     highwaydf = getHighwayDf(osmdata)
 
     idCoords_dict = getCoordsFromNodes(nodes)
-
-    # Read the junctions data from csv that was produced by the junctions sub-project 
-    # and is therefore located in PyPipeline_/junctions.
-    # !!!!! Be sure to execute the junctions project first before executing the 
-    #       segments project for the same region !!!!
-    # (Otherwise, there might be no file to read.)
-    # TODO is this reasonable?
-
-    subdir_path = utils.getSubDirPath(f"{region}_junctions_for_segs.csv", "csv_data")
-
-    # Notify user if junctions_for_segs.csv is unavailable as the junctions project hasn't been
-    # executed before the segments fraction
-    try:
-        junctionsdf = pd.read_csv(subdir_path)
-    except FileNotFoundError: 
-        print("Junctions file wasn't found! Please execute OSM_jcts.py for this region to generate it.")
-        sys.exit()
     
-    return highwaydf, junctionsdf, idCoords_dict
+    return highwaydf, idCoords_dict

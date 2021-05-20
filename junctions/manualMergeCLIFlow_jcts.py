@@ -9,6 +9,9 @@ import manualMergePrep_jcts as manualMergePrep
 
 import manualMergeTool_jcts as manualMergeTool
 
+import sys
+sys.path.append("..")
+
 import utils
 
 import toml
@@ -82,13 +85,12 @@ run_modifications = input ("Please add your desired modifications to {region}.to
 
 if (run_modifications == 'ok'):
 
-    config_path = utils.getSubDirPath(f'{region}.toml', 'manual_merge_config')
+    config_path = utils.getSubDirPath(f'{region}.toml', 'manual_merge_config', 'junctions')
 
     config = toml.load(config_path)
 
-    print(config)
+    #print(config)
 
-    '''
     for elem in config['replace']:
 
         manualMergeTool.update_clust(elem['old'], elem['new'], region)
@@ -102,4 +104,3 @@ if (run_modifications == 'ok'):
     manualMergeTool.save_result(region)
 
     print(f'Your data can be found here: PyPipeline_/junctions/csv_data/manual_merging_res_{region}_{datetime.date.today()}.csv')
-    '''

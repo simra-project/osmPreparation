@@ -10,6 +10,9 @@ from shapely.geometry import Polygon, MultiPolygon
 
 import mapSegs
 
+import sys
+sys.path.append("..")
+
 import utils
 
 def tidyItUp(region, oddballs, normies):

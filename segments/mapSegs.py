@@ -2,15 +2,9 @@ import folium
 
 import geopandas as gpd
 
-from shapely.ops import cascaded_union
-
 from shapely.geometry.multipolygon import MultiPolygon
 
 from shapely.geometry.polygon import Polygon
-
-from shapely.geometry import Point
-
-import numpy as np
 
 import os
 
@@ -83,6 +77,6 @@ def runAllMapTasks (region, bbCentroid, oddballs, normies):
 
     file_name = f'{region}-segs-{datetime.date.today()}.html'
 
-    path = utils.getSubDirPath(file_name, "html_maps")
+    path = utils.getSubDirPath(file_name, "html_maps", "segments")
 
     myMap.save(path)

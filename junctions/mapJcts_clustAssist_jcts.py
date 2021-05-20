@@ -8,13 +8,9 @@ from shapely.geometry.multipolygon import MultiPolygon
 
 from shapely.geometry.polygon import Polygon
 
-from statistics import mean
-
 import datetime
 
 import random
-
-import os
 
 import utils # internal import
 
@@ -105,6 +101,6 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     file_name = f'{region}-jcts-manualClust_{datetime.date.today()}.html'
 
-    path = utils.getSubDirPath(file_name, "html_maps")
+    path = utils.getSubDirPath(file_name, "html_maps", "junctions")
 
     myMap.save(path)
