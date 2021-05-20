@@ -9,6 +9,7 @@ import sys
 sys.path.append("..")
 
 import utils
+import config
 import dataAcqAndForm_Segs as dfShizzle
 import segmentizeAndEnrich
 import bufferSegs
@@ -28,7 +29,7 @@ import sys
 
 def main(region, junctionsdf):
 
-    highwaydf, idCoords_dict = dfShizzle.metaFunc(utils.paramDict[region]["bounding_box"])
+    highwaydf, idCoords_dict = dfShizzle.metaFunc(config.paramDict[region]["bounding_box"])
 
     unfoldedEnrichedDf = segmentizeAndEnrich.metaFunc(highwaydf, junctionsdf, idCoords_dict)
 

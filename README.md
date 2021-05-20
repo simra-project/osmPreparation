@@ -58,7 +58,7 @@ Then run `python -m pip install -r 'requirements.txt'` inside the project folder
 
 ## (I.) Getting both junctions and segments data (currently not Docker-enabled)
 
-If executing locally, you can now get junctions and segments data in `.csv` format with one meta script. From the top level directory (`PyPipeline_`), run `python main.py {region} {buffer_size}`, e.g. `python main.py leipzig 2`. You can then find `{region}_junctions_complete_YYY-MM-DD.csv` and `{region}_segments_complete_YYY-MM-DD.csv` in `PyPipeline_/csv_data`.
+If executing locally, you can now get junctions and segments data in `.csv` format with one meta script. From the top level directory (`PyPipeline_`), run `python main.py {region}`, e.g. `python main.py leipzig`. You can then find `{region}_junctions_complete_YYY-MM-DD.csv` and `{region}_segments_complete_YYY-MM-DD.csv` in `PyPipeline_/csv_data`.
 
 ## (II.) Getting junctions and segments data separately (currently required if using Docker)
 

@@ -14,12 +14,13 @@ import sys
 sys.path.append("..")
 
 import utils
+import config
 
 def tidyItUp(region, oddballs, normies):
 
     # 0.) Retrieve params from dict
 
-    bb_centroid = utils.paramDict[region]["centroid"]
+    bb_centroid = config.paramDict[region]["centroid"]
 
     ## a) Merge neighbour clusters: dissolving geometric shapes according to a shared property can be achieved using [geopandas](https://www.earthdatascience.org/workshops/gis-open-source-python/dissolve-polygons-in-python-geopandas-shapely/)
 

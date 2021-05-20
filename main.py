@@ -7,6 +7,7 @@ import OSM_jcts
 import OSM_segs
 
 import utils
+import config
 
 import argparse
 import datetime
@@ -19,19 +20,19 @@ if __name__ == "__main__":
 
     parser.add_argument(dest='region', type=str, help="The region to compute junctions for.")
 
-    # buf_size will be moved to config, so it doesn't have to be specified
-
-    parser.add_argument(dest='buf_size', type=float, help="By how much the one-dimensional junction points will be buffered.")
-
-    # Parse the input parameters
+    # Parse the input parameter
 
     args = parser.parse_args()
 
-    completeJunctions, junctions_for_segs = OSM_jcts.main(args.region, args.buf_size)
+    # Look up buffer size from param_dict in config.py
 
-    # Write junction files to csv
+    buf_size = config.paramDict[args.region]["small_buf_default"]
 
-    # Write entire data set to csv
+    # Run junctions main script
+
+    completeJunctions, junctions_for_segs = OSM_jcts.main(args.region, buf_size)
+
+    # Write junction data set to csv
 
     jcts_file_name = f"{args.region}_junctions_complete_{datetime.date.today()}.csv"
 
@@ -39,7 +40,7 @@ if __name__ == "__main__":
 
     completeJunctions.to_csv(junction_path, index=False, sep="|")
 
-    # Write data subset to be used by segments script to csv
+    # Write junction data subset to be used by segments script to csv
 
     jcts_for_segs_file_name = f"{args.region}_junctions_for_segs.csv"
 

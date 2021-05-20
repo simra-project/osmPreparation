@@ -13,6 +13,7 @@ import sys
 sys.path.append("..")
 
 import utils
+import config
 
 import toml
 
@@ -28,12 +29,12 @@ region = input ("Please enter a region (in lowercase, e.g.: bern): \n")
 print(f'\nThanks! The region you entered is {region}.\n')
 
 # * the other two params (small_buf, large_buf) are optional - ask user if
-#   defaults (found in paramDict in utils) should be accepted or custom
+#   defaults (found in paramDict in config) should be accepted or custom
 #   values desired
 
-small_buf = utils.paramDict[region]["small_buf_default"]
+small_buf = config.paramDict[region]["small_buf_default"]
 
-large_buf = utils.paramDict[region]["large_buf_default"]
+large_buf = config.paramDict[region]["large_buf_default"]
 
 print(f"The default buffer sizes to compare for this region are: \n")
 
