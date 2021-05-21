@@ -11,6 +11,7 @@ import config
 
 import argparse
 import datetime
+import json
 
 if __name__ == "__main__":
 
@@ -52,7 +53,7 @@ if __name__ == "__main__":
 
     completeSegments = OSM_segs.main(args.region, junctions_for_segs)
 
-    # Write segment data set to csv
+    # Write segments data set to csv
 
     segs_file_name = f"{args.region}_segments_complete_{datetime.date.today()}.csv"
 
@@ -60,3 +61,17 @@ if __name__ == "__main__":
 
     completeSegments.to_csv(segs_path, index=False, sep="|")
 
+    # Write meta file
+
+    meta_dict = {
+        "bounding_box": config.paramDict[args.region]["bounding_box"],
+        "centroid": config.paramDict[args.region]["centroid"],
+        "junctions_buffer": config.paramDict[args.region]["small_buf_default"],
+        "datetime": str(datetime.date.today())
+    }
+
+    # the json file where the output must be stored
+    meta_path = utils.getSubDirPath(f'{args.region}_meta.json', 'meta_data')
+  
+    with open(meta_path, 'w') as json_file:
+        json.dump(meta_dict, json_file)

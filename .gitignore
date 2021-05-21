@@ -3,4 +3,10 @@ venv/
 .DS_Store
 *.csv
 *.html
+*.json
 */pickled_data/*
+
+*.ipynb_checkpoints
+*.ipynb
+.vscode/
+pypipe_venv/
