@@ -23,9 +23,9 @@ paramDict = {
         "small_buf_default": 2,             # medium-sized city  (< 1 Mio. inhabitants)
         "large_buf_default": 2.25           # medium-sized city  (< 1 Mio. inhabitants)
     },
-    "stuttgart": {
-        "bounding_box": [9.038601,48.692019,9.31582,48.866399],
-        "centroid": [48.778461,9.177910],
+    "stuttgart": {  # Region Stuttgart
+        "bounding_box": [8.772582,48.511551,9.976016,49.070801],
+        "centroid": [48.775556,9.182778],
         "small_buf_default": 2.25,          # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 2.5            # medium-sized city (< 1 Mio. inhabitants)
     },
@@ -47,5 +47,25 @@ paramDict = {
         "centroid": [51.3403333, 12.37475],
         "small_buf_default": 2,             # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 2.25           # medium-sized city (< 1 Mio. inhabitants)
+    },
+    "konstanz": {
+        "bounding_box": [8.608894, 47.654161, 9.213842, 47.941796],
+        "centroid": [47.669167, 9.177778],
+        "small_buf_default": 2,             # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25           # small-sized city (< 200k inhabitants)
+    },
+    "nürnberg": {  # Nürnberg/Erlangen/Fürth
+        "bounding_box": [10.826157, 49.301248, 11.310743, 49.639198],
+        "centroid": [49.455556,11.078611],
+        "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
+    },
+    "mannheim": {  # Mannheim/Ludwigshafen/Heidelberg
+        "bounding_box": [8.183910, 49.315638, 8.721256, 49.591742],
+        "centroid": [49.48776,8.46622],
+        "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
     }
+
+
 }
