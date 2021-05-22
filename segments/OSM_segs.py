@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     print("--- %s seconds ---" % (time.time() - start_time))
 
-    file_name = f"hannover_segments_complete_{datetime.date.today()}.csv"
+    file_name = f"{args.region}_segments_complete_{datetime.date.today()}.csv"
 
     path = utils.getSubDirPath(file_name, "csv_data", "segments")
 

@@ -62,20 +62,33 @@ def getFromOverpass(bbox):
 
 def getHighwayDf(osmdata):
 
-    columns = ['id', 'highway', 'lanes', 'lanes:backward', 'name', 'nodes']
+    columns = ['id', 'highway', 'ref', 'lanes', 'lanes:backward', 'name', 'nodes']
 
     osmdf = pd.DataFrame(osmdata, columns = columns)
 
-    highwaydf = osmdf.dropna(subset=['name','highway'], how='any')
-    highwaydf.tail(5)
+    #highwaydf = osmdf.dropna(subset=['name','highway'], how='any')
+    #highwaydf.tail(5)
 
     # Zu kleine Straßen raus werfen:
 
-    highwaydf = highwaydf[highwaydf['highway'].isin(tags)]
+    highwaydf = osmdf[osmdf['highway'].isin(tags)]
 
     # Replace `NaN` with word `unknown` and reset the index:
 
     highwaydf = highwaydf.fillna(u'unknown').reset_index(drop=True)
+
+    # split the df into two new dfs according to highwayname == 'unknown'
+
+    highways_no_names = highwaydf[highwaydf['name'] == 'unknown'].copy()
+    highways_with_names = highwaydf[highwaydf['name'] != 'unknown'].copy()
+
+    # for rows with missing names, replace 'name' with str('ref')
+    highways_with_names = highways_with_names.drop('ref', axis=1)
+    highways_no_names = highways_no_names.drop('name', axis=1)
+    highways_no_names['ref'] = highways_no_names['ref'].map(lambda r: str(r))
+    highways_no_names.rename(columns = {'ref':'name'}, inplace = True)
+
+    highwaydf = pd.concat([highways_with_names, highways_no_names], ignore_index = True, sort = False)
     
     return highwaydf
 

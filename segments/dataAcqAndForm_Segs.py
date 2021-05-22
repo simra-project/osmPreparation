@@ -71,7 +71,7 @@ def getHighwayDf(ways):
 
     # osmdf = pd.DataFrame(osmdata)
 
-    highwaydf = pd.DataFrame(ways)[['highway','id','lanes','lanes:backward','name','nodes']].dropna(subset=['name','highway'], how='any')
+    highwaydf = pd.DataFrame(ways)[['highway','id','ref','lanes','lanes:backward','name','nodes']]
 
     # 'id', 'highway', 'lanes', 'lanes:backward', 'name', 'maxspeed', 'nodes', 'ref'
 
@@ -83,7 +83,19 @@ def getHighwayDf(ways):
 
     highwaydf = highwaydf.fillna(u'unknown').reset_index(drop=True)
 
-    # PROBABLY NOT BC NEED UNIQUE 
+    # split the df into two new dfs according to highwayname == 'unknown'
+
+    highways_no_names = highwaydf[highwaydf['name'] == 'unknown'].copy()
+    highways_with_names = highwaydf[highwaydf['name'] != 'unknown'].copy()
+
+    # for rows with missing names, replace 'name' with str('ref')
+    highways_with_names = highways_with_names.drop('ref', axis=1)
+    highways_no_names = highways_no_names.drop('name', axis=1)
+    highways_no_names['ref'] = highways_no_names['ref'].map(lambda r: str(r))
+    highways_no_names.rename(columns = {'ref':'name'}, inplace = True)
+
+    highwaydf = pd.concat([highways_with_names, highways_no_names], ignore_index = True, sort = False)
+
     # Map ids to list to facilitate cluster comparison in manualClusterPrep
     # COMMENT OUT TO PREVENT THIS
 

@@ -47,5 +47,12 @@ paramDict = {
         "centroid": [51.3403333, 12.37475],
         "small_buf_default": 2,             # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 2.25           # medium-sized city (< 1 Mio. inhabitants)
+    },
+    "konstanz": {
+        "bounding_box": [8.608894, 47.654161, 9.213842, 47.941796],
+        #"bounding_box": [9.015248,47.637553,9.207471,47.689824], # subset for testing
+        "centroid": [47.669167, 9.177778],
+        "small_buf_default": 2,             # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25           # small-sized city (< 200k inhabitants)
     }
 }

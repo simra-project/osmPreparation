@@ -10,3 +10,7 @@ venv/
 *.ipynb
 .vscode/
 pypipe_venv/
+
+__pycache__/
+junctions/__pycache__/
+segments/__pycache__/
