@@ -56,7 +56,7 @@ def neighbourFindingWrapper(junctionsdf):
     ops_number = junctionsdf.index.size
 
     neighbours_list = []
-    bar = tqdm(total=ops_number, desc="Clustering Neighbours")
+    bar = tqdm(total=ops_number, desc="Computing Neighbours")
     for id, geometry, highway_name in zip(junctionsdf.index,junctionsdf['poly_geometry'],junctionsdf['highwaynames']):
         neighbours_list.append(getNeighbours(id, geometry, highway_name))
         bar.update(1)

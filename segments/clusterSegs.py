@@ -149,7 +149,7 @@ def findNeighbours(unfoldedOddballs, junctionsdf):
     ops_number = unfoldedOddballs.index.size
 
     neighbours_list = []
-    bar = tqdm(total=ops_number, desc="Clustering Neighbours")
+    bar = tqdm(total=ops_number, desc="Computing Neighbours")
     for node, highway_type, id in zip(unfoldedOddballs['segment_nodes_ids'], unfoldedOddballs['highwaytype'], unfoldedOddballs.index):
         neighbours_list.append(getNeighbours(node, highway_type, id))
         bar.update(1)

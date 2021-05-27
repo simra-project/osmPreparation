@@ -36,11 +36,12 @@ def getFromOverpass(bbox):
 
     osmrequest = {'data': compactOverpassQLstring}
 
-    osmurl = 'http://overpass-api.de/api/interpreter'
+    # osmurl = 'http://overpass-api.de/api/interpreter'
 
-    #osmurl = 'http://vm3.mcc.tu-berlin.de:8088/api/interpreter'
+    osmurl = 'http://vm3.mcc.tu-berlin.de:8088/api/interpreter'
 
     osm = requests.get(osmurl, params=osmrequest)
+    print("Completed request to overpass, status was {0!s}".format(osm.status_code))
 
     ##############################################################################################################
     # c)  Reformat the JSON to fit in a Pandas Dataframe
