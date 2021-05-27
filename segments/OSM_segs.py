@@ -30,14 +30,19 @@ import sys
 def main(region, junctionsdf):
 
     highwaydf, idCoords_dict = dfShizzle.metaFunc(config.paramDict[region]["bounding_box"])
+    print("Created highwaydf and coordsdict")
 
     unfoldedEnrichedDf = segmentizeAndEnrich.metaFunc(highwaydf, junctionsdf, idCoords_dict)
+    print("Unfolded the enrichted df")
 
     bufferedDf = bufferSegs.bufferize(unfoldedEnrichedDf)
+    print("Created bufferDf")
 
     oddballs, normies = clusterSegs.cluster(bufferedDf, junctionsdf)
+    print("Created segment clusters")
 
     completeSegments = tidyData_Segs.tidyItUp(region, oddballs, normies)
+    print("Cleaned segments")
     
     # Write to pickle for future use
 

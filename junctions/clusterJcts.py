@@ -1,5 +1,6 @@
 
 from itertools import starmap
+from tqdm import tqdm
 
 from collections import Counter
 
@@ -50,9 +51,18 @@ def neighbourFindingWrapper(junctionsdf):
     # Use buffer trick if polygon is invalid
     # https://stackoverflow.com/questions/13062334/polygon-intersection-error-in-shapely-shapely-geos-topologicalerror-the-opera
 
-    junctionsdf['poly_geometry'] = junctionsdf['poly_geometry'].map(lambda poly: poly if poly.is_valid else poly.buffer(0))   
+    junctionsdf['poly_geometry'] = junctionsdf['poly_geometry'].map(lambda poly: poly if poly.is_valid else poly.buffer(0))
 
-    junctionsdf['neighbours'] = [x for x in starmap(getNeighbours, list(zip(junctionsdf.index,junctionsdf['poly_geometry'],junctionsdf['highwaynames'])))]
+    ops_number = junctionsdf.index.size
+
+    neighbours_list = []
+    bar = tqdm(total=ops_number, desc="Clustering Neighbours")
+    for id, geometry, highway_name in zip(junctionsdf.index,junctionsdf['poly_geometry'],junctionsdf['highwaynames']):
+        neighbours_list.append(getNeighbours(id, geometry, highway_name))
+        bar.update(1)
+
+    junctionsdf['neighbours'] = neighbours_list
+    bar.close()
 
     # junctionsdf.dropna(subset=['neighbours'], inplace=True)
 

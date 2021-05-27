@@ -40,7 +40,8 @@ def tidyItUp(region, oddballs, normies):
 
     ## c) Plot !
 
-    mapSegs.runAllMapTasks (region, bb_centroid, oddballMerge, normies)
+    # UNCOMMENT TO CREATE HTML MAPS
+    # mapSegs.runAllMapTasks (region, bb_centroid, oddballMerge, normies)
 
     ## d) Extract the vertices of shapes. This involves our delightful procedure of exploding MultiPolygons into their
     ##    components because they suck and we don't want them in our df!!!!

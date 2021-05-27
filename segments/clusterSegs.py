@@ -1,5 +1,6 @@
 
 from itertools import starmap
+from tqdm import tqdm
 
 #*******************************************************************************************************************
 # (1) Find out which ways don't start and/or end with a junction. Wherever that is the case, we want to 
@@ -145,7 +146,16 @@ def findNeighbours(unfoldedOddballs, junctionsdf):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    unfoldedOddballs['neighbours'] = [x for x in starmap(getNeighbours, zip(unfoldedOddballs['segment_nodes_ids'], unfoldedOddballs['highwaytype'], unfoldedOddballs.index))]
+    ops_number = unfoldedOddballs.index.size
+
+    neighbours_list = []
+    bar = tqdm(total=ops_number, desc="Clustering Neighbours")
+    for node, highway_type, id in zip(unfoldedOddballs['segment_nodes_ids'], unfoldedOddballs['highwaytype'], unfoldedOddballs.index):
+        neighbours_list.append(getNeighbours(node, highway_type, id))
+        bar.update(1)
+
+    unfoldedOddballs['neighbours'] = neighbours_list
+    bar.close()
 
     return unfoldedOddballs
 

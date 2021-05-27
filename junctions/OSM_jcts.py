@@ -32,14 +32,19 @@ import tidyData_Jcts
 def main(region, buffer_size):
 
     nodesdf = dfShizzle.metaFunc(config.paramDict[region]["bounding_box"])
+    print("Created nodedf")
 
     junctionsdf, junctions_for_segs = findJunctions.getJunctionsDf(nodesdf, region)
+    print("Got junctions for region {0!s}".format(region))
 
     bufferedJunctionsDf = bufferJcts.bufferize(junctionsdf, buffer_size)
+    print("Created bufferDf")
 
     nonIsolatedJunctions, isolatedJunctions = clusterJcts.cluster(bufferedJunctionsDf)
+    print("Created junction clusters")
 
     completeJunctions = tidyData_Jcts.tidyItUp(region, config.paramDict[region]["centroid"], nonIsolatedJunctions, isolatedJunctions, buffer_size)
+    print("Cleaned junctions")
 
     # Write to pickle for future use
 

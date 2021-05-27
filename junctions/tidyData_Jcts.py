@@ -119,7 +119,8 @@ def tidyItUp(region, bbCentroid, nonIsolatedJunctions, isolatedJunctions, buffer
 
     ## c) Plot !
 
-    mapJcts.runAllMapTasks(region, bbCentroid, nonIsolatedMerge, isolatedJunctions, bufferSize)
+    # UNCOMMENT TO CREATE HTML MAPS
+    # mapJcts.runAllMapTasks(region, bbCentroid, nonIsolatedMerge, isolatedJunctions, bufferSize)
 
     completeJunctions = explodeAndConcat(nonIsolatedMerge, isolatedJunctions)
 

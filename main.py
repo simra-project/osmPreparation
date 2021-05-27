@@ -31,7 +31,9 @@ if __name__ == "__main__":
 
     # Run junctions main script
 
+    print("Running junctions main script")
     completeJunctions, junctions_for_segs = OSM_jcts.main(args.region, buf_size)
+    print("Completed junctions main script")
 
     # Write junction data set to csv
 
@@ -50,8 +52,9 @@ if __name__ == "__main__":
     junctions_for_segs.to_csv(jcts_for_segs_path)
 
     # Call segments script
-
+    print("Running segments main script")
     completeSegments = OSM_segs.main(args.region, junctions_for_segs)
+    print("Completed segments main script")
 
     # Write segments data set to csv
 
