@@ -42,6 +42,8 @@ def neighbourFindingWrapper(junctionsdf):
     junctionsdf['poly_geometry'] = junctionsdf['poly_geometry'].map(lambda poly: poly if poly.is_valid else poly.buffer(0))
 
     ops_number = junctionsdf.index.size
+    # add row number, needed to check only x rows above/below current row in getNeighbours
+    junctionsdf['row_number'] = [x for x in range(0, ops_number)]
     neighbours_list = []
     bar = tqdm(total=ops_number, desc="Computing Neighbours")
 
@@ -50,10 +52,12 @@ def neighbourFindingWrapper(junctionsdf):
     poly_list = junctionsdf['poly_geometry'].tolist()
     highway_list = junctionsdf['highwaynames'].tolist()
 
-    for id, geometry, highway_name in zip(junctionsdf.index,junctionsdf['poly_geometry'],junctionsdf['highwaynames']):
-        neighbours_list.append(getNeighbours(id, geometry, highway_name, index_list, poly_list, highway_list))
+    for id, geometry, highway_name, row_number in zip(junctionsdf.index,junctionsdf['poly_geometry'],junctionsdf['highwaynames'],junctionsdf['row_number']):
+        neighbours_list.append(getNeighbours(id, geometry, highway_name, row_number, index_list, poly_list, highway_list))
         bar.update(1)
 
+    # remove row number
+    junctionsdf.drop(columns=['row_number'], inplace=True)
     junctionsdf['neighbours'] = neighbours_list
     bar.close()
 
@@ -61,17 +65,27 @@ def neighbourFindingWrapper(junctionsdf):
 
     return junctionsdf
 
-def getNeighbours(outerInd, outerPoly, outerHighways, index_list, poly_list, highway_list):
+def getNeighbours(outerInd, outerPoly, outerHighways, row_number, index_list, poly_list, highway_list):
+    max_row_diff = 1500
+    # we do not need to check all rows for neighbours. to be safe, let's check max_row_diff above and max_row_diff below row number
+    lower_range = max(0, row_number - max_row_diff)
+    upper_range = min(len(index_list), row_number + max_row_diff)
+
     # check largeIntersection or sharedSquare for each item in poly_list/highway_list
     neighbours = []
-    for i in range(0, len(index_list)):
+    for i in range(lower_range, upper_range):
+        if outerInd == index_list[i]:
+            continue
+
         intersection = largeIntersection(poly_list[i], outerPoly)
         square = sharedSquare(highway_list[i], outerHighways)
 
         if intersection or square:
-            neighbours.append(index_list[i])
+            diff_percentage = abs(row_number - i) / float(max_row_diff)
+            if diff_percentage >= 0.8:
+                print("Row difference at {0!s}%, absolute max_row_diff is {1!s}".format(diff_percentage, abs(row_number - i)))
 
-    neighbours.remove(outerInd)
+            neighbours.append(index_list[i])
 
     return neighbours
 
