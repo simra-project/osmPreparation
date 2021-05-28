@@ -5,6 +5,7 @@ from tqdm import tqdm
 from collections import Counter
 
 import numpy as np
+import pandas as pd
 
 # ## Cluster junctions
 
@@ -35,30 +36,22 @@ def sharedSquare(lst1, lst2):
 
 def neighbourFindingWrapper(junctionsdf):
 
-    def getNeighbours(outerInd, outerPoly, outerHighways):
-
-        # Filter df according to poly overlap or shared square
-
-        neighs = junctionsdf[junctionsdf.apply(lambda row: (largeIntersection(row['poly_geometry'],outerPoly) or sharedSquare(row['highwaynames'], outerHighways)), axis=1)]
-        
-        # Grab indices of those rows that passed the filter
-        neighbours = list(neighs.index)
-
-        neighbours.remove(outerInd)               
-                        
-        return neighbours
-
     # Use buffer trick if polygon is invalid
     # https://stackoverflow.com/questions/13062334/polygon-intersection-error-in-shapely-shapely-geos-topologicalerror-the-opera
 
     junctionsdf['poly_geometry'] = junctionsdf['poly_geometry'].map(lambda poly: poly if poly.is_valid else poly.buffer(0))
 
     ops_number = junctionsdf.index.size
-
     neighbours_list = []
     bar = tqdm(total=ops_number, desc="Computing Neighbours")
+
+    # prepare lists outside of loop to get rid of expensive pandas operations
+    index_list = junctionsdf.index.tolist()
+    poly_list = junctionsdf['poly_geometry'].tolist()
+    highway_list = junctionsdf['highwaynames'].tolist()
+
     for id, geometry, highway_name in zip(junctionsdf.index,junctionsdf['poly_geometry'],junctionsdf['highwaynames']):
-        neighbours_list.append(getNeighbours(id, geometry, highway_name))
+        neighbours_list.append(getNeighbours(id, geometry, highway_name, index_list, poly_list, highway_list))
         bar.update(1)
 
     junctionsdf['neighbours'] = neighbours_list
@@ -67,6 +60,20 @@ def neighbourFindingWrapper(junctionsdf):
     # junctionsdf.dropna(subset=['neighbours'], inplace=True)
 
     return junctionsdf
+
+def getNeighbours(outerInd, outerPoly, outerHighways, index_list, poly_list, highway_list):
+    # check largeIntersection or sharedSquare for each item in poly_list/highway_list
+    neighbours = []
+    for i in range(0, len(index_list)):
+        intersection = largeIntersection(poly_list[i], outerPoly)
+        square = sharedSquare(highway_list[i], outerHighways)
+
+        if intersection or square:
+            neighbours.append(index_list[i])
+
+    neighbours.remove(outerInd)
+
+    return neighbours
 
 #*******************************************************************************************************************
 # (2) Split the df according to 'junction has/does not have neighbours'
