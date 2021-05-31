@@ -80,12 +80,6 @@ def oddballWrapper (segmentsdf, jctsdf):
     unfoldedOddballs.reset_index(inplace=True)
     unfoldedOddballs = unfoldedOddballs.drop('index', axis=1)
 
-    file_name = "oddballs_debug.csv"
-
-    path = utils.getSubDirPath(file_name, "csv_data", "segments")
-
-    unfoldedOddballs.to_csv(path, index=False, sep="|")
-
     unfoldedNormies.reset_index(inplace=True)
 
     unfoldedOddballs = unfoldedOddballs.fillna(u'unknown').reset_index(drop=True)
