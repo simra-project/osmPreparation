@@ -49,7 +49,7 @@ paramDict = {
         "large_buf_default": 2.25           # medium-sized city (< 1 Mio. inhabitants)
     },
     "Konstanz": {
-        "bounding_box": [8.608894, 47.654161, 9.213842, 47.941796],
+        "bounding_box": [8.989582,47.635771,9.290482,47.762737],
         "centroid": [47.669167, 9.177778],
         "small_buf_default": 2,             # small-sized city (< 200k inhabitants)
         "large_buf_default": 2.25           # small-sized city (< 200k inhabitants)
