@@ -1,14 +1,5 @@
-import pandas as pd
 
 from itertools import starmap
-
-from shapely.geometry import Polygon
-
-from shapely.geometry import Point
-
-import os
-
-import utils # internal import
 
 relevantTypes = ['primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
 
@@ -75,13 +66,9 @@ def getJunctionsDf(nodesdf, region):
 
     junctionsdf = junctionsdf.drop('index',axis=1)
 
-    file_name = f"{region}_junctions_for_segs.csv"
+    # Subset of the data set to be read by segments scripts
 
-    path = utils.getSubDirPath(file_name, "csv_data")
-
-    # Keep the column containing information on the type of junction (small vs. large)
-
-    pd.DataFrame(junctionsdf[['junction','id','lat','lon','highwaynames']]).to_csv(path)
+    junctions_for_segs = junctionsdf[['junction','id','lat','lon','highwaynames']]
 
     # Now we can get rid of the smaller junctions (only needed in the segments project so
     # it needs to be contained in the 'junctions_for_segs'-df)
@@ -92,4 +79,4 @@ def getJunctionsDf(nodesdf, region):
 
     junctionsdf = junctionsdf.drop(['index','junction'],axis=1)
 
-    return junctionsdf
+    return junctionsdf, junctions_for_segs

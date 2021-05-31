@@ -1,10 +1,6 @@
 
 from itertools import starmap
-
-from geopandas import GeoSeries
-
-from shapely.geometry import Point
-
+from tqdm import tqdm
 import utils
 
 #*******************************************************************************************************************
@@ -83,6 +79,7 @@ def oddballWrapper (segmentsdf, jctsdf):
 
     unfoldedOddballs.reset_index(inplace=True)
     unfoldedOddballs = unfoldedOddballs.drop('index', axis=1)
+
     unfoldedNormies.reset_index(inplace=True)
 
     unfoldedOddballs = unfoldedOddballs.fillna(u'unknown').reset_index(drop=True)
@@ -111,16 +108,31 @@ def findNeighbours(unfoldedOddballs, junctionsdf):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Determine neighbours based on shared nodes that aren't junctions.
 
-    def getNeighbours(outerNodes, outerHighwayType, outerId):
+    def getNeighbours(outerNodes, outerHighwayType, outerInd, row_number):
+
+        max_row_diff = 1500
+        # we do not need to check all rows for neighbours. to be safe, let's check max_row_diff above and max_row_diff below row number
+        lower_range = max(0, row_number - max_row_diff)
+        upper_range = min(unfoldedOddballs['row_number'].max(), row_number + max_row_diff)
+
+        interval = range(lower_range, upper_range)
+
+        # Slice data frame according to range - this operation might be expensive too though 
+        # and thus be eliminated in the future
+        df_slice = unfoldedOddballs[unfoldedOddballs['row_number'].isin(interval)]
+
+        # prepare lists outside of map operations to get rid of expensive pandas operations
+        segment_nodes_list = df_slice['segment_nodes_ids'].tolist()
+        index_list = df_slice.index.tolist()
 
         # Filter the 'segment_nodes_ids' column so that only those elements that are also contained in outerNodes
         # remain
-
-        common_nodes = unfoldedOddballs['segment_nodes_ids'].map(lambda innerNodes: set(innerNodes).intersection(set(outerNodes)))
         
+        common_nodes = map(lambda innerNodes: set(innerNodes).intersection(set(outerNodes)), segment_nodes_list)
+
         # Convert back to list (from set)
 
-        common_nodes_list = common_nodes.map(lambda x: list(x))
+        common_nodes_list = map(lambda x: list(x), common_nodes)
 
         # If we're looking at smaller highway types, check if any of the nodes each row has in common with outerNodes
         # is a junction of any type (small or large, the last one meaning that at least two highways of a larger
@@ -128,7 +140,7 @@ def findNeighbours(unfoldedOddballs, junctionsdf):
 
         if outerHighwayType in ['unclassified', 'pedestrian', 'cycleway']:
         
-            common_nodes_nojcts = common_nodes_list.map(lambda cns: [x for x in cns if x not in jctids])
+            common_nodes_nojcts = map(lambda cns: [x for x in cns if x not in jctids], common_nodes_list)
         
         else:
 
@@ -136,22 +148,35 @@ def findNeighbours(unfoldedOddballs, junctionsdf):
         # check if any of the nodes each row has in common with outerNodes is a junction of a larger type 
         # (meaning that at least two highways of a larger type - residential, primary, trunk, etc - intersect)
 
-            common_nodes_nojcts = common_nodes_list.map(lambda cns: [x for x in cns if x not in larger_jctids])
+            common_nodes_nojcts = map(lambda cns: [x for x in cns if x not in larger_jctids], common_nodes_list)
 
         # Grab the indices of all rows where the resultant list of nodes (shared with outerNodes, but not a junction)
         # isn't empty
-        
-        neighbours = [i for i in range(len(common_nodes_nojcts)) if common_nodes_nojcts[i]]
+        # 'if list' (here: 'if nodes') returns true if list is non-empty, false if list is empty
+
+        neighbours = [ind for ind, nodes in zip(index_list, common_nodes_nojcts) if nodes]
 
         # Remove self
         
-        neighbours_without_self = [x for x in neighbours if x != outerId]
+        neighbours_without_self = [x for x in neighbours if x != outerInd]
 
         return neighbours_without_self
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    unfoldedOddballs['neighbours'] = [x for x in starmap(getNeighbours, zip(unfoldedOddballs['segment_nodes_ids'], unfoldedOddballs['highwaytype'], unfoldedOddballs.index))]
+    ops_number = unfoldedOddballs.index.size
+
+    # add row number, needed to check only x rows above/below current row in getNeighbours
+    unfoldedOddballs['row_number'] = [x for x in range(0, ops_number)]
+
+    neighbours_list = []
+    bar = tqdm(total=ops_number, desc="Computing Neighbours")
+    for node, highway_type, id, row_number in zip(unfoldedOddballs['segment_nodes_ids'], unfoldedOddballs['highwaytype'], unfoldedOddballs.index, unfoldedOddballs['row_number']):
+        neighbours_list.append(getNeighbours(node, highway_type, id, row_number))
+        bar.update(1)
+
+    unfoldedOddballs['neighbours'] = neighbours_list
+    bar.close()
 
     return unfoldedOddballs
 

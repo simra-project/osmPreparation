@@ -4,8 +4,6 @@ from folium.plugins import MarkerCluster
 
 import geopandas as gpd
 
-from shapely.ops import cascaded_union
-
 from shapely.geometry.multipolygon import MultiPolygon
 
 from shapely.geometry.polygon import Polygon
@@ -18,7 +16,12 @@ import random
 
 import os
 
-import utils # internal import
+import sys
+sys.path.append("..")
+
+# internal import
+import utils 
+import config
 
 #*******************************************************************************************************************
 # (*) Scatter marker location to prevent overlay
@@ -89,11 +92,11 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     # region, nonIsolatedJunctions, isolatedJunctions, bufferSize
 
-    bbCentroid = utils.paramDict[region]['centroid']
+    bbCentroid = config.paramDict[region]['centroid']
 
     # I.) Set up our maps
 
-    bbCentroid = utils.paramDict[region]['centroid']
+    bbCentroid = config.paramDict[region]['centroid']
 
     myMap = folium.Map(location=bbCentroid, zoom_start=15, tiles='cartodbpositron')
 
@@ -117,6 +120,6 @@ def runAllMapTasks (region, small_buf_inconsist, large_buf_inconsist):
 
     file_name = f'{region}-segs-manualClust_{datetime.date.today()}.html'
 
-    path = utils.getSubDirPath(file_name, "html_maps")
+    path = utils.getSubDirPath(file_name, "html_maps", "segments")
 
     myMap.save(path)

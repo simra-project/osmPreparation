@@ -10,7 +10,11 @@ import time
 
 pd.set_option('display.max_columns', 200)
 
+import sys
+sys.path.append("..")
+
 import utils
+import config
 import dataAcqAndForm_Jcts as dfShizzle
 import findJunctions
 import bufferJcts
@@ -27,21 +31,26 @@ import tidyData_Jcts
 
 def main(region, buffer_size):
 
-    nodesdf = dfShizzle.metaFunc(utils.paramDict[region]["bounding_box"])
+    nodesdf = dfShizzle.metaFunc(config.paramDict[region]["bounding_box"])
+    print("Created nodedf")
 
-    junctionsdf = findJunctions.getJunctionsDf(nodesdf, region)
+    junctionsdf, junctions_for_segs = findJunctions.getJunctionsDf(nodesdf, region)
+    print("Got junctions for region {0!s}".format(region))
 
     bufferedJunctionsDf = bufferJcts.bufferize(junctionsdf, buffer_size)
+    print("Created bufferDf")
 
     nonIsolatedJunctions, isolatedJunctions = clusterJcts.cluster(bufferedJunctionsDf)
+    print("Created junction clusters")
 
-    completeJunctions = tidyData_Jcts.tidyItUp(region, utils.paramDict[region]["centroid"], nonIsolatedJunctions, isolatedJunctions, buffer_size)
+    completeJunctions = tidyData_Jcts.tidyItUp(region, config.paramDict[region]["centroid"], nonIsolatedJunctions, isolatedJunctions, buffer_size)
+    print("Cleaned junctions")
 
     # Write to pickle for future use
 
     file_name = f"{region}_junctions_buffer={buffer_size}"
 
-    path = utils.getSubDirPath(file_name, "pickled_data")
+    path = utils.getSubDirPath(file_name, "pickled_data", "junctions")
 
     # Write data frame to pickle folder; include buffer_size in the file name
     # ==> purpose of this is to be able to reuse data in the manual merging
@@ -50,7 +59,7 @@ def main(region, buffer_size):
 
     completeJunctions.to_pickle(path)
 
-    return completeJunctions
+    return completeJunctions, junctions_for_segs
 
 if __name__ == "__main__":
 
@@ -68,13 +77,24 @@ if __name__ == "__main__":
 
     start_time = time.time()
 
-    completeJunctions = main(args.region, args.buf_size)
+    completeJunctions, junctions_for_segs = main(args.region, args.buf_size)
 
     print("--- %s seconds ---" % (time.time() - start_time))
 
+    # Write entire data set to csv
+
     file_name = f"{args.region}_junctions_complete_{datetime.date.today()}.csv"
 
-    path = utils.getSubDirPath(file_name, "csv_data")
+    path = utils.getSubDirPath(file_name, "csv_data", "junctions")
 
     completeJunctions.to_csv(path, index=False, sep="|")
+
+    # Write data subset to be used by segments script to csv
+
+    file_name_ = f"{args.region}_junctions_for_segs.csv"
+
+    path_ = utils.getSubDirPath(file_name_, "csv_data", "junctions")
+
+    junctions_for_segs.to_csv(path_)
+
 

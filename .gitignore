@@ -1,0 +1,17 @@
+venv/
+.idea/
+.DS_Store
+*.csv
+*.html
+*.json
+*/pickled_data/*
+
+*.ipynb_checkpoints
+*.ipynb
+.vscode/
+pypipe_venv/
+simra_venv/
+
+__pycache__/
+junctions/__pycache__/
+segments/__pycache__/

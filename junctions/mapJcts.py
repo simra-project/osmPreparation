@@ -3,17 +3,16 @@ import folium
 
 import geopandas as gpd
 
-from shapely.ops import cascaded_union
-
 from shapely.geometry.multipolygon import MultiPolygon
 
 from shapely.geometry.polygon import Polygon
 
 from statistics import mean
 
-import os
-
 import datetime
+
+import sys
+sys.path.append("..")
 
 import utils # internal import
 
@@ -70,6 +69,6 @@ def runAllMapTasks (region, bbCentroid, nonIsolatedJunctions, isolatedJunctions,
 
     file_name = f'{region}-jcts-map_buf={bufferSize}_{datetime.date.today()}.html'
 
-    path = utils.getSubDirPath(file_name, "html_maps")
+    path = utils.getSubDirPath(file_name, "html_maps", "junctions")
 
     myMap.save(path)

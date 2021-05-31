@@ -10,13 +10,17 @@ from shapely.geometry import Polygon, MultiPolygon
 
 import mapSegs
 
+import sys
+sys.path.append("..")
+
 import utils
+import config
 
 def tidyItUp(region, oddballs, normies):
 
     # 0.) Retrieve params from dict
 
-    bb_centroid = utils.paramDict[region]["centroid"]
+    bb_centroid = config.paramDict[region]["centroid"]
 
     ## a) Merge neighbour clusters: dissolving geometric shapes according to a shared property can be achieved using [geopandas](https://www.earthdatascience.org/workshops/gis-open-source-python/dissolve-polygons-in-python-geopandas-shapely/)
 
@@ -36,7 +40,8 @@ def tidyItUp(region, oddballs, normies):
 
     ## c) Plot !
 
-    mapSegs.runAllMapTasks (region, bb_centroid, oddballMerge, normies)
+    # UNCOMMENT TO CREATE HTML MAPS
+    # mapSegs.runAllMapTasks (region, bb_centroid, oddballMerge, normies)
 
     ## d) Extract the vertices of shapes. This involves our delightful procedure of exploding MultiPolygons into their
     ##    components because they suck and we don't want them in our df!!!!

@@ -1,13 +1,11 @@
 
 from itertools import starmap
+from tqdm import tqdm
 
 from collections import Counter
 
 import numpy as np
-
-import json
-
-import utils
+import pandas as pd
 
 # ## Cluster junctions
 
@@ -38,29 +36,58 @@ def sharedSquare(lst1, lst2):
 
 def neighbourFindingWrapper(junctionsdf):
 
-    def getNeighbours(outerInd, outerPoly, outerHighways):
-
-        # Filter df according to poly overlap or shared square
-
-        neighs = junctionsdf[junctionsdf.apply(lambda row: (largeIntersection(row['poly_geometry'],outerPoly) or sharedSquare(row['highwaynames'], outerHighways)), axis=1)]
-        
-        # Grab indices of those rows that passed the filter
-        neighbours = list(neighs.index)
-
-        neighbours.remove(outerInd)               
-                        
-        return neighbours
-
     # Use buffer trick if polygon is invalid
     # https://stackoverflow.com/questions/13062334/polygon-intersection-error-in-shapely-shapely-geos-topologicalerror-the-opera
 
-    junctionsdf['poly_geometry'] = junctionsdf['poly_geometry'].map(lambda poly: poly if poly.is_valid else poly.buffer(0))   
+    junctionsdf['poly_geometry'] = junctionsdf['poly_geometry'].map(lambda poly: poly if poly.is_valid else poly.buffer(0))
 
-    junctionsdf['neighbours'] = [x for x in starmap(getNeighbours, list(zip(junctionsdf.index,junctionsdf['poly_geometry'],junctionsdf['highwaynames'])))]
+    ops_number = junctionsdf.index.size
+    # add row number, needed to check only x rows above/below current row in getNeighbours
+    junctionsdf['row_number'] = [x for x in range(0, ops_number)]
+    neighbours_list = []
+    bar = tqdm(total=ops_number, desc="Computing Neighbours")
+
+    # prepare lists outside of loop to get rid of expensive pandas operations
+    index_list = junctionsdf.index.tolist()
+    poly_list = junctionsdf['poly_geometry'].tolist()
+    highway_list = junctionsdf['highwaynames'].tolist()
+
+    for id, geometry, highway_name, row_number in zip(junctionsdf.index,junctionsdf['poly_geometry'],junctionsdf['highwaynames'],junctionsdf['row_number']):
+        neighbours_list.append(getNeighbours(id, geometry, highway_name, row_number, index_list, poly_list, highway_list))
+        bar.update(1)
+
+    # remove row number
+    junctionsdf.drop(columns=['row_number'], inplace=True)
+    junctionsdf['neighbours'] = neighbours_list
+    bar.close()
 
     # junctionsdf.dropna(subset=['neighbours'], inplace=True)
 
     return junctionsdf
+
+def getNeighbours(outerInd, outerPoly, outerHighways, row_number, index_list, poly_list, highway_list):
+    max_row_diff = 1500
+    # we do not need to check all rows for neighbours. to be safe, let's check max_row_diff above and max_row_diff below row number
+    lower_range = max(0, row_number - max_row_diff)
+    upper_range = min(len(index_list), row_number + max_row_diff)
+
+    # check largeIntersection or sharedSquare for each item in poly_list/highway_list
+    neighbours = []
+    for i in range(lower_range, upper_range):
+        if outerInd == index_list[i]:
+            continue
+
+        intersection = largeIntersection(poly_list[i], outerPoly)
+        square = sharedSquare(highway_list[i], outerHighways)
+
+        if intersection or square:
+            diff_percentage = abs(row_number - i) / float(max_row_diff)
+            if diff_percentage >= 0.8:
+                print("Row difference at {0!s}%, absolute max_row_diff is {1!s}".format(diff_percentage, abs(row_number - i)))
+
+            neighbours.append(index_list[i])
+
+    return neighbours
 
 #*******************************************************************************************************************
 # (2) Split the df according to 'junction has/does not have neighbours'

@@ -9,7 +9,11 @@ import manualMergePrep_jcts as manualMergePrep
 
 import manualMergeTool_jcts as manualMergeTool
 
+import sys
+sys.path.append("..")
+
 import utils
+import config
 
 import toml
 
@@ -25,12 +29,12 @@ region = input ("Please enter a region (in lowercase, e.g.: bern): \n")
 print(f'\nThanks! The region you entered is {region}.\n')
 
 # * the other two params (small_buf, large_buf) are optional - ask user if
-#   defaults (found in paramDict in utils) should be accepted or custom
+#   defaults (found in paramDict in config) should be accepted or custom
 #   values desired
 
-small_buf = utils.paramDict[region]["small_buf_default"]
+small_buf = config.paramDict[region]["small_buf_default"]
 
-large_buf = utils.paramDict[region]["large_buf_default"]
+large_buf = config.paramDict[region]["large_buf_default"]
 
 print(f"The default buffer sizes to compare for this region are: \n")
 
@@ -82,13 +86,12 @@ run_modifications = input ("Please add your desired modifications to {region}.to
 
 if (run_modifications == 'ok'):
 
-    config_path = utils.getSubDirPath(f'{region}.toml', 'manual_merge_config')
+    config_path = utils.getSubDirPath(f'{region}.toml', 'manual_merge_config', 'junctions')
 
     config = toml.load(config_path)
 
-    print(config)
+    #print(config)
 
-    '''
     for elem in config['replace']:
 
         manualMergeTool.update_clust(elem['old'], elem['new'], region)
@@ -102,4 +105,3 @@ if (run_modifications == 'ok'):
     manualMergeTool.save_result(region)
 
     print(f'Your data can be found here: PyPipeline_/junctions/csv_data/manual_merging_res_{region}_{datetime.date.today()}.csv')
-    '''

@@ -1,19 +1,7 @@
 
-import pyproj
-from pyproj import CRS
-from pyproj import Proj
-
-from functools import partial
-
-import geopandas as gpd
 from geopandas import GeoSeries
 
-import shapely
-from shapely.ops import transform
-from shapely.geometry import CAP_STYLE, JOIN_STYLE
 from shapely.geometry import LineString
-from shapely.geometry import Polygon
-from shapely.geometry import MultiPolygon
 from shapely.geometry import Point
 
 import numpy as np

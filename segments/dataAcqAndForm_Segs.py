@@ -1,17 +1,7 @@
 
-import os
-
-#os.environ["MODIN_ENGINE"] = "dask"  # Modin will use Dask
-#os.environ["MODIN_ENGINE"] = "ray"  # Modin will use Ray
-#import modin.pandas as pd
-
 import pandas as pd
 
 import requests
-import numpy as np
-import sys
-
-import utils
 
 # ********************************************************************************************************************
     
@@ -46,11 +36,12 @@ def getFromOverpass(bbox):
 
     osmrequest = {'data': compactOverpassQLstring}
 
-    osmurl = 'http://overpass-api.de/api/interpreter'
+    # osmurl = 'http://overpass-api.de/api/interpreter'
 
-    #osmurl = 'http://vm3.mcc.tu-berlin.de:8088/api/interpreter'
+    osmurl = 'http://vm3.mcc.tu-berlin.de:8088/api/interpreter'
 
     osm = requests.get(osmurl, params=osmrequest)
+    print("Completed request to overpass, status was {0!s}".format(osm.status_code))
 
     ##############################################################################################################
     # c)  Reformat the JSON to fit in a Pandas Dataframe
@@ -81,7 +72,7 @@ def getHighwayDf(ways):
 
     # osmdf = pd.DataFrame(osmdata)
 
-    highwaydf = pd.DataFrame(ways)[['highway','id','lanes','lanes:backward','name','nodes']].dropna(subset=['name','highway'], how='any')
+    highwaydf = pd.DataFrame(ways)[['highway','id','ref','lanes','lanes:backward','name','nodes']]
 
     # 'id', 'highway', 'lanes', 'lanes:backward', 'name', 'maxspeed', 'nodes', 'ref'
 
@@ -93,7 +84,19 @@ def getHighwayDf(ways):
 
     highwaydf = highwaydf.fillna(u'unknown').reset_index(drop=True)
 
-    # PROBABLY NOT BC NEED UNIQUE 
+    # split the df into two new dfs according to highwayname == 'unknown'
+
+    highways_no_names = highwaydf[highwaydf['name'] == 'unknown'].copy()
+    highways_with_names = highwaydf[highwaydf['name'] != 'unknown'].copy()
+
+    # for rows with missing names, replace 'name' with str('ref')
+    highways_with_names = highways_with_names.drop('ref', axis=1)
+    highways_no_names = highways_no_names.drop('name', axis=1)
+    highways_no_names['ref'] = highways_no_names['ref'].map(lambda r: str(r))
+    highways_no_names.rename(columns = {'ref':'name'}, inplace = True)
+
+    highwaydf = pd.concat([highways_with_names, highways_no_names], ignore_index = True, sort = False)
+
     # Map ids to list to facilitate cluster comparison in manualClusterPrep
     # COMMENT OUT TO PREVENT THIS
 
@@ -123,29 +126,12 @@ def getCoordsFromNodes(nodes):
 # ********************************************************************************************************************
 # (0) Call all the functions in this script in logical order.
 
-def metaFunc(bbox, region):
+def metaFunc(bbox):
 
     osmdata, nodes = getFromOverpass(bbox)
 
     highwaydf = getHighwayDf(osmdata)
 
     idCoords_dict = getCoordsFromNodes(nodes)
-
-    # Read the junctions data from csv that was produced by the junctions sub-project 
-    # and is therefore located in PyPipeline_/junctions.
-    # !!!!! Be sure to execute the junctions project first before executing the 
-    #       segments project for the same region !!!!
-    # (Otherwise, there might be no file to read.)
-    # TODO is this reasonable?
-
-    subdir_path = utils.getSubDirPath(f"{region}_junctions_for_segs.csv", "csv_data")
-
-    # Notify user if junctions_for_segs.csv is unavailable as the junctions project hasn't been
-    # executed before the segments fraction
-    try:
-        junctionsdf = pd.read_csv(subdir_path)
-    except FileNotFoundError: 
-        print("Junctions file wasn't found! Please execute OSM_jcts.py for this region to generate it.")
-        sys.exit()
     
-    return highwaydf, junctionsdf, idCoords_dict
+    return highwaydf, idCoords_dict
