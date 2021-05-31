@@ -7,7 +7,6 @@ venv/
 */pickled_data/*
 
 *.ipynb_checkpoints
-*.ipynb
 .vscode/
 pypipe_venv/
 simra_venv/
