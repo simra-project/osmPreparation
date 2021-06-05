@@ -39,17 +39,9 @@ if __name__ == "__main__":
 
     jcts_file_name = f"{args.region}_junctions_complete_{datetime.date.today()}.csv"
 
-    junction_path = utils.getSubDirPath(jcts_file_name, "csv_data")
+    junction_path = utils.getSubDirPath(jcts_file_name, "output_data")
 
     completeJunctions.to_csv(junction_path, index=False, sep="|")
-
-    # Write junction data subset to be used by segments script to csv
-
-    jcts_for_segs_file_name = f"{args.region}_junctions_for_segs.csv"
-
-    jcts_for_segs_path = utils.getSubDirPath(jcts_for_segs_file_name, "csv_data")
-
-    junctions_for_segs.to_csv(jcts_for_segs_path)
 
     # Call segments script
     print("Running segments main script")
@@ -60,7 +52,7 @@ if __name__ == "__main__":
 
     segs_file_name = f"{args.region}_segments_complete_{datetime.date.today()}.csv"
 
-    segs_path = utils.getSubDirPath(segs_file_name, "csv_data")
+    segs_path = utils.getSubDirPath(segs_file_name, "output_data")
 
     completeSegments.to_csv(segs_path, index=False, sep="|")
 
@@ -74,7 +66,7 @@ if __name__ == "__main__":
     }
 
     # the json file where the output must be stored
-    meta_path = utils.getSubDirPath(f'{args.region}_meta.json', 'meta_data')
+    meta_path = utils.getSubDirPath(f'{args.region}_meta.json', 'output_data')
   
     with open(meta_path, 'w') as json_file:
         json.dump(meta_dict, json_file)
