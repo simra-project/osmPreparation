@@ -7,6 +7,8 @@ from collections import Counter
 import numpy as np
 import pandas as pd
 
+import h3
+
 # ## Cluster junctions
 
 #*******************************************************************************************************************
@@ -34,30 +36,73 @@ def sharedSquare(lst1, lst2):
 
 # c) Put it all together to assign its neighbours to each junction
 
-def neighbourFindingWrapper(junctionsdf):
+def findNeighboursH3(junctionsdf):
+
+    # Now more efficient using h3
+    # Python API can be found here: https://github.com/uber/h3-py/blob/master/src/h3/api/_api_template.py
+
+    # define h3 resolution
+    # Resolution 8 corresponds to an average hexagon area of 0.737 km^2 
+    # (the higher the resolution, the smaller the area covered by each individual hexagon,
+    # see https://h3geo.org/docs/core-library/restable/)
+    h3_resolution = 8
+
+    # Add h3 column - each junction is assigned a spatial index based on its lat/lon
+    junctionsdf["h3"] = junctionsdf.apply (lambda row: h3.geo_to_h3(row["lat"], row["lon"], h3_resolution), axis=1)
 
     # Use buffer trick if polygon is invalid
     # https://stackoverflow.com/questions/13062334/polygon-intersection-error-in-shapely-shapely-geos-topologicalerror-the-opera
-
     junctionsdf['poly_geometry'] = junctionsdf['poly_geometry'].map(lambda poly: poly if poly.is_valid else poly.buffer(0))
 
+    # Isolate the h3 & index columns
+    df_h3_only = pd.DataFrame(junctionsdf.h3.tolist(), index=junctionsdf.index)
+
+    # set up tdqm for progress bar
     ops_number = junctionsdf.index.size
-    # add row number, needed to check only x rows above/below current row in getNeighbours
-    junctionsdf['row_number'] = [x for x in range(0, ops_number)]
-    neighbours_list = []
     bar = tqdm(total=ops_number, desc="Computing Neighbours")
 
-    # prepare lists outside of loop to get rid of expensive pandas operations
-    index_list = junctionsdf.index.tolist()
-    poly_list = junctionsdf['poly_geometry'].tolist()
-    highway_list = junctionsdf['highwaynames'].tolist()
+    neighbours_list = []
 
-    for id, geometry, highway_name, row_number in zip(junctionsdf.index,junctionsdf['poly_geometry'],junctionsdf['highwaynames'],junctionsdf['row_number']):
-        neighbours_list.append(getNeighbours(id, geometry, highway_name, row_number, index_list, poly_list, highway_list))
+    # Iterate over junctionsdf and look for neighbours among junctions in the same h3 ring
+
+    checked = 0
+
+    for ind in junctionsdf.index:
+
+        row = junctionsdf.loc[ind]
+
+        '''
+        API for k_ring: 
+        'Return unordered set of cells with H3 distance `<= k` from `h`.
+        That is, the "filled-in" disk.'
+        
+        As opposed to hex_ring:
+        'Return unordered set of cells with H3 distance `== k` from `h`.
+        That is, the "hollow" ring.'
+
+        Source: https://github.com/uber/h3-py/blob/master/src/h3/api/_api_template.py
+        '''
+
+        h3_disk = h3.k_ring(row["h3"], 1)
+
+        # From https://stackoverflow.com/questions/53342715/pandas-dataframe-select-rows-where-a-list-column-contains-any-of-a-list-of-strin
+        rows_to_check = junctionsdf[df_h3_only.isin(h3_disk).any(1).values]
+        checked += rows_to_check.size
+
+        neighbour_rows = rows_to_check[rows_to_check.apply(lambda apply_row: (largeIntersection(apply_row['poly_geometry'],row["poly_geometry"]) or sharedSquare(apply_row['highwaynames'], row['highwaynames'])), axis=1)]
+
+        # Grab indices of those rows that passed the filter
+        neighbours = neighbour_rows.index.tolist()
+        # remove use from the neighbourslist
+        neighbours.remove(ind)
+
+        neighbours_list.append(neighbours)
         bar.update(1)
 
+    print(f"Checked on average {checked / junctionsdf.index.size} entries for neighbours")
+
     # remove row number
-    junctionsdf.drop(columns=['row_number'], inplace=True)
+    junctionsdf.drop(columns=['h3'], inplace=True)
     junctionsdf['neighbours'] = neighbours_list
     bar.close()
 
@@ -363,7 +408,7 @@ def cluster (junctionsdf):
 
     junctionsdf.set_index('id', inplace=True)
 
-    junctionsWithNeighbourProperty = neighbourFindingWrapper(junctionsdf)
+    junctionsWithNeighbourProperty = findNeighboursH3(junctionsdf)
 
     # II.) Split the df according to 'junction has/does not have neighbours'
 
