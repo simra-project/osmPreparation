@@ -1,7 +1,8 @@
 
 from itertools import starmap
 from tqdm import tqdm
-import utils
+import pandas as pd
+import h3
 
 #*******************************************************************************************************************
 # (1) Find out which ways don't start and/or end with a junction. Wherever that is the case, we want to 
@@ -93,7 +94,16 @@ def oddballWrapper (segmentsdf, jctsdf):
 #     A neighbouring segment is a segment whose polygon a segments' polygon intersects with (again, without a junction 
 #     being contained in that intersection).
 
-def findNeighbours(unfoldedOddballs, junctionsdf):
+def findNeighboursH3(unfoldedOddballs, junctionsdf):
+
+    # set up for h3 usage
+    unfoldedOddballs['centroid_lat'] = unfoldedOddballs['poly_geometry'].map(lambda x: x.centroid.x)
+    unfoldedOddballs['centroid_lon'] = unfoldedOddballs['poly_geometry'].map(lambda x: x.centroid.y)
+
+    h3_resolution = 8
+
+    # add an h3 column  
+    unfoldedOddballs["h3"] = unfoldedOddballs.apply(lambda row: h3.geo_to_h3(row["centroid_lat"], row["centroid_lon"], h3_resolution), axis=1)
 
     # these are ALL junctions (i.e., intersections of at least two highways, irrespective of their type)
 
@@ -108,18 +118,12 @@ def findNeighbours(unfoldedOddballs, junctionsdf):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Determine neighbours based on shared nodes that aren't junctions.
 
-    def getNeighbours(outerNodes, outerHighwayType, outerInd, row_number):
+    def getNeighbours(outerNodes, outerHighwayType, outerInd, row_h3):
 
-        max_row_diff = 1500
-        # we do not need to check all rows for neighbours. to be safe, let's check max_row_diff above and max_row_diff below row number
-        lower_range = max(0, row_number - max_row_diff)
-        upper_range = min(unfoldedOddballs['row_number'].max(), row_number + max_row_diff)
-
-        interval = range(lower_range, upper_range)
-
-        # Slice data frame according to range - this operation might be expensive too though 
-        # and thus be eliminated in the future
-        df_slice = unfoldedOddballs[unfoldedOddballs['row_number'].isin(interval)]
+        h3_disk = h3.k_ring(row_h3, 1)
+        
+        # Slice according to 'h3 index in h3_disk'
+        df_slice = unfoldedOddballs[pd.DataFrame(unfoldedOddballs.h3.tolist()).isin(h3_disk).any(1).values]
 
         # prepare lists outside of map operations to get rid of expensive pandas operations
         segment_nodes_list = df_slice['segment_nodes_ids'].tolist()
@@ -166,17 +170,16 @@ def findNeighbours(unfoldedOddballs, junctionsdf):
 
     ops_number = unfoldedOddballs.index.size
 
-    # add row number, needed to check only x rows above/below current row in getNeighbours
-    unfoldedOddballs['row_number'] = [x for x in range(0, ops_number)]
-
     neighbours_list = []
     bar = tqdm(total=ops_number, desc="Computing Neighbours")
-    for node, highway_type, id, row_number in zip(unfoldedOddballs['segment_nodes_ids'], unfoldedOddballs['highwaytype'], unfoldedOddballs.index, unfoldedOddballs['row_number']):
-        neighbours_list.append(getNeighbours(node, highway_type, id, row_number))
+    for node, highway_type, id, row_h3 in zip(unfoldedOddballs['segment_nodes_ids'], unfoldedOddballs['highwaytype'], unfoldedOddballs.index, unfoldedOddballs['h3']):
+        neighbours_list.append(getNeighbours(node, highway_type, id, row_h3))
         bar.update(1)
 
     unfoldedOddballs['neighbours'] = neighbours_list
     bar.close()
+
+    unfoldedOddballs.drop(columns=['centroid_lat','centroid_lon','h3'], inplace=True)
 
     return unfoldedOddballs
 
@@ -290,7 +293,9 @@ def cluster (segmentsdf, junctionsdf):
     # II.) Assign each oddball segment its neighbours (other segments it intersects with without a junction being contained
     #      in that intersection).
 
-    oddballsWithNeighbours = findNeighbours(oddballs, junctionsdf)
+    oddballsWithNeighbours = findNeighboursH3(oddballs, junctionsdf)
+
+
 
     # III.) Cluster the oddball segments based on their neighbours
 
