@@ -1,10 +1,22 @@
 
 from itertools import starmap
 
+from collections import Counter
+
 relevantTypes = ['primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential']
 
 # ********************************************************************************************************************
 # (*) Find out which nodes in the nodesdf are junctions.
+
+# Helper function for determining if there are at least 2 occurrences of tiny road types in a given list of highwaytypes.
+
+def tinyRoadAlert(highwaytypes):
+
+    tinytypes = [x for x in highwaytypes if x in ['path','track','footway','unclassified', 'pedestrian', 'cycleway']]
+
+    count = Counter(tinytypes)
+
+    return any(v >= 2 for v in count.values())
 
 def identifyjunction(highwayIDs, highwaytypes, highwaynames):
     
@@ -46,6 +58,14 @@ def identifyjunction(highwayIDs, highwaytypes, highwaynames):
             else:
                 
                 return 'small_junction'
+
+        # New: try to determine if we are dealing with tiny roads
+        # That's because these often don't have names and hence the above criterion selecting based
+        # on the presence of at least two distinct hwNames won't work
+
+        elif tinyRoadAlert(hwTypes):
+
+            return 'small_junction'
         
         else: 
             

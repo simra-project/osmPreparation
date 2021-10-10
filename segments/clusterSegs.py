@@ -128,6 +128,24 @@ def findNeighboursH3(unfoldedOddballs, junctionsdf):
         # prepare lists outside of map operations to get rid of expensive pandas operations
         segment_nodes_list = df_slice['segment_nodes_ids'].tolist()
         index_list = df_slice.index.tolist()
+    
+        '''
+
+        # DRAFT: ensure highways with small types can't become the neighbours of highways with large types
+
+        highwaytypes_list = df_slice['highwaytype'].tolist()
+
+        nodes_and_types = zip(highwaytypes_list, segment_nodes_list)
+
+        smalltypes = ['path','track','footway','unclassified', 'pedestrian', 'cycleway']
+
+        small_nodes = [t2 for (t1,t2) in nodes_and_types if t1 in smalltypes]   
+
+        common_nodes_small = map(lambda innerNodes: set(innerNodes).intersection(set(outerNodes)), small_nodes)
+
+        common_nodes_small_list = map(lambda x: list(x), common_nodes_small)
+
+        '''
 
         # Filter the 'segment_nodes_ids' column so that only those elements that are also contained in outerNodes
         # remain
@@ -142,7 +160,7 @@ def findNeighboursH3(unfoldedOddballs, junctionsdf):
         # is a junction of any type (small or large, the last one meaning that at least two highways of a larger
         # type - residential, primary, trunk, etc - intersect)
 
-        if outerHighwayType in ['unclassified', 'pedestrian', 'cycleway']:
+        if outerHighwayType in ['path','track','footway','unclassified', 'pedestrian', 'cycleway']:
         
             common_nodes_nojcts = map(lambda cns: [x for x in cns if x not in jctids], common_nodes_list)
         
@@ -294,8 +312,6 @@ def cluster (segmentsdf, junctionsdf):
     #      in that intersection).
 
     oddballsWithNeighbours = findNeighboursH3(oddballs, junctionsdf)
-
-
 
     # III.) Cluster the oddball segments based on their neighbours
 

@@ -191,5 +191,11 @@ paramDict = {
         "centroid": [47.985494, 8.819951],
         "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
         "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
-    }
+    },
+    "Reutles": {  # Nuernberg-Reutles for testing purposes
+        "bounding_box": [10.986024,49.513978,11.071893,49.55191],
+        "centroid": [49.534858, 11.028398],
+        "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
+    },
 }
