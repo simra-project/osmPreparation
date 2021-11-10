@@ -197,5 +197,5 @@ paramDict = {
         "centroid": [49.534858, 11.028398],
         "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
         "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
-    },
+    }
 }
