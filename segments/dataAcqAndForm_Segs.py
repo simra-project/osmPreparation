@@ -1,15 +1,21 @@
 
 import pandas as pd
+import numpy as np
 
 import requests
+import config
+import json
+import utils
 
 # ********************************************************************************************************************
     
-tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway']
+tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway', 'path', 'track']
+# tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway', 'path', 'track']
+# tags = ['trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway', 'path', 'track']
 
 # (1) Get data from OSM, input param = bounding box
 
-def getFromOverpass(bbox):
+def getFromOverpass(bbox, ways, nodes):
 
     ##############################################################################################################
     # a) Extract bb corners
@@ -28,10 +34,12 @@ def getFromOverpass(bbox):
     # 'unclassified', 'pedestrian', 'cycleway'
     objects = ['way'] # like way, node, relation
 
-    compactOverpassQLstring = '[out:json][timeout:60];('
+    compactOverpassQLstring = '[out:json][timeout:3600];('
     for tag in tags:
         for obj in objects:
             compactOverpassQLstring += '%s["highway"="%s"](%s,%s,%s,%s);' % (obj, tag, minLat, minLon, maxLat, maxLon)
+#    compactOverpassQLstring += 'way[bicycle=yes](%s,%s,%s,%s);' % (minLat, minLon, maxLat, maxLon)
+#    compactOverpassQLstring += 'way[bicycle=designated](%s,%s,%s,%s);' % (minLat, minLon, maxLat, maxLon)
     compactOverpassQLstring += ');out body;>;out skel qt;'
 
     osmrequest = {'data': compactOverpassQLstring}
@@ -39,8 +47,10 @@ def getFromOverpass(bbox):
     # osmurl = 'http://overpass-api.de/api/interpreter'
 
     osmurl = 'http://vm3.mcc.tu-berlin.de:8088/api/interpreter'
+    # print(osmrequest)
 
     osm = requests.get(osmurl, params=osmrequest)
+
     print("Completed request to overpass, status was {0!s}".format(osm.status_code))
 
     ##############################################################################################################
@@ -49,17 +59,16 @@ def getFromOverpass(bbox):
     osmdata = osm.json()
     osmdata = osmdata['elements']
 
-    nodes = []
-    ways = []
-
     for dct in osmdata:
         if dct['type']=='way':
             for key, val in dct['tags'].items():
                 dct[key] = val
             del dct['tags']
-            ways.append(dct)
+            if dct not in ways:
+                ways.append(dct)
         else:
-            nodes.append(dct)
+            if dct not in nodes:
+                nodes.append(dct)
 
     return ways, nodes # resp osmdata
 
@@ -126,11 +135,18 @@ def getCoordsFromNodes(nodes):
 # ********************************************************************************************************************
 # (0) Call all the functions in this script in logical order.
 
-def metaFunc(bbox):
+def metaFunc(bbox, region):
 
-    osmdata, nodes = getFromOverpass(bbox)
+    ways, nodes = [[], []]
+    if region == "Ruhrgebiet":
+        ruhrgebiet_dict = {k: v for k, v in config.paramDict.items() if (k.startswith('Ruhrgebiet') and len(k) == 12)}
+        for key, value in ruhrgebiet_dict.items():
+            print("segs getFromOverpass for: " + key)
+            ways, nodes = getFromOverpass(value["bounding_box"], ways, nodes)
+    else:
+        ways, nodes = getFromOverpass(bbox, ways, nodes)
 
-    highwaydf = getHighwayDf(osmdata)
+    highwaydf = getHighwayDf(ways)
 
     idCoords_dict = getCoordsFromNodes(nodes)
     

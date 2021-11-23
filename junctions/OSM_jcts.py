@@ -11,15 +11,18 @@ import time
 pd.set_option('display.max_columns', 200)
 
 import sys
+sys.path.insert(0, './junctions')
+sys.path.insert(0, './segments')
 sys.path.append("..")
 
 import utils
 import config
-import dataAcqAndForm_Jcts as dfShizzle
+import dataAcqAndForm_Jcts
 import findJunctions
 import bufferJcts
 import clusterJcts
 import tidyData_Jcts
+
 
 # ARGUMENTS.
 #  * region: a string - which region are we currently looking at? Required for writing files.
@@ -30,8 +33,7 @@ import tidyData_Jcts
 #                depending on the city layout.
 
 def main(region, buffer_size):
-
-    nodesdf = dfShizzle.metaFunc(config.paramDict[region]["bounding_box"])
+    nodesdf = dataAcqAndForm_Jcts.metaFunc(config.paramDict[region]["bounding_box"], region)
     print("Created nodedf")
 
     junctionsdf, junctions_for_segs = findJunctions.getJunctionsDf(nodesdf, region)
@@ -43,7 +45,8 @@ def main(region, buffer_size):
     nonIsolatedJunctions, isolatedJunctions = clusterJcts.cluster(bufferedJunctionsDf)
     print("Created junction clusters")
 
-    completeJunctions = tidyData_Jcts.tidyItUp(region, config.paramDict[region]["centroid"], nonIsolatedJunctions, isolatedJunctions, buffer_size)
+    completeJunctions = tidyData_Jcts.tidyItUp(region, config.paramDict[region]["centroid"], nonIsolatedJunctions,
+                                               isolatedJunctions, buffer_size)
     print("Cleaned junctions")
 
     # Write to pickle for future use
@@ -61,15 +64,16 @@ def main(region, buffer_size):
 
     return completeJunctions, junctions_for_segs
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     # Create the argument parser and add arguments
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument(dest='region', type=str, help="The region to compute junctions for.")
 
-    parser.add_argument(dest='buf_size', type=float, help="By how much the one-dimensional junction points will be buffered.")
+    parser.add_argument(dest='buf_size', type=float,
+                        help="By how much the one-dimensional junction points will be buffered.")
 
     # Parse the input parameters
 
@@ -96,5 +100,3 @@ if __name__ == "__main__":
     path_ = utils.getSubDirPath(file_name_, "csv_data", "junctions")
 
     junctions_for_segs.to_csv(path_)
-
-

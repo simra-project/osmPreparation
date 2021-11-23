@@ -1,11 +1,14 @@
 
 import sys
+
+import junctions.OSM_jcts
+import segments.OSM_segs
+
 sys.path.insert(0, './junctions')
 sys.path.insert(0, './segments')
 
-import OSM_jcts
-import OSM_segs
-
+import dataAcqAndForm_Jcts
+import dataAcqAndForm_Segs
 import utils
 import config
 
@@ -25,6 +28,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # dataAcqAndForm_Jcts.getFromOverpass(config.paramDict[args.region]["bounding_box"], args.region)
+    # dataAcqAndForm_Segs.getFromOverpass(config.paramDict[args.region]["bounding_box"], args.region)
+
     # Look up buffer size from param_dict in config.py
 
     buf_size = config.paramDict[args.region]["small_buf_default"]
@@ -32,7 +38,7 @@ if __name__ == "__main__":
     # Run junctions main script
 
     print("Running junctions main script")
-    completeJunctions, junctions_for_segs = OSM_jcts.main(args.region, buf_size)
+    completeJunctions, junctions_for_segs = junctions.OSM_jcts.main(args.region, buf_size)
     print("Completed junctions main script")
 
     # Write junction data set to csv
@@ -45,7 +51,7 @@ if __name__ == "__main__":
 
     # Call segments script
     print("Running segments main script")
-    completeSegments = OSM_segs.main(args.region, junctions_for_segs)
+    completeSegments = segments.OSM_segs.main(args.region, junctions_for_segs)
     print("Completed segments main script")
 
     # Write segments data set to csv

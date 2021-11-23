@@ -2,14 +2,23 @@
 import pandas as pd
 import requests
 import numpy as np
+import sys
+import os
+import json
+import utils
+import config
 
+sys.path.insert(0, './junctions')
+sys.path.insert(0, './segments')
 # ********************************************************************************************************************
 
-tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway']
+tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway', 'path', 'track']
+# tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway']
+# tags = ['trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway', 'path']
 
 # (1) Get data from OSM, input param = bounding box
 
-def getFromOverpass(bbox):
+def getFromOverpass(bbox, region, osmdf):
 
     # a) Extract bb corners
 
@@ -27,10 +36,12 @@ def getFromOverpass(bbox):
     # 'unclassified', 'pedestrian', 'cycleway'
     objects = ['way'] # like way, node, relation
 
-    compactOverpassQLstring = '[out:json][timeout:60];('
+    compactOverpassQLstring = '[out:json][timeout:3600];('
     for tag in tags:
         for obj in objects:
             compactOverpassQLstring += '%s["highway"="%s"](%s,%s,%s,%s);' % (obj, tag, minLat, minLon, maxLat, maxLon)
+#    compactOverpassQLstring += 'way[bicycle=yes](%s,%s,%s,%s);' % (minLat, minLon, maxLat, maxLon)
+#    compactOverpassQLstring += 'way[bicycle=designated](%s,%s,%s,%s);' % (minLat, minLon, maxLat, maxLon)
     compactOverpassQLstring += ');out body;>;out skel qt;'
 
     osmrequest = {'data': compactOverpassQLstring}
@@ -47,16 +58,17 @@ def getFromOverpass(bbox):
 
     osmdata = osm.json()
     osmdata = osmdata['elements']
-
+    # Reading the json as a dict
+    print("Reading the json as a dict")
     for dct in osmdata:
-        if dct['type']=='way':
+        if dct['type'] == 'way':
             for key, val in dct['tags'].items():
                 dct[key] = val
             del dct['tags']
+            osmdf.append(dct)
         else:
-            pass # nodes
-
-    return osmdata
+            osmdf.append(dct) # nodes
+    return osmdf
 
 # ********************************************************************************************************************
 # (2) Construct a df containing highways (streets, way objects) from the raw osmdata
@@ -90,7 +102,7 @@ def getHighwayDf(osmdata):
     highways_no_names.rename(columns = {'ref':'name'}, inplace = True)
 
     highwaydf = pd.concat([highways_with_names, highways_no_names], ignore_index = True, sort = False)
-    
+
     return highwaydf
 
 # ********************************************************************************************************************
@@ -125,7 +137,7 @@ def getNodesDf(osmdata):
 def getMoreNodeProps(highwaydf, nodesdf):
 
     vals = highwaydf.nodes.values.tolist()
-    rs = [len(r) for r in vals]    
+    rs = [len(r) for r in vals]
     ids = np.repeat(highwaydf.id, rs)
     name = np.repeat(highwaydf.name, rs)
     highway = np.repeat(highwaydf.highway, rs)
@@ -145,18 +157,33 @@ def getMoreNodeProps(highwaydf, nodesdf):
 # ********************************************************************************************************************
 # (0) Call all the functions in this script in logical order.
 
-def metaFunc(bbox):
+def metaFunc(bbox, region):
 
-    osmdf = getFromOverpass(bbox)
+    osmdf = []
+    ######## if Ruhrgebiet, make multiple overpass-api requests and collect the responses in osmdf
+    # if region == "Ruhrgebiet":
+    #     ruhrgebiet_dict = {k: v for k, v in config.paramDict.items() if (k.startswith('Ruhrgebiet') and len(k) == 12)}
+    #     for key, value in ruhrgebiet_dict.items():
+    #         print("jcts getFromOverpass for: " + key)
+    #         #osmdf = list(np.unique(np.array(getFromOverpass(value["bounding_box"], region, osmdf)).astype(str)))
+    #         osmdf = getFromOverpass(value["bounding_box"], region, osmdf)
+    # else:
+    #     osmdf = getFromOverpass(bbox, region, osmdf)
 
+    # with open("file.json", 'w') as f:
+    #     # indent=2 is not needed but makes the file human-readable
+    #     json.dump(osmdf, f, indent=2)
+    ######## file.json contains the results of the multiple overpass api requests for Ruhrgebiet (so osmdf as a json).
+    ######## Read it to avoid the Ruhrgebiet requests, since it takes very long
+    with open("file.json", 'r') as f:
+        osmdf = json.load(f)
     highwaydf = getHighwayDf(osmdf)
 
     nodesdf = getNodesDf(osmdf)
 
     enrichedNodesdf = getMoreNodeProps(highwaydf, nodesdf)
-    
+
     return enrichedNodesdf
 
 
 
- 

@@ -1,12 +1,10 @@
 
-from itertools import starmap
 from tqdm import tqdm
 
 from collections import Counter
 
 import numpy as np
 import pandas as pd
-
 import h3
 
 # ## Cluster junctions
@@ -70,6 +68,9 @@ def findNeighboursH3(junctionsdf):
     for ind in junctionsdf.index:
 
         row = junctionsdf.loc[ind]
+        ######## for some reason, row["h3"] contains multiple identical elements. In that case, take the first.
+        if isinstance(row["h3"], pd.Series):
+            row = row.iloc[0]
 
         '''
         API for k_ring: 
@@ -179,7 +180,7 @@ def clusterNeighbours(df):
             # Assign the current cluster index to the row.
         
             df.at[ind, 'neighbour_cluster'] = clusterInd
-            
+
             # Add the current row's index to the list of rows that were already visited.
             
             included.append(ind)
@@ -196,8 +197,16 @@ def clusterNeighbours(df):
         
             # Now iterate through the df again to find the neighbours' neighbours.
 
-            included = expandNeighbours(df, clusterInd, ind, list(set(currNeighbours)), included)
-                    
+            ######## flatten the list if currNeighbours is a list of lists
+            currNeighboursCleaned = []
+            for i, elem in enumerate(currNeighbours):
+                if isinstance(currNeighbours[i], list):
+                    for j, elem2 in enumerate(currNeighbours[i]):
+                        currNeighboursCleaned.append(currNeighbours[i][j])
+                else:
+                    currNeighboursCleaned.append(currNeighbours[i])
+
+            included = expandNeighbours(df, clusterInd, ind, list(set(currNeighboursCleaned)), included)
             # No more extended neighbours, up the cluster numbers
         
             clusterInd += 1
@@ -205,7 +214,6 @@ def clusterNeighbours(df):
     return df
 
 def expandNeighbours(df, clusterInd, outerInd, currNeighbours, included):
-
     # Create a queue based on currNeighbours (the neighbours of the data point in the
     # row considered in the outer loop).
 
@@ -220,6 +228,9 @@ def expandNeighbours(df, clusterInd, outerInd, currNeighbours, included):
         # Remove first element from queue
 
         nextNeighbour = neighbour_queue.pop(0)
+        ######## skip this neighbour if it is already in included (because, somehow there are still duplicates...)
+        if nextNeighbour in included:
+            continue
 
         # Add nextNeighbour to the list of included data points so it won't be
         # considered in the outer loop
@@ -227,7 +238,10 @@ def expandNeighbours(df, clusterInd, outerInd, currNeighbours, included):
         included.append(nextNeighbour)
 
         # Assign the cluster nr. to nextNeighbour
-
+        print(f"clusterInd: {clusterInd}")
+        print(f"df.loc[{nextNeighbour}]:\n {df.loc[nextNeighbour]}")
+        print(f"df.loc[{nextNeighbour}].size: {df.loc[nextNeighbour].size}")
+        print(f"df.loc[{nextNeighbour}].shape: {df.loc[nextNeighbour].shape}")
         df.at[nextNeighbour, 'neighbour_cluster'] = clusterInd
 
         # Grab the next neighbour's neighbours

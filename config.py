@@ -1,9 +1,21 @@
 paramDict = {
     "Augsburg": {
         "bounding_box": [10.763362,48.249337,10.959333,48.468336],
-        "centroid": [48.354761, 10.896351],
+        "centroid": [48.354761,10.896351],
         "small_buf_default": 2.25,          # medium-sized city (< 1 Mio. inhabitants)
         "large_buf_default": 2.5            # medium-sized city (< 1 Mio. inhabitants)
+    },
+    "Dresden": {
+        "bounding_box": [13.1956,50.8285,14.2901,51.2662],
+        "centroid": [51.05,13.73],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Düsseldorf": {
+        "bounding_box": [6.61712,51.148577,6.949457,51.3066],
+        "centroid": [51.23,6.78],
+        "small_buf_default": 2,             # medium-sized city  (< 1 Mio. inhabitants)
+        "large_buf_default": 2.25           # medium-sized city  (< 1 Mio. inhabitants)
     },
     "Bern": {
         "bounding_box": [7.423641,46.93916,7.469955,46.962112],
@@ -114,6 +126,42 @@ paramDict = {
         "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
         "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
     },
+    "Darmstadt": {  # Darmstadt
+        "bounding_box": [8.482112,49.787748,8.814449,49.959337],
+        "centroid": [49.87,8.65],
+        "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
+    },
+    "Saarbrücken": {  # Saarbrücken
+        "bounding_box": [6.856136,49.148703,7.136287,49.32087],
+        "centroid": [49.23,6.99],
+        "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
+    },
+    "Weimar": {  # Weimar
+        "bounding_box": [11.249637,50.949992,11.395549,51.029304],
+        "centroid": [50.98,11.32],
+        "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
+    },
+    "Brühl": {  # Brühl
+        "bounding_box": [6.864489,50.805607,6.936215,50.857649],
+        "centroid": [50.83,6.9],
+        "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
+    },
+    "Ulm": {  # Ulm
+        "bounding_box": [9.861932,48.312447,10.126978,48.481816],
+        "centroid": [48.40,9.99],
+        "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
+    },
+    "Sigmaringen": {  # Sigmaringen
+        "bounding_box": [9.06096,47.992125,9.375444,48.18053],
+        "centroid": [48.09,9.21],
+        "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
+    },
     "Saarlouis": {  # Landkreis Saarlouis
         "bounding_box": [6.483765, 49.198789, 7.027267, 49.522844],
         "centroid": [49.316937, 6.751789],
@@ -191,5 +239,176 @@ paramDict = {
         "centroid": [47.985494, 8.819951],
         "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
         "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
+    },
+    "München": {  # München
+        "bounding_box": [11.345589, 48.045297, 11.797402, 48.239568],
+        "centroid": [48.13, 11.57],
+        "small_buf_default": 2.5,            # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75            # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.6244,51.346258,7.537335,51.645947],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet1": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.6244,51.346258,7.0808675,51.4961025],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet11": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.6244000,51.3462580,6.8526337,51.4211802],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet12": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.8526337,51.3462580,7.0808675,51.4211802],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet13": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [7.0808675,51.3462580,7.3091012,51.4211802],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet14": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [7.3091012,51.3462580,7.5373350,51.4211802],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet2": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.6244,51.4961025,7.0808675,51.645947],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet21": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.6244000,51.4211802,6.8526337,51.4961025],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet22": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.8526337,51.4211802,7.0808675,51.4961025],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet23": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [7.0808675,51.4211802,7.3091012,51.4961025],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet24": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [7.3091012,51.4211802,7.5373350,51.4961025],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet3": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [7.0808675,51.346258,7.537335,51.4961025],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet31": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.6244000,51.4961025,6.8526337,51.5710247],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet32": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.8526337,51.4961025,7.0808675,51.5710247],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet33": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [7.0808675,51.4961025,7.3091012,51.5710247],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet34": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [7.3091012,51.4961025,7.5373350,51.5710247],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet4": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [7.0808675,51.4961025,7.537335,51.645947],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet41": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.6244000,51.5710247,6.8526337,51.6459470],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet42": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [6.8526337,51.5710247,7.0808675,51.6459470],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet43": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [7.0808675,51.5710247,7.3091012,51.6459470],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Ruhrgebiet44": {  # Ruhrgebiet
+        #"bounding_box": [6.4913, 51.2998, 7.9004, 51.7517],
+        "bounding_box": [7.3091012,51.5710247,7.5373350,51.6459470],
+        "centroid": [51.51, 7.18],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
+    },
+    "Eichwalde": {  # Landkreis Tuttlingen
+        "bounding_box": [13.553875, 52.326109, 13.674421, 52.397836],
+        "centroid": [52.36261, 13.61594],
+        "small_buf_default": 2,  # small-sized city (< 200k inhabitants)
+        "large_buf_default": 2.25  # small-sized city (< 200k inhabitants)
+    },
+    "Bielefeld": {
+        "bounding_box": [8.349841, 51.9205, 8.715136, 52.099701],
+        "centroid": [52.022445, 8.532489],
+        "small_buf_default": 2,  # medium-sized city (< 1 Mio. inhabitants)
+        "large_buf_default": 2.25  # medium-sized city (< 1 Mio. inhabitants)
+    },
+    "Berlin": {
+        "bounding_box": [12.9731, 52.3452, 13.8298, 52.6941],
+        "centroid": [52.51, 13.40],
+        "small_buf_default": 2.5,  # large city (>1 Mio. inhabitants)
+        "large_buf_default": 2.75  # large-sized city (> 1 Mio. inhabitants)
     }
 }

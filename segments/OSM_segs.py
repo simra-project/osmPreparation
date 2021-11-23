@@ -29,7 +29,7 @@ import sys
 
 def main(region, junctionsdf):
 
-    highwaydf, idCoords_dict = dfShizzle.metaFunc(config.paramDict[region]["bounding_box"])
+    highwaydf, idCoords_dict = dfShizzle.metaFunc(config.paramDict[region]["bounding_box"], region)
     print("Created highwaydf and coordsdict")
 
     unfoldedEnrichedDf = segmentizeAndEnrich.metaFunc(highwaydf, junctionsdf, idCoords_dict)
