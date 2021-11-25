@@ -150,7 +150,7 @@ def findNeighboursH3(unfoldedOddballs, junctionsdf):
 
             common_nodes = map(lambda innerNodes: list(set(innerNodes).intersection(set(outerNodes))), small_nodes)
 
-            relevant_jcts = jctids
+            relevant_jctids = jctids
 
         else:
 
