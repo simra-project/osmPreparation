@@ -132,15 +132,13 @@ def findNeighboursH3(unfoldedOddballs, junctionsdf):
         segment_nodes_list = df_slice['segment_nodes_ids'].tolist()
         index_list = df_slice.index.tolist()
 
-        # Ensure highways with small types can't become the neighbours of highways with large types
-
         # grab highwaytypes
         highwaytypes_list = df_slice['highwaytype'].tolist()
 
         # make a list of tuples of the form (index, highwaytype, segment_nodes_list), e.g. [73, 'residential', [1234, 5678, 91234]]
         nodes_and_types = zip(index_list, highwaytypes_list, segment_nodes_list)
 
-        # now differentiate between highways of smaller vs larger type
+        # now differentiate between highways of smaller vs larger type so they can't become neighbours and thus won't be merged
 
         if outerHighwayType in smalltypes:
 

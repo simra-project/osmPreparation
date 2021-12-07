@@ -27,7 +27,7 @@ def getFromOverpass(bbox):
     # 'unclassified', 'pedestrian', 'cycleway'
     objects = ['way'] # like way, node, relation
 
-    compactOverpassQLstring = '[out:json][timeout:60];('
+    compactOverpassQLstring = '[out:json][timeout:3600][maxsize:2147483648];('
     for tag in tags:
         for obj in objects:
             compactOverpassQLstring += '%s["highway"="%s"](%s,%s,%s,%s);' % (obj, tag, minLat, minLon, maxLat, maxLon)
