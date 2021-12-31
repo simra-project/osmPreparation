@@ -1,5 +1,4 @@
 
-from itertools import starmap
 from tqdm import tqdm
 
 from collections import Counter
@@ -35,6 +34,7 @@ def sharedSquare(lst1, lst2):
     return False
 
 # c) Put it all together to assign its neighbours to each junction
+
 
 def findNeighboursH3(junctionsdf):
 

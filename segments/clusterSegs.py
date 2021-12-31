@@ -4,6 +4,9 @@ from tqdm import tqdm
 import pandas as pd
 import h3
 
+from shapely.geometry import LineString
+from shapely.ops import polygonize, unary_union
+
 #*******************************************************************************************************************
 # (1) Find out which ways don't start and/or end with a junction. Wherever that is the case, we want to 
 #     merge segments together in order to get rid of weird breaks - goal is to obtain a clean model of
@@ -94,6 +97,27 @@ def oddballWrapper (segmentsdf, jctsdf):
 #     A neighbouring segment is a segment whose polygon a segments' polygon intersects with (again, without a junction 
 #     being contained in that intersection).
 
+def make_valid(poly):
+
+    # fix for invalid polygons that self-intersect according to
+    # https://stackoverflow.com/questions/35110632/splitting-self-intersecting-polygon-only-returned-one-polygon-in-shapely
+
+    polys = []
+
+    ls = LineString(poly.exterior.coords.xy)
+
+    lr = LineString(ls.coords[:] + ls.coords[0:1])
+
+    mls = unary_union(lr)
+
+    for polygon in polygonize(mls):
+
+        polygon.buffer(0)
+
+        polys.append(polygon)
+
+    return polys
+
 def findNeighboursH3(unfoldedOddballs, junctionsdf):
 
     # set up for h3 usage
@@ -102,12 +126,17 @@ def findNeighboursH3(unfoldedOddballs, junctionsdf):
 
     h3_resolution = 8
 
-    # add an h3 column  
+    # do sth about invalidity
+    # Use buffer trick if polygon is invalid
+    # https://stackoverflow.com/questions/13062334/polygon-intersection-error-in-shapely-shapely-geos-topologicalerror-the-opera
+    unfoldedOddballs['poly_geometry'] = unfoldedOddballs['poly_geometry'].map(lambda poly: poly if poly.is_valid else make_valid(poly))
+
+    unfoldedOddballs = unfoldedOddballs.explode('poly_geometry', ignore_index=True)
+
+    # add a h3 column  
     unfoldedOddballs["h3"] = unfoldedOddballs.apply(lambda row: h3.geo_to_h3(row["centroid_lat"], row["centroid_lon"], h3_resolution), axis=1)
 
-    # these are ALL junctions (i.e., intersections of at least two highways, irrespective of their type)
-
-    jctids = junctionsdf['id'].values
+    jctids = junctionsdf['id'].values     # these are ALL junctions (i.e., intersections of at least two highways, irrespective of their type)
 
     # now we also need the LARGER junctions (i.e., intersections of at least two highways of a larger type)
 
@@ -123,7 +152,7 @@ def findNeighboursH3(unfoldedOddballs, junctionsdf):
 
     def getNeighbours(outerNodes, outerHighwayType, outerInd, row_h3):
 
-        h3_disk = h3.k_ring(row_h3, 1)
+        h3_disk = h3.k_ring(row_h3, 2)
         
         # Slice according to 'h3 index in h3_disk'
         df_slice = unfoldedOddballs[pd.DataFrame(unfoldedOddballs.h3.tolist()).isin(h3_disk).any(1).values]
