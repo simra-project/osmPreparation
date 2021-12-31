@@ -32,7 +32,7 @@ def tidyItUp(region, oddballs, normies):
 
     ## (b) Join the remaining df columns too using pandas groupby and merge everything together
 
-    oddballs = oddballs.drop(["lats","lons","coords","oddball","poly_geometry","poly_vertices_lats","poly_vertices_lons","neighbours"], axis=1)
+    oddballs = oddballs.drop(["lats","lons","coords","oddball","poly_geometry","neighbours"], axis=1)
 
     oddballs = oddballs.groupby('neighbour_cluster', as_index = False).agg({'id': 'sum', 'highwayname': lambda x: ', '.join(map(str, x)), 'highwaytype': lambda x: ', '.join(map(str, x)), 'highwaylanes': lambda x: ', '.join(map(str, x)),'lanes:backward': lambda x: ', '.join(map(str, x)), 'segment_nodes_ids': 'sum', 'seg_length': 'sum'})
 
@@ -100,16 +100,22 @@ def tidyItUp(region, oddballs, normies):
 
     polyLons = explodedOddballs['poly_geometry'].map(lambda x: x.exterior.coords.xy).map(lambda x: x[1])
 
-    explodedOddballs.loc[:,'poly_vertices_lats'], explodedOddballs.loc[:,'poly_vertices_lons'] = polyLats, polyLons
+    explodedOddballs['poly_vertices_lats'], explodedOddballs['poly_vertices_lons'] = polyLats, polyLons
 
     ## d) Merge back together with the normie-df.
 
     unfoldedNormies = normies.drop(["index","lats","lons","coords","oddball"], axis=1)
 
+    polyLats_n = unfoldedNormies['poly_geometry'].map(lambda x: x.exterior.coords.xy).map(lambda x: x[0])
+
+    polyLons_n = unfoldedNormies['poly_geometry'].map(lambda x: x.exterior.coords.xy).map(lambda x: x[1])
+
+    unfoldedNormies['poly_vertices_lats'], unfoldedNormies['poly_vertices_lons'] = polyLats_n, polyLons_n
+
     completeSegments = pd.concat([explodedOddballs, unfoldedNormies], ignore_index = True, sort = False)
 
-    completeSegments.loc[:,'poly_vertices_lats'] = completeSegments['poly_vertices_lats'].map(lambda x: list(x))
+    completeSegments['poly_vertices_lats'] = completeSegments['poly_vertices_lats'].map(lambda x: list(x))
 
-    completeSegments.loc[:,'poly_vertices_lons'] = completeSegments['poly_vertices_lons'].map(lambda x: list(x))
+    completeSegments['poly_vertices_lons'] = completeSegments['poly_vertices_lons'].map(lambda x: list(x))
 
     return completeSegments

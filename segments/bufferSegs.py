@@ -104,10 +104,10 @@ def bufferize(segmentsdf):
 
     # Extract poly vertices and store in df as well
 
-    polyLats = reprojected_segs.map(lambda x: x.exterior.coords.xy).map(lambda x: x[0])
+    # polyLats = reprojected_segs.map(lambda x: x.exterior.coords.xy).map(lambda x: x[0])
 
-    polyLons = reprojected_segs.map(lambda x: x.exterior.coords.xy).map(lambda x: x[1])
+    # polyLons = reprojected_segs.map(lambda x: x.exterior.coords.xy).map(lambda x: x[1])
 
-    segmentsdf.loc[:,'poly_vertices_lats'], segmentsdf.loc[:,'poly_vertices_lons'] = polyLats, polyLons
+    # segmentsdf.loc[:,'poly_vertices_lats'], segmentsdf.loc[:,'poly_vertices_lons'] = polyLats, polyLons
 
     return segmentsdf
