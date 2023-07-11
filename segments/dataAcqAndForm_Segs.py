@@ -7,7 +7,7 @@ import requests
     
 # tags = ['motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway']
 
-tags = ['path','track','footway','road','motorway','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway']
+tags = ['path','track','footway','road','trunk','primary','secondary','secondary_link','tertiary','tertiary_link','living_street','residential', 'unclassified', 'pedestrian', 'cycleway', 'service']
 
 # (1) Get data from OSM, input param = bounding box
 
@@ -40,7 +40,7 @@ def getFromOverpass(bbox):
 
     # osmurl = 'http://overpass-api.de/api/interpreter'
 
-    osmurl = 'http://vm3.mcc.tu-berlin.de:8088/api/interpreter'
+    osmurl = 'https://vm3.mcc.tu-berlin.de:7583/api/interpreter'
 
     osm = requests.get(osmurl, params=osmrequest)
     print("Completed request to overpass, status was {0!s}".format(osm.status_code))
